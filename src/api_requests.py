@@ -1,7 +1,8 @@
 
 from bs4 import BeautifulSoup
 from requests.exceptions import HTTPError
-from utils import color_print
+
+from src.utils import color_print
 
 def get_user_id(session):
     url = 'https://projects.invisionapp.com/api:unifiedprojects.getProjects'

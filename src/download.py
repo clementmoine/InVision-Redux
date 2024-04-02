@@ -1,10 +1,10 @@
 import os
+import json
 import shutil
 import zipfile
-import json
 
-from api_requests import export_project
-from utils import color_print
+from src.utils import color_print
+from src.api_requests import export_project
 
 def download_project(project, user_id, session):
     link = export_project(project, user_id, session)

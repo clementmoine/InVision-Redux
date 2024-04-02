@@ -1,6 +1,7 @@
 import json
 from bs4 import BeautifulSoup, formatter
-from utils import color_print
+
+from src.utils import color_print
 
 def generate_index_page(projects):
     # Path of the template file and the generated index.html file

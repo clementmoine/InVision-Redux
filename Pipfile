@@ -7,10 +7,7 @@ name = "pypi"
 requests = "*"
 beautifulsoup4 = "*"
 python-dotenv = "*"
-tabulate = "*"
 colorama = "*"
-emoji = "*"
-selenium = "*"
 
 [dev-packages]
 

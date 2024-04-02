@@ -1,4 +1,4 @@
-from utils import color_print
+from src.utils import color_print
 
 def login_classic(email, password, session):
     url = 'https://login.invisionapp.com/login-api/api/v2/login'

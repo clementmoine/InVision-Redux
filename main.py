@@ -5,11 +5,11 @@ import concurrent.futures
 
 dotenv.load_dotenv()
 
-from utils import color_print, is_test_mode
-from download import download_project
-from auth import login_classic, login_api
-from build import generate_index_page
-from api_requests import fetch_projects, get_user_id, fetch_tags
+from src.download import download_project
+from src.utils import color_print, is_test_mode
+from src.auth import login_classic, login_api
+from src.build import generate_index_page
+from src.api_requests import fetch_projects, get_user_id, fetch_tags
 
 
 def main():
