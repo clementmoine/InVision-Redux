@@ -18,6 +18,22 @@ def get_user_id(session):
         color_print(f"Failed to get user id: {response.text}", 'red')
         return None
 
+def fetch_tags(session):
+    url = 'https://projects.invisionapp.com/api:unifiedprojects.getTags'
+    headers = {'x-xsrf-token': session.cookies.get('XSRF-TOKEN')}
+
+    response = session.get(url=url, headers=headers)
+    if response.status_code == 200:
+        session.cookies.update(response.cookies)
+        
+        tags = response.json().get('tags')
+
+        return tags
+    else:
+        color_print(f"Failed to fetch tags: {response.text}", 'red')
+        return None
+    
+
 def fetch_projects(session):
     url = 'https://projects.invisionapp.com/api:unifiedprojects.getProjects'
     params = {
@@ -53,7 +69,7 @@ def export_project(project, user_id, session):
             'projectid': project['id'],
             'preventHotspotHinting': 'false',
             'preventBrowse': 'false',
-            'preventBranding': 'false'
+            'preventBranding': 'true'
         }
 
         response = session.post(url=url, headers=headers, data=data)

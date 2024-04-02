@@ -7,7 +7,7 @@ from utils import color_print
 from download import download_project
 from auth import login_classic, login_api
 from index_generator import generate_index_page
-from api_requests import fetch_projects, get_user_id
+from api_requests import fetch_projects, get_user_id, fetch_tags
 
 dotenv.load_dotenv()
 
@@ -26,21 +26,28 @@ def main():
         
         user_id = get_user_id(session)
 
-        projects = fetch_projects(session)
+        #projects = fetch_projects(session)
+        projects = [fetch_projects(session)[3]]
+        tags = fetch_tags(session)
 
         if projects:
-            color_print(f"Retrieving {len(projects)} projects...", 'green')
+            color_print(f"\nRetrieving {len(projects)} projects:", 'green')
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
                 futures = []
                 for project in projects:
+                    project['data']['tags'] = []
+                    for tag in tags:
+                        if project['id'] in tag['prototypeIDs']:
+                            project['data']['tags'].append(tag)
+
                     futures.append(executor.submit(download_project, project, user_id, session))
                 for future in concurrent.futures.as_completed(futures):
                     future.result()
 
             generate_index_page(projects)
         else:
-            color_print("No projects were found nor successfully exported.", 'red')
+            color_print("\nNo projects were found nor successfully exported.", 'red')
 
 if __name__ == "__main__":
     main()

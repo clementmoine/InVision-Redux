@@ -1,6 +1,7 @@
 import os
 import shutil
 import zipfile
+import json
 
 from api_requests import export_project
 from utils import color_print
@@ -23,7 +24,20 @@ def download_project(project, user_id, session):
         # Extract the contents of the ZIP file
         with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
             zip_ref.extractall(export_folder)
-            
-        color_print(f"Project '{project['data']['name']}' successfully exported!", 'green')
+
+        # Create project.json
+        project_json_path = os.path.join(export_folder, "project.json")
+        with open(project_json_path, "w") as project_json_file:
+            json.dump(project, project_json_file, indent=4)
+
+        # Retrieve the thumbnail.png file
+        thumbnail_url = project['data']['thumbnailUrl']
+        thumbnail_path = os.path.join(export_folder, "thumbnail.png")
+        response = session.get(thumbnail_url, stream=True)
+        if response.status_code == 200:
+            with open(thumbnail_path, 'wb') as thumbnail_file:
+                shutil.copyfileobj(response.raw, thumbnail_file)
+
+        color_print(f"  ⮑  '{project['data']['name']}' ({project['id']}): Successfully exported!", 'green')
     else:
-        color_print(f"Failed to export project '{project['data']['name']}'.", 'red')
+        color_print(f"  ⮑  '{project['data']['name']}' ({project['id']}): Failed to export!", 'red')
