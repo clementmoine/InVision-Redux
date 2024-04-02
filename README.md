@@ -39,5 +39,9 @@ To get started with Invision Export, follow these steps:
 7. **Review the Exported Projects**:
    Once the script finishes running, you can find the exported projects in the `docs` directory, running the `index.html` in your browser or in a web server you will retrieve the complete index of your projects.
 
+## Debug / Test
+
+By default, Invision Export processes all projects available in your Invision account. However, you can enable a test mode to process only a single project of each type. To enable the test mode, set the `TEST_MODE` environment variable to `True` or `1` in your `.env` file. This can be useful for testing and debugging purposes.
+
 ## Note
 Please note that InVision Export is not affiliated with InVision. It is an independent tool developed to assist users in exporting their projects before the closure of InVision's services.

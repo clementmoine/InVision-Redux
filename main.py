@@ -3,13 +3,14 @@ import requests
 import dotenv
 import concurrent.futures
 
-from utils import color_print
+dotenv.load_dotenv()
+
+from utils import color_print, is_test_mode
 from download import download_project
 from auth import login_classic, login_api
 from index_generator import generate_index_page
 from api_requests import fetch_projects, get_user_id, fetch_tags
 
-dotenv.load_dotenv()
 
 def main():
     email = os.getenv('INVISION_EMAIL')
@@ -28,6 +29,16 @@ def main():
 
         #projects = fetch_projects(session)
         projects = [fetch_projects(session)[3]]
+
+
+        projects = fetch_projects(session)
+    
+        # In test mode we process one project of each type
+        if is_test_mode():
+            color_print("CAUTION: TEST_MODE enabled, processing only one project of each type.", "yellow")
+
+            projects = {project['type']: project for project in projects}.values()
+
         tags = fetch_tags(session)
 
         if projects:
