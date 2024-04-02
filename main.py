@@ -8,7 +8,7 @@ dotenv.load_dotenv()
 from utils import color_print, is_test_mode
 from download import download_project
 from auth import login_classic, login_api
-from index_generator import generate_index_page
+from build import generate_index_page
 from api_requests import fetch_projects, get_user_id, fetch_tags
 
 
@@ -46,8 +46,7 @@ def main():
         if projects:
             color_print(f"\nRetrieving {len(projects)} projects:", 'green')
             
-            # List to store successfully exported projects
-            successfully_exported_projects = []
+            successfully_exported_project_ids = set()
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
                 futures = []
@@ -62,9 +61,10 @@ def main():
                     for future in concurrent.futures.as_completed(futures):
                         result = future.result()
                         if result:
-                            successfully_exported_projects.append(result)
+                            successfully_exported_project_ids.add(result["id"])
 
-            # Generate index page only for successfully exported projects
+            #  Generate index page only for successfully exported projects
+            successfully_exported_projects = [project for project in projects if project['id'] in successfully_exported_project_ids]
             if successfully_exported_projects:
                 generate_index_page(successfully_exported_projects)
 
