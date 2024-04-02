@@ -21,8 +21,11 @@ def generate_index_page(projects):
     for project in projects:
         project_name = project['data']['name']
         project_id = project['id']
+
         index_url = f"./{project_id}/index.html"
         thumbnail_url = f"./{project_id}/thumbnail.png"
+
+        project_tags = [{key: value for key, value in tag.items() if key != 'prototypeIDs'} for tag in project['data'].get('tags', [])]
 
         # Append the project entry with the image, name, and link
         project_entries += (
@@ -40,7 +43,8 @@ def generate_index_page(projects):
         projects_info.append({
             "name": project_name,
             "id": project_id,
-            "thumbnail_url": thumbnail_url
+            "thumbnail_url": thumbnail_url,
+            "tags": project_tags
         })
 
     # Insert the project entries into the template and format

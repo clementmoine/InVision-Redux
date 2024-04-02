@@ -32,11 +32,12 @@ def download_project(project, user_id, session):
 
         # Retrieve the thumbnail.png file
         thumbnail_url = project['data']['thumbnailUrl']
-        thumbnail_path = os.path.join(export_folder, "thumbnail.png")
-        response = session.get(thumbnail_url, stream=True)
-        if response.status_code == 200:
-            with open(thumbnail_path, 'wb') as thumbnail_file:
-                shutil.copyfileobj(response.raw, thumbnail_file)
+        if thumbnail_url:
+            thumbnail_path = os.path.join(export_folder, "thumbnail.png")
+            response = session.get(thumbnail_url, stream=True)
+            if response.status_code == 200:
+                with open(thumbnail_path, 'wb') as thumbnail_file:
+                    shutil.copyfileobj(response.raw, thumbnail_file)
 
         color_print(f"  ⮑  '{project['data']['name']}' ({project['id']}): Successfully exported!", 'green')
 

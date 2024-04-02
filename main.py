@@ -47,21 +47,19 @@ def main():
             color_print(f"\nRetrieving {len(projects)} projects:", 'green')
             
             successfully_exported_project_ids = set()
+            
+            max_workers = os.cpu_count() or 1
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-                futures = []
-                for project in projects:
-                    project['data']['tags'] = []
-                    for tag in tags:
-                        if project['id'] in tag['prototypeIDs']:
-                            project['data']['tags'].append(tag)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                # Define a helper function to process a single project
+                def process_project(project):
+                    project['data']['tags'] = [tag for tag in tags if project['id'] in tag['prototypeIDs']]
 
-                    futures.append(executor.submit(download_project, project, user_id, session))
-                    
-                    for future in concurrent.futures.as_completed(futures):
-                        result = future.result()
-                        if result:
-                            successfully_exported_project_ids.add(result["id"])
+                    if download_project(project, user_id, session):
+                        successfully_exported_project_ids.add(project["id"])
+
+                # Use executor.map() to submit and execute tasks in parallel
+                executor.map(process_project, projects)
 
             #  Generate index page only for successfully exported projects
             successfully_exported_projects = [project for project in projects if project['id'] in successfully_exported_project_ids]
