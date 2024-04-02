@@ -35,7 +35,9 @@ def main():
     
         # In test mode we process one project of each type
         if is_test_mode():
-            color_print("CAUTION: TEST_MODE enabled, processing only one project of each type.", "yellow")
+            color_print("╭────────────────────────────────────────────────────────────╮", "yellow")
+            color_print("│ Test mode enabled: Fetching only one project of each type! │", "yellow")
+            color_print("╰────────────────────────────────────────────────────────────╯", "yellow")
 
             projects = {project['type']: project for project in projects}.values()
 
@@ -43,6 +45,9 @@ def main():
 
         if projects:
             color_print(f"\nRetrieving {len(projects)} projects:", 'green')
+            
+            # List to store successfully exported projects
+            successfully_exported_projects = []
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
                 futures = []
@@ -53,12 +58,25 @@ def main():
                             project['data']['tags'].append(tag)
 
                     futures.append(executor.submit(download_project, project, user_id, session))
-                for future in concurrent.futures.as_completed(futures):
-                    future.result()
+                    
+                    for future in concurrent.futures.as_completed(futures):
+                        result = future.result()
+                        if result:
+                            successfully_exported_projects.append(result)
 
-            generate_index_page(projects)
+            # Generate index page only for successfully exported projects
+            if successfully_exported_projects:
+                generate_index_page(successfully_exported_projects)
+
+                # Compare the success to global list to find failed ones
+                failed_projects = [project for project in projects if project not in successfully_exported_projects]
+                
+                if failed_projects:
+                    color_print("\nSome projects failed to export.", 'red')
+            else:
+                color_print("\nNo projects were successfully exported.", 'red')
         else:
-            color_print("\nNo projects were found nor successfully exported.", 'red')
+            color_print("\nNo projects were found.", 'red')
 
 if __name__ == "__main__":
     main()

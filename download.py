@@ -39,5 +39,9 @@ def download_project(project, user_id, session):
                 shutil.copyfileobj(response.raw, thumbnail_file)
 
         color_print(f"  ⮑  '{project['data']['name']}' ({project['id']}): Successfully exported!", 'green')
+
+        return project
     else:
-        color_print(f"  ⮑  '{project['data']['name']}' ({project['id']}): Failed to export!", 'red')
+        color_print(f"  ✘  '{project['data']['name']}' ({project['id']}): Failed to export!", 'red')
+
+        return None
