@@ -10,7 +10,8 @@ def get_user_id(session):
 
     response = session.get(url=url, headers=headers)
     if response.status_code == 200:
-        session.cookies.update(response.cookies)
+        if response.cookies:
+            session.cookies.update(response.cookies)
         
         user_id = response.json().get('account.id')
 
@@ -25,7 +26,8 @@ def fetch_tags(session):
 
     response = session.get(url=url, headers=headers)
     if response.status_code == 200:
-        session.cookies.update(response.cookies)
+        if response.cookies:
+            session.cookies.update(response.cookies)
         
         tags = response.json().get('tags')
 
@@ -45,7 +47,8 @@ def fetch_projects(session):
 
     response = session.get(url=url, headers=headers, params=params)
     if response.status_code == 200:
-        session.cookies.update(response.cookies)
+        if response.cookies:
+            session.cookies.update(response.cookies)
         
         projects = response.json().get('results')
 
@@ -76,6 +79,9 @@ def export_project(project, user_id, session):
         response = session.post(url=url, headers=headers, data=data)
         response.raise_for_status()
 
+        if response.cookies:
+            session.cookies.update(response.cookies)
+
         soup = BeautifulSoup(response.text, 'html.parser')
 
         if project['type'] == 'prototype':
@@ -95,4 +101,90 @@ def export_project(project, user_id, session):
         return None
     except Exception as err:
         color_print(f"Error exporting the project: {err}", 'red')
+        return None
+
+def get_project_details(project, session):
+    url = 'https://projects.invisionapp.com/api:desktop_partials.projectScreens2Grouped'
+    params = {
+        'id': project['id'],
+    }
+
+    headers = {'x-xsrf-token': session.cookies.get('XSRF-TOKEN')}
+
+    response = session.get(url=url, headers=headers, params=params)
+    if response.status_code == 200:
+        if response.cookies:
+            session.cookies.update(response.cookies)
+
+        # Details includes groups and screens
+        project_details = response.json()
+
+        return project_details
+    else:
+        color_print(f"Failed to fetch projects details: {response.text}", 'red')
+        return None
+
+def get_screen_details(screen, session):
+    url = 'https://projects.invisionapp.com/api:desktop_partials.consoleScreen'
+    params = {
+        'screenID': screen['id'],
+        'trigger': 'navigation.screen' # Possible values: (navigation.mode, navigation.screen, initial-load, event.reload)
+    }
+
+    headers = {'x-xsrf-token': session.cookies.get('XSRF-TOKEN')}
+
+    response = session.get(url=url, headers=headers, params=params)
+    if response.status_code == 200:
+        if response.cookies:
+            session.cookies.update(response.cookies)
+
+        # Screen details includes hotspots
+        screen_details = response.json()
+
+        return screen_details
+    else:
+        color_print(f"Failed to fetch screen details: {response.text}", 'red')
+        return None
+
+def get_project_assets(project, session):
+    url = 'https://projects.invisionapp.com/api:inspect.getProjectAssets'
+    params = {
+        'projectID': project['id'],
+    }
+
+    headers = {'x-xsrf-token': session.cookies.get('XSRF-TOKEN')}
+
+    response = session.get(url=url, headers=headers, params=params)
+    if response.status_code == 200:
+        if response.cookies:
+            session.cookies.update(response.cookies)
+
+        project_assets = response.json()
+
+        return project_assets
+    else:
+        color_print(f"Failed to fetch screen inspect details: {response.text}", 'red')
+        return None
+
+
+
+def get_screen_inspect_details(screen, session):
+    url = 'https://projects.invisionapp.com/api:inspect.getExtractionJSON'
+    params = {
+        'id': screen['id'],
+    }
+
+    headers = {'x-xsrf-token': session.cookies.get('XSRF-TOKEN')}
+
+    response = session.get(url=url, headers=headers, params=params)
+    if response.status_code == 200:
+        if response.cookies:
+            session.cookies.update(response.cookies)
+
+        # Inspect details includes layers
+        screen_inspect_details = response.json()
+
+        return screen_inspect_details
+    else:
+        color_print(f"Failed to fetch screen inspect details: {response.text}", 'red')
         return None
