@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 'backend'
+    env_file:
+      - .env
+    volumes:
+      - './backend/src:/srv/src:ro'
+    ports:
+      - '8080:8080'
+  frontend:
+    build: 'frontend'
+    env_file:
+      - .env
+    volumes:
+      - './frontend/src:/app/src:ro'
+      - './frontend/public:/app/public:ro'
+    ports:
+      - '3000:3000'

@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["Clément MOINE <clement.moine86@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "^3.0.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
