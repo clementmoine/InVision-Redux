@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from src.utils import color_print
 
 # Constants for directories
-DOCS_ROOT = os.getenv('DOCS_ROOT', './docs')
+DOCS_ROOT = os.path.join('../', os.getenv('DOCS_ROOT', './docs'))
 
 def download_file(url, destination, session):
     """

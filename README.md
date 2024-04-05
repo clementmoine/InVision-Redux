@@ -1,47 +1,57 @@
-# Invision Export
+# InVision Export
 
-Invision Export is a Python script designed to help users export their projects from Invision before its closure in December 2024. With this tool, you can retrieve all your projects and preserve the prototypes with their hotspots.
+InVision Export is a Python script designed to help users export their projects from InVision before its closure in December 2024. With this tool, users can retrieve all their projects and preserve the prototypes along with their hotspots.
 
 ## Getting Started
 
-To get started with Invision Export, follow these steps:
+To begin using InVision Export, follow these steps:
 
-1. **Install Pipenv**:
-   If you don't have Pipenv installed, you can do so by following the instructions [here](https://pipenv.pypa.io/en/latest/installation.html).
-
-2. **Clone the Repository**:
+1. **Clone the Repository**:
    ```
    git clone https://github.com/clementmoine/InVision-Export.git
    ```
 
-3. **Navigate to the Project Directory**:
+2. **Navigate to the Project Directory**:
    ```
    cd InVision-Export
    ```
 
-4. **Create a .env File**:
-   Create a `.env` file in the root directory of the project and add your InVision email and password in the following format:
+3. **Install Dependencies and Set Up Environment**:
+   Run the following command to install dependencies and set up the environment:
+   ```
+   make install
+   ```
+
+4. **Edit the .env File**:
+   The `.env` file is automatically generated during installation. Open the `.env` file located in the root directory of the project and add your InVision email and password in the following format:
    ```
    INVISION_EMAIL=your_email@example.com
    INVISION_PASSWORD=your_password
    ```
+   You can also modify other settings as needed.
 
-5. **Install Dependencies**:
+5. **Run the Scraper**:
+   Execute the scraper to generate the necessary documentation files:
    ```
-   pipenv install
-   ```
-
-6. **Run the Script**:
-   ```
-   pipenv run python backend main.py
+   make scrape
    ```
 
-7. **Review the Exported Projects**:
-   Once the script finishes running, you can find the exported projects in the `docs` directory, running the `index.html` in your browser or in a web server you will retrieve the complete index of your projects.
+6. **Review the Exported Projects**:
+   Once the scraper has finished running, you can find the exported projects in the `docs` directory. To start the frontend and backend containers serving the documentation:
+   ```
+   make start
+   ```
 
-## Debug / Test
+7. **Stop the Project**:
+   To stop the containers, you can run:
+   ```
+   make stop
+   ```
 
-By default, Invision Export processes all projects available in your Invision account. However, you can enable a test mode to process only a single project of each type. To enable the test mode, set the `TEST_MODE` environment variable to `True` or `1` in your `.env` file. This can be useful for testing and debugging purposes.
+## Debugging and Testing
+
+By default, InVision Export processes all projects available in your InVision account. However, you can enable a test mode to process only a single project of each type. To enable the test mode, set the `TEST_MODE` environment variable to `True` or `1` in your `.env` file. This can be useful for testing and debugging purposes.
 
 ## Note
-Please note that InVision Export is not affiliated with InVision. It is an independent tool developed to assist users in exporting their projects before the closure of InVision's services.
+
+Please note that InVision Export is an independent tool developed to assist users in exporting their projects before the closure of InVision's services. It is not affiliated with InVision.

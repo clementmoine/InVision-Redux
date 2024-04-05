@@ -6,7 +6,7 @@ from src.api_requests import fetch_projects, fetch_tags
 from src.api_requests import get_project_details, get_screen_details, get_screen_inspect_details
 
 # Constants for directories
-DOCS_ROOT = os.getenv('DOCS_ROOT', './docs')
+DOCS_ROOT = os.path.join('../', os.getenv('DOCS_ROOT', './docs'))
 
 # Function to ask the user if they want to overwrite the existing docs folder
 def ask_user():

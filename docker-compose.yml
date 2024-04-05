@@ -2,19 +2,18 @@ version: '3.8'
 
 services:
   backend:
+    container_name: invision-backend
     build: 'backend'
-    env_file:
-      - .env
     volumes:
-      - './backend/src:/srv/src:ro'
+      - ${ROOT:-.}/backend/src:/srv/src
+      - ${DOCS_ROOT:-./docs}:/srv/src/static:ro
     ports:
       - '8080:8080'
   frontend:
+    container_name: invision-frontend
     build: 'frontend'
-    env_file:
-      - .env
     volumes:
-      - './frontend/src:/app/src:ro'
-      - './frontend/public:/app/public:ro'
+      - ${ROOT:-.}/frontend/src:/app/src:ro
+      - ${ROOT:-.}/frontend/public:/app/public:ro
     ports:
       - '3000:3000'

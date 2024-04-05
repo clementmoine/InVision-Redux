@@ -8,7 +8,7 @@
 
 ARG NODE_VERSION=21.7.2
 
-FROM node:${NODE_VERSION}-alpine
+FROM node:${NODE_VERSION}
 
 # Use production node environment by default.
 ENV NODE_ENV development
@@ -27,8 +27,8 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 # Copy the rest of the source files into the image.
 COPY . .
 
-# Expose the port that the application listens on.
-EXPOSE 3000
+# # Expose the port that the application listens on.
+# EXPOSE 3000
 
 # Run the application.
 CMD yarn dev

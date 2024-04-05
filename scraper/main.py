@@ -1,13 +1,13 @@
 import os
 import requests
-import dotenv
+from dotenv import load_dotenv
 
-dotenv.load_dotenv()
 
 # from src.download import download_project
 from src.browse import browse_projects
 from src.api_requests import login_classic, login_api
 
+load_dotenv()
 
 def main():
     email = os.getenv('INVISION_EMAIL')
