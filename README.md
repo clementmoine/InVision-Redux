@@ -33,7 +33,7 @@ To get started with Invision Export, follow these steps:
 
 6. **Run the Script**:
    ```
-   pipenv run python main.py
+   pipenv run python backend main.py
    ```
 
 7. **Review the Exported Projects**:
