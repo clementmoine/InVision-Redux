@@ -1,5 +1,4 @@
-
 export interface Tag {
-    label: string,
-    color: `#${string}`
+  label: string;
+  color: `#${string}`;
 }

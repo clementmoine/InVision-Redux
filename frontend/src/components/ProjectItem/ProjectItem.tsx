@@ -17,7 +17,9 @@ const ProjectItem: React.FC<ProjectItemProps> = ({ project }) => {
         <h3>{project.name}</h3>
         <ul>
           {project.tags.map((tag, index) => (
-            <li key={index} style={{"--color"; tag.color}}>{tag.label}</li>
+            <li key={index} style={{ '--color': tag.color }}>
+              {tag.label}
+            </li>
           ))}
         </ul>
       </Link>

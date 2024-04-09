@@ -1,7 +1,7 @@
-
 import os
 from urllib.parse import urlparse
 from colorama import Fore, Style
+
 
 def color_print(text, color="RESET"):
     color_mapping = {
@@ -18,6 +18,7 @@ def color_print(text, color="RESET"):
     color_code = color_mapping.get(color.lower(), Style.RESET_ALL)
     return print(color_code + text + Style.RESET_ALL)
 
+
 def color_input(text, color="RESET"):
     color_mapping = {
         "reset": Style.RESET_ALL,
@@ -33,8 +34,10 @@ def color_input(text, color="RESET"):
     color_code = color_mapping.get(color.lower(), Style.RESET_ALL)
     return input(color_code + text + Style.RESET_ALL)
 
+
 def is_test_mode():
-    return os.getenv('TEST_MODE', '').lower() in ['true', '1']
+    return os.getenv("TEST_MODE", "").lower() in ["true", "1"]
+
 
 def is_link(text):
     """
@@ -48,7 +51,7 @@ def is_link(text):
     """
     # Trim the string to remove leading and trailing spaces
     text = text.strip()
-    
+
     # Check if the string contains only a link
     parsed_url = urlparse(text)
     if parsed_url.scheme and parsed_url.netloc:
