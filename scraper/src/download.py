@@ -1,7 +1,7 @@
 import os
 import json
 from urllib.parse import urlparse
-from src.utils import color_print
+from src.utils import color_print, is_link
 
 # Constants for directories
 DOCS_ROOT = os.path.join('../', os.getenv('DOCS_ROOT', './docs'))
@@ -18,6 +18,9 @@ def download_file(url, destination, session):
     Returns:
         bool: True if the file was downloaded successfully, False otherwise.
     """
+    if os.path.exists(destination):
+        return True
+    
     response = session.get(url)
     if response.status_code == 200:
         # Save the file content to the destination
@@ -43,6 +46,9 @@ def json_patch_to_local_assets(json_data, project_id, session):
     assets_dir = os.path.join(DOCS_ROOT, "projects", str(project_id), "assets")
     os.makedirs(assets_dir, exist_ok=True)
 
+    avatars_dir = os.path.join(DOCS_ROOT, "common/avatars")
+    os.makedirs(avatars_dir, exist_ok=True)
+
     def download_and_patch(data):
         """
         Recursively traverses the JSON data, downloads files from URLs, and updates the data with local file paths.
@@ -52,21 +58,28 @@ def json_patch_to_local_assets(json_data, project_id, session):
         """
         if isinstance(data, dict):
             for key, value in list(data.items()):
-                if isinstance(value, str) and "invisionapp.com" in value:
+                if isinstance(value, str) and "invisionapp.com" in value and is_link(value):
                     # Clean the URL to remove query parameters
                     url_without_params = urlparse(value)._replace(query='').geturl()
 
                     dir_name, file_name = os.path.split(url_without_params.split("invisionapp.com/")[-1])
 
-                    # Custom file destination for thumbnails and screen image since they are named identically 
-                    if "screens/thumbnails" in dir_name or "screens/files" in dir_name:
-                        screen_id, file_extension = os.path.splitext(file_name)
-                        
-                        if screen_id:
-                            file_name = f"{'thumbnail' if 'thumbnails' in dir_name else 'image'}{file_extension}"
-                            dir_name = f"screens/{screen_id}"
+                    # Custom case for common assets
+                    if "avatars" in dir_name:
+                        file_path = os.path.join(avatars_dir, file_name)
+                    
+                    # Project assets
+                    else:
+                        # Custom file destination for thumbnails and screen image since they are named identically 
+                        if "screens/thumbnails" in dir_name or "screens/files" in dir_name:
+                            screen_id, file_extension = os.path.splitext(file_name)
+                            
+                            if screen_id:
+                                file_name = f"{'thumbnail' if 'thumbnails' in dir_name else 'image'}{file_extension}"
+                                dir_name = f"screens/{screen_id}"
 
-                    file_path = os.path.join(assets_dir, dir_name, file_name)
+                        file_path = os.path.join(assets_dir, dir_name, file_name)
+                        
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
                     if download_file(value, file_path, session):
