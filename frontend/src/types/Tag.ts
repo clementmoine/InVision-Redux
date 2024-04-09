@@ -1,4 +1,7 @@
 export interface Tag {
-  label: string;
+  id: number;
+  name: string;
   color: `#${string}`;
+  backgroundColor: `#${string}`;
+  prototypeIDs: number[];
 }

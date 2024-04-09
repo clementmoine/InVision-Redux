@@ -6,12 +6,12 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
+    "types": ["vite-plugin-svgr/client"],
+
     /* Aliases */
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "@src": ["src"],
-      "@types": ["src/types"],
-      "@components": ["src/components"]
+      "@/*": ["./src/*"]
     },
 
     /* Bundler mode */

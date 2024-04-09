@@ -48,7 +48,7 @@ def ask_user():
 if os.path.exists(DOCS_ROOT):
     user_choice = ask_user()
     if user_choice == "overwrite":
-        shutil.rmtree(DOCS_ROOT)
+        shutil.rmtree(DOCS_ROOT, ignore_errors=True)
     elif user_choice == "ignore":
         color_print(
             "Existing docs folder will be ignored. Continuing operation.", "yellow"
@@ -208,8 +208,6 @@ def browse_projects(session):
     projects = fetch_projects(session)
 
     if projects:
-        tags = fetch_tags(session)
-
         # In test mode we process one project of each type
         if is_test_mode():
             color_print("╭───────────────────────────────────────────────╮", "yellow")
@@ -222,6 +220,12 @@ def browse_projects(session):
         projects = [project for project in projects if project["type"] == "prototype"]
 
         color_print(f"\nRetrieving {len(projects)} projects:", "green")
+
+        tags = fetch_tags(session)
+        if not save_json_data(tags, os.path.join(DOCS_ROOT, "common"), "tags.json"):
+            color_print(f" ✘  Failed to save tags data", "red")
+
+            return False
 
         successfully_exported_project_ids = set()
 

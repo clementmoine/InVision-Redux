@@ -33,7 +33,7 @@ open-browser:
 	open http://localhost:3000
 
 # Start both backend and frontend services and open browser
-start: install start-backend start-frontend open-browser
+start: start-backend start-frontend open-browser
 
 # Stop both backend and frontend services
 stop: stop-backend stop-frontend

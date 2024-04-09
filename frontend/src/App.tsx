@@ -1,35 +1,52 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+import { Routes, Route, Outlet, Link } from 'react-router-dom';
 
-function App() {
-  const [count, setCount] = useState(0);
+import { NotFound } from '@/screens/NotFound';
+import { Projects } from '@/screens/Projects';
+import { Project } from '@/screens/Project';
 
+import { Redirect } from '@/components/redirect';
+import { ThemeToggle } from '@/components/theme-toggle';
+
+import InVision from '@/assets/invision.svg?react';
+
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount(count => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        {/* Home => Redirect to projects */}
+        <Route path="/" element={<Redirect to="/projects" />} />
+
+        {/* Screens */}
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/projects/:id" element={<Project />} />
+
+        {/* Not found route */}
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
   );
 }
 
-export default App;
+function Layout() {
+  return (
+    <div className="flex min-h-screen w-full flex-col">
+      <header className="sticky z-30 top-0 flex h-16 items-center gap-4 border-b bg-background px-4">
+        <nav>
+          <Link
+            to="/"
+            className="flex items-center gap-2 font-semibold flex-shrink-0"
+          >
+            <InVision className="h-6 w-6" title="InVision" />
+            InVision
+          </Link>
+        </nav>
+
+        <div className="gap-4 ml-auto">
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <Outlet />
+    </div>
+  );
+}

@@ -94,9 +94,9 @@ def json_patch_to_local_assets(json_data, project_id, session):
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
                     if download_file(value, file_path, session):
-                        data[key] = os.path.relpath(
+                        data[key] = "/" + os.path.relpath(
                             file_path,
-                            start=os.path.join(DOCS_ROOT, "projects", str(project_id)),
+                            start=DOCS_ROOT,
                         )
                 else:
                     download_and_patch(value)
