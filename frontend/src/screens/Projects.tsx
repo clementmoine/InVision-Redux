@@ -13,8 +13,10 @@ import { Project } from '@/components/project';
 
 import { getProjects } from '@/api/projects';
 import { getTags } from '@/api/tags';
+import { useSearchParams } from 'react-router-dom';
 
 function Projects() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: projects } = useQuery({
     queryKey: ['projects'],
     queryFn: getProjects,
@@ -27,15 +29,31 @@ function Projects() {
         <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
 
         <div>
-          <Select>
-            <SelectTrigger className="w-[180px]">
+          <Select
+            value={searchParams.get('tag') ?? 'all'}
+            onValueChange={value => {
+              if (value == 'all') {
+                searchParams.delete('tag', undefined);
+              } else {
+                searchParams.set('tag', value);
+              }
+
+              setSearchParams(searchParams);
+            }}
+          >
+            <SelectTrigger className="w-[180px] text-left">
               <SelectValue placeholder="Select a tag" />
             </SelectTrigger>
+
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Tags</SelectLabel>
+                <SelectItem value="all">All</SelectItem>
+
                 {tags?.map(tag => (
-                  <SelectItem value={tag.id.toString()}>{tag.name}</SelectItem>
+                  <SelectItem key={tag.id} value={tag.id.toString()}>
+                    {tag.name}
+                  </SelectItem>
                 ))}
               </SelectGroup>
             </SelectContent>
