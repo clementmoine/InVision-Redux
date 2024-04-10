@@ -8,11 +8,10 @@ blueprint = Blueprint("tags", __name__)
 @blueprint.route("/tags")
 def get_tags():
     try:
-        # Obtenez le chemin du fichier JSON des tags de manière sécurisée
         tags_json_path = os.path.join(current_app.static_folder, "common/tags.json")
 
         if os.path.exists(tags_json_path):
-            # Lire le contenu du fichier JSON
+            # Read JSON file
             with open(tags_json_path, "r") as file:
                 tags = json.load(file)
                 return jsonify(tags)

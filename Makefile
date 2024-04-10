@@ -13,19 +13,17 @@ install:
 scrape:
 	cd scraper && poetry install && poetry run python main.py
 
-# Start backend and frontend services
-start-backend:
-	docker compose up -d backend || (echo "Failed to start backend service"; exit 1)
+# Build backend and frontend services
+build:
+	docker compose build
 
-start-frontend:
-	docker compose up -d frontend || (echo "Failed to start frontend service"; exit 1)
+# Start backend and frontend services
+up:
+	docker compose up -d
 
 # Stop backend and frontend services
-stop-backend:
-	docker compose down backend
-
-stop-frontend:
-	docker compose down frontend
+down:
+	docker compose down
 
 # Open browser at localhost:3000
 open-browser:
@@ -33,7 +31,10 @@ open-browser:
 	open http://localhost:3000
 
 # Start both backend and frontend services and open browser
-start: start-backend start-frontend open-browser
+start: build up open-browser
 
 # Stop both backend and frontend services
-stop: stop-backend stop-frontend
+stop: down
+
+# Restart (stop then start) 
+restart: stop start

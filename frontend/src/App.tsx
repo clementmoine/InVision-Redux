@@ -1,11 +1,11 @@
 import { Routes, Route, Outlet, Link } from 'react-router-dom';
 
-import { NotFound } from '@/screens/NotFound';
-import { Projects } from '@/screens/Projects';
-import { Project } from '@/screens/Project';
+import { NotFound } from '@/views/NotFound';
+import { Projects } from '@/views/Projects';
+import { Project } from '@/views/Project';
 
-import { Redirect } from '@/components/redirect';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { Redirect } from '@/components/Redirect';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 import InVision from '@/assets/invision.svg?react';
 
@@ -36,7 +36,7 @@ function Layout() {
             to="/"
             className="flex items-center gap-2 font-semibold flex-shrink-0"
           >
-            <InVision className="h-6 w-6" title="InVision" />
+            <InVision className="h-6 w-6 text-primary" title="InVision" />
             InVision
           </Link>
         </nav>
