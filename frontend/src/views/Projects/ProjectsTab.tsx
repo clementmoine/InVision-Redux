@@ -26,46 +26,31 @@ function ProjectsTab() {
   const params = useMemo<GetProjectsParams>(() => {
     const params: GetProjectsParams = {};
 
-    searchParams.entries();
-    const search = searchParams.get('search') ?? defaultValues.search;
-    const type = searchParams.get('type') ?? defaultValues.type;
-    const tag = searchParams.get('tag') ?? defaultValues.tag;
-    const page = searchParams.get('page') ?? defaultValues.page;
-    const limit = searchParams.get('limit') ?? defaultValues.limit;
-    const sort = searchParams.get('sort') ?? defaultValues.sort;
+    (
+      Array.from(searchParams.entries()) as Array<
+        [keyof Omit<GetProjectsParams, 'project_ids'>, string]
+      >
+    ).forEach(([key, value]) => {
+      if (value && (value ?? defaultValues[key]) !== defaultValues[key]) {
+        if (key === 'tag' || key === 'page' || key === 'limit') {
+          params[key] = Number(value);
+        } else if (key === 'type') {
+          if (value === 'favorites') {
+            params.project_ids = Array.from(favorites);
 
-    // When favorite tab is open we pass the ids to fetch
-    if (type === 'favorites') {
-      // Filter on favorites by their ids
-      params.project_ids = Array.from(favorites);
-    } else if (type !== defaultValues.type) {
-      params.type = type == 'prototypes' ? 'prototype' : 'board';
-    }
+            return;
+          }
 
-    // Filter on prototypes with a tag
-    if (tag !== defaultValues.tag) {
-      params.tag = Number(tag);
-    }
-
-    if (page !== defaultValues.page) {
-      params.page = Number(page);
-    }
-
-    if (limit !== defaultValues.limit) {
-      params.limit = Number(limit);
-    }
-
-    if (search !== defaultValues.search) {
-      params.search = search;
-    }
-
-    if (
-      sort &&
-      sort !== defaultValues.sort &&
-      ['title', 'update'].includes(sort)
-    ) {
-      params.sort = sort as 'title' | 'update';
-    }
+          params[key] = value == 'prototypes' ? 'prototype' : 'board';
+        } else if (key === 'sort') {
+          if (value === 'update' || value === 'title') {
+            params[key] = value;
+          }
+        } else {
+          params[key] = value;
+        }
+      }
+    });
 
     return params;
   }, [searchParams, favorites]);

@@ -6,7 +6,7 @@ export const defaultValues: Partial<Record<keyof GetProjectsParams, string>> = {
   tag: 'all',
   page: '1',
   limit: '10',
-  sort: 'title',
+  sort: 'update',
 };
 
 export default defaultValues;
