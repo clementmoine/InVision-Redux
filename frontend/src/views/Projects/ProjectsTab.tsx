@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 
-import { defaultValues } from '@/views/Projects';
+import defaultValues from '@/constants/defaultValues';
 import { Project } from '@/components/Project';
 import {
   Pagination,
@@ -16,22 +16,25 @@ import {
 
 import { useFavorites } from '@/hooks/useFavorites';
 
-import { GetProjectsParams, getProjects } from '@/api/projects';
+import { FetchProjectsParams, fetchProjects } from '@/api/projects';
 
 function ProjectsTab() {
   const [searchParams] = useSearchParams();
   const { favorites } = useFavorites();
 
   // Define the params to get favorites (pagination, type, tags ...)
-  const params = useMemo<GetProjectsParams>(() => {
-    const params: GetProjectsParams = {};
+  const params = useMemo<FetchProjectsParams>(() => {
+    const params: FetchProjectsParams = {};
 
     (
       Array.from(searchParams.entries()) as Array<
-        [keyof Omit<GetProjectsParams, 'project_ids'>, string]
+        [keyof Omit<FetchProjectsParams, 'project_ids'>, string]
       >
     ).forEach(([key, value]) => {
-      if (value && (value ?? defaultValues[key]) !== defaultValues[key]) {
+      if (
+        value &&
+        (value ?? defaultValues.projects[key]) !== defaultValues.projects[key]
+      ) {
         if (key === 'tag' || key === 'page' || key === 'limit') {
           params[key] = Number(value);
         } else if (key === 'type') {
@@ -57,7 +60,7 @@ function ProjectsTab() {
 
   const { data: response } = useQuery({
     queryKey: ['projects', params],
-    queryFn: getProjects,
+    queryFn: fetchProjects,
     placeholderData: keepPreviousData,
   });
 

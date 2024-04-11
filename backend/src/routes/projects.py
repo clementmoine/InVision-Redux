@@ -14,7 +14,7 @@ def get_projects():
     limit = int(request.args.get("limit", 10))
     page = int(request.args.get("page", 1))
 
-    # Get type and tag if provided
+    # Get type, tag and search query if provided
     project_type = request.args.get("type")
     project_tag = request.args.get("tag")
     search_query = request.args.get("search")
@@ -85,4 +85,34 @@ def get_projects():
 
 @blueprint.route("/projects/<int:project_id>")
 def get_project(project_id):
-    return f"Détails du projet {project_id}"
+    # Get search query if provided
+    search_query = request.args.get("search")
+
+    project_dir = os.path.join(current_app.static_folder, "projects", str(project_id))
+    project_json_path = os.path.join(project_dir, "project.json")
+    screens_json_path = os.path.join(project_dir, "screens.json")
+
+    try:
+        with open(project_json_path, "r") as project_file:
+            project_data = json.load(project_file)
+
+        if os.path.exists(screens_json_path):
+            with open(screens_json_path, "r") as screens_file:
+                screens_data = json.load(screens_file)
+
+                # Filter the screens
+                filtered_screens = [
+                    screen
+                    for screen in screens_data.get("screens", [])
+                    if search_query.lower() in screen.get("name", "").lower()
+                ]
+                screens_data["screens"] = filtered_screens
+
+                # Add the screens_data to the project_data
+                project_data["screens"] = screens_data
+
+        return jsonify(project_data)
+    except FileNotFoundError:
+        return "Project not found", 404
+    except Exception as e:
+        return f"Error fetching project: {e}", 500

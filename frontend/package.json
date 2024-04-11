@@ -24,6 +24,7 @@
     "@tanstack/react-query": "^5.29.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "dayjs": "^1.11.10",
     "debounce": "^2.0.0",
     "lucide-react": "^0.366.0",
     "react": "^18.2.0",

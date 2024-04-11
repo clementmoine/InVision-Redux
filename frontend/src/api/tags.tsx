@@ -1,6 +1,6 @@
 import { Tag } from '@/types';
 
-export function getTags(): Promise<Tag[]> {
+export function fetchTags(): Promise<Tag[]> {
   return fetch('/api/tags')
     .then(response => {
       if (!response.ok) {
