@@ -61,6 +61,8 @@ function Projects() {
           searchParams.set('search', search);
         }
 
+        searchParams.delete('page');
+
         return searchParams;
       });
     },
@@ -125,7 +127,7 @@ function Projects() {
       <Tabs
         value={searchParams.get('type') ?? defaultValues.projects.type}
         defaultValue={defaultValues.projects.type}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-4 h-full w-full"
         onValueChange={value => {
           setSearchParams(searchParams => {
             if (value == 'all') {
@@ -133,6 +135,8 @@ function Projects() {
             } else {
               searchParams.set('type', value);
             }
+
+            searchParams.delete('page');
 
             return searchParams;
           });
@@ -150,6 +154,7 @@ function Projects() {
               {favorites.size > 0 && (
                 <TabsTrigger value="favorites">Favorites</TabsTrigger>
               )}
+              <TabsTrigger value="archived">Archived</TabsTrigger>
             </TabsList>
           </div>
 
@@ -180,8 +185,8 @@ function Projects() {
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>Sort</SelectLabel>
-                  <SelectItem value="update">Recently updated</SelectItem>
-                  <SelectItem value="title">Title</SelectItem>
+                  <SelectItem value="updatedAt">Recently updated</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -196,6 +201,8 @@ function Projects() {
                   } else {
                     searchParams.set('tag', value);
                   }
+
+                  searchParams.delete('page');
 
                   return searchParams;
                 });
@@ -226,17 +233,20 @@ function Projects() {
 
         {/* Tabs (all, favorites ...) */}
         {/* Note: the key is mandatory to properly render the tab depending on the type (key value doesn't matter but they should be different) */}
-        <TabsContent value="all">
+        <TabsContent value="all" className="h-full w-full">
           <ProjectsTab key="all" />
         </TabsContent>
-        <TabsContent value="prototypes">
+        <TabsContent value="prototypes" className="h-full w-full">
           <ProjectsTab key="prototypes" />
         </TabsContent>
-        <TabsContent value="boards">
+        <TabsContent value="boards" className="h-full w-full">
           <ProjectsTab key="boards" />
         </TabsContent>
-        <TabsContent value="favorites">
+        <TabsContent value="favorites" className="h-full w-full">
           <ProjectsTab key="favorites" />
+        </TabsContent>
+        <TabsContent value="archived" className="h-full w-full">
+          <ProjectsTab key="archived" />
         </TabsContent>
       </Tabs>
     </div>

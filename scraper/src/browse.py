@@ -71,9 +71,7 @@ def browse_screen(screen, project, session):
         bool: True if the screen was successfully browsed or if the data already existed, False otherwise.
     """
     project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
-    screen_json_folder = os.path.join(
-        project_folder, "assets/screens", str(screen["id"])
-    )
+    screen_json_folder = os.path.join(project_folder, "screens", str(screen["id"]))
 
     # Check if screen files exist
     file_names = ["screen.json", "inspect.json", "thumbnail.png", "image.png"]

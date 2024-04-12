@@ -1,6 +1,7 @@
 import React from 'react';
+import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
-import { StarIcon } from 'lucide-react';
+import { ImageOffIcon, StarIcon } from 'lucide-react';
 
 import {
   Card,
@@ -14,6 +15,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 import { useFavorites } from '@/hooks/useFavorites';
+
 import { Project as ProjectType } from '@/types';
 
 interface ProjectProps {
@@ -30,12 +32,19 @@ const Project: React.FC<ProjectProps> = ({ project }) => {
           ratio={9 / 6}
           className="relative bg-muted overflow-hidden rounded-md"
         >
-          <Link to={`/projects/${project.id}`}>
-            <img
-              className="absolute inset-0 h-full w-full object-cover transition-all hover:scale-105"
-              src={`/api/static${project.data.thumbnailUrl}`}
-              alt={project.data.name}
-            />
+          <Link
+            to={`/projects/${project.id}`}
+            className="flex h-full w-full items-center justify-center"
+          >
+            {project.data.thumbnailUrl ? (
+              <img
+                className="absolute inset-0 h-full w-full object-cover transition-all hover:scale-105"
+                src={`/api/static/${project.data.thumbnailUrl}`}
+                alt={project.data.name}
+              />
+            ) : (
+              <ImageOffIcon className="h-8 w-8" />
+            )}
           </Link>
 
           <div className="absolute flex flex-col top-2 left-2 gap-1">
@@ -57,12 +66,15 @@ const Project: React.FC<ProjectProps> = ({ project }) => {
       <CardContent className="flex flex-row gap-4 px-4 py-3 justify-between">
         <div className="flex flex-col gap-1 overflow-hidden">
           <Link to={`/projects/${project.id}`}>
-            <CardTitle className="text-md text-ellipsis whitespace-nowrap overflow-hidden">
+            <CardTitle className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">
               {project.data.name}
             </CardTitle>
           </Link>
 
           <CardDescription>{project.data.itemCount} screens</CardDescription>
+          <CardDescription>
+            {dayjs(project.data.updatedAt).fromNow()}
+          </CardDescription>
         </div>
 
         <Toggle

@@ -1,7 +1,7 @@
 import React from 'react';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import { Link } from 'react-router-dom';
+import { ImageOffIcon } from 'lucide-react';
 
 import {
   Card,
@@ -13,8 +13,6 @@ import {
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 import { Screen as ScreenType } from '@/types';
-
-dayjs.extend(relativeTime);
 
 interface ScreenProps {
   screen: ScreenType;
@@ -29,11 +27,15 @@ const Screen: React.FC<ScreenProps> = ({ screen }) => {
           className="relative bg-muted overflow-hidden rounded-md"
         >
           <Link to={`/projects/${screen.projectID}/${screen.id}`}>
-            <img
-              className="absolute inset-0 h-full w-full object-cover transition-all hover:scale-105"
-              src={`/api/static${screen.thumbnailUrl}`}
-              alt={screen.name}
-            />
+            {screen.thumbnailUrl ? (
+              <img
+                className="absolute inset-0 h-full w-full object-cover transition-all hover:scale-105"
+                src={`/api/static/${screen.thumbnailUrl}`}
+                alt={screen.name}
+              />
+            ) : (
+              <ImageOffIcon className="h-8 w-8" />
+            )}
           </Link>
         </AspectRatio>
       </CardHeader>
@@ -41,7 +43,7 @@ const Screen: React.FC<ScreenProps> = ({ screen }) => {
       <CardContent className="flex flex-row gap-4 px-4 py-3 justify-between">
         <div className="flex flex-col gap-1 overflow-hidden">
           <Link to={`/projects/${screen.projectID}/${screen.id}`}>
-            <CardTitle className="text-md text-ellipsis whitespace-nowrap overflow-hidden">
+            <CardTitle className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">
               {screen.name}
             </CardTitle>
           </Link>

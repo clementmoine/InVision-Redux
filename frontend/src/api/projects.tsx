@@ -1,4 +1,4 @@
-import { Project, ProjectWithScreens, Tag } from '@/types';
+import { Screen, Project, ProjectWithScreens, Tag } from '@/types';
 import { QueryFunction } from '@tanstack/react-query';
 
 export interface FetchProjectsParams {
@@ -8,7 +8,7 @@ export interface FetchProjectsParams {
   page?: number;
   limit?: number;
   search?: string;
-  sort?: 'update' | 'title';
+  sort?: 'updatedAt' | 'name';
 }
 
 export interface FetchProjectsResponse {
@@ -16,6 +16,8 @@ export interface FetchProjectsResponse {
   total: number;
   limit: number;
   page: number;
+  previousPage: number;
+  nextPage: number;
 }
 
 export const fetchProjects: QueryFunction<
@@ -92,6 +94,34 @@ export const getProject: QueryFunction<
     })
     .then(project => {
       return project;
+    })
+    .catch(error => {
+      throw error;
+    });
+};
+
+export const getProjectScreen: QueryFunction<
+  Screen,
+  [string, Project['id'], Screen['id']]
+> = ({ queryKey }) => {
+  const [_key, project_id, screen_id] = queryKey;
+
+  // Prepare the url
+  const url = new URL(
+    `/api/projects/${project_id}/screens/${screen_id}`,
+    window.location.origin,
+  );
+
+  return fetch(url.toString())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      return response.json();
+    })
+    .then(screen => {
+      return screen;
     })
     .catch(error => {
       throw error;

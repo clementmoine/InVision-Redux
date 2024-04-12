@@ -6,7 +6,7 @@ blueprint = Blueprint("tags", __name__)
 
 
 @blueprint.route("/tags")
-def get_tags():
+def fetch_tags():
     try:
         tags_json_path = os.path.join(current_app.static_folder, "common/tags.json")
 

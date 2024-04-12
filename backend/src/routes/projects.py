@@ -1,5 +1,6 @@
 import os
 import json
+import math
 
 from flask import Blueprint, jsonify, current_app, request
 
@@ -9,15 +10,22 @@ STATIC_FOLDER = "src/static/"
 
 
 @blueprint.route("/projects")
-def get_projects():
+def fetch_projects():
     # Get pagination parameters
-    limit = int(request.args.get("limit", 10))
+    limit = int(request.args.get("limit", 20))
     page = int(request.args.get("page", 1))
 
     # Get type, tag and search query if provided
-    project_type = request.args.get("type")
-    project_tag = request.args.get("tag")
-    search_query = request.args.get("search")
+    project_type = request.args.get("type", "all")
+    project_tag = request.args.get("tag", "all")
+    search_query = request.args.get("search", "")
+    sort_by = request.args.get("sort", "updatedAt")
+
+    # Ignore type and tag if they equal 'all'
+    if project_type == "all":
+        project_type = None
+    if project_tag == "all":
+        project_tag = None
 
     # Get specific list of projects by their ids
     project_ids = request.args.getlist("project_ids")
@@ -63,11 +71,24 @@ def get_projects():
                             if not project_ids or project_id in project_ids:
                                 projects.append(project)
 
+        # Sort projects based on the provided sort parameter
+        if sort_by == "updatedAt":
+            projects.sort(key=lambda x: x["data"]["updatedAt"], reverse=True)
+        elif sort_by == "name":
+            projects.sort(key=lambda x: x["data"]["name"])
+
         # Pagination
         total_projects = len(projects)
+        total_pages = math.ceil(total_projects / limit)
         start_index = (page - 1) * limit
         end_index = start_index + limit
         paginated_projects = projects[start_index:end_index]
+
+        # Calculate next page number
+        next_page = page + 1 if end_index < total_projects else 1
+
+        # Calculate previous page number
+        previous_page = page - 1 if start_index > 0 else total_pages
 
         return jsonify(
             {
@@ -75,6 +96,8 @@ def get_projects():
                 "total": total_projects,
                 "page": page,
                 "limit": limit,
+                "nextPage": next_page,
+                "previousPage": previous_page,
             }
         )
     except FileNotFoundError:
@@ -116,3 +139,26 @@ def get_project(project_id):
         return "Project not found", 404
     except Exception as e:
         return f"Error fetching project: {e}", 500
+
+
+@blueprint.route("/projects/<int:project_id>/screens/<int:screen_id>")
+def get_project_screen(project_id, screen_id):
+    screen_dir = os.path.join(
+        current_app.static_folder,
+        "projects",
+        str(project_id),
+        "screens",
+        str(screen_id),
+    )
+    screen_json_path = os.path.join(screen_dir, "screen.json")
+
+    try:
+        if os.path.exists(screen_json_path):
+            with open(screen_json_path, "r") as screen_file:
+                screen_data = json.load(screen_file)
+
+        return jsonify(screen_data)
+    except FileNotFoundError:
+        return "Screen not found", 404
+    except Exception as e:
+        return f"Error fetching screen: {e}", 500
