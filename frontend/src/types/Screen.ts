@@ -4,10 +4,10 @@ import {
   UserDetails,
   Template,
   Divider,
-  Hotspot,
   Conversation,
   ProjectStatus,
   ProjectData,
+  HotspotWithMetadata,
 } from '@/types';
 
 export interface ScreenForProject {
@@ -79,7 +79,7 @@ export interface ScreenDetails {
   projectMembers: User[];
   dividers: Divider[];
   projectBackgroundColors: Array<unknown>;
-  allHotspots: Hotspot[];
+  allHotspots: HotspotWithMetadata[];
   conversations: Conversation[];
   placeholders: {
     filename: string;
@@ -111,7 +111,7 @@ export interface ScreenDetails {
   projectMemberCount: number;
   projectStatuses: ProjectStatus[];
   canViewPrivateComments: boolean;
-  hotspots: Hotspot[];
+  hotspots: HotspotWithMetadata[];
   unreadConversationsCount: number;
   projectOwner: UserDetails;
 }

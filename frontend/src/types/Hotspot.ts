@@ -46,7 +46,10 @@ export interface HotspotExternalURL {
   };
 }
 export interface HotspotPositionOnScreen {
-  metaData: Record<never, never>;
+  metaData: {
+    isSmoothScroll: boolean; // Duration (450 ms)
+    scrollOffset: number;
+  };
 }
 
 export interface HotspotLinkToAnotherPointOnThisScreen {
@@ -74,10 +77,6 @@ export interface HotspotLinkToScreenAsOverlay {
   };
 }
 
-export interface UnknownMetadata {
-  metaData: Record<string, unknown>;
-}
-
 export interface Hotspot<TargetType extends TargetTypes = TargetTypes> {
   isBottomAligned: boolean;
   height: number;
@@ -96,6 +95,7 @@ export interface Hotspot<TargetType extends TargetTypes = TargetTypes> {
   id: number;
   isScrollTo: boolean;
 }
+
 export type HotspotTypeMap = {
   [targetType in TargetTypes]: targetType extends 'screen'
     ? HotspotLinkToScreen
@@ -113,10 +113,4 @@ export type HotspotTypeMap = {
 };
 
 export type HotspotWithMetadata<TargetType extends TargetTypes = TargetTypes> =
-  Hotspot<TargetType> & { metaData: HotspotTypeMap[TargetType] };
-
-const hotspot = {} as HotspotWithMetadata;
-
-if (hotspot.targetTypeID === 5) {
-  hotspot.metaData;
-}
+  Hotspot<TargetType> & HotspotTypeMap[TargetType];

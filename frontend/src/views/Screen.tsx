@@ -80,7 +80,10 @@ function Screen() {
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden">
       {/* Screen */}
-      <div className="flex h-full w-full bg-muted/40 justify-center overflow-auto p-0">
+      <div
+        id="screen-preview"
+        className="flex h-full w-full bg-muted/40 justify-center overflow-auto p-0"
+      >
         {screen ? (
           <div
             className={`flex relative max-w-full max-h-full`}
