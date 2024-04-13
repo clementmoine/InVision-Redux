@@ -24,6 +24,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Toggle } from '@/components/ui/toggle';
+import { Button } from '@/components/ui/button';
 
 import { getProject } from '@/api/projects';
 
@@ -31,7 +32,8 @@ import defaultValues from '@/constants/defaultValues';
 
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCollapsedGroups } from '@/hooks/useCollapsedGroups';
-import { Button } from '@/components/ui/button';
+
+import EmptyState from '@/assets/illustrations/empty-state.svg?react';
 
 const formSchema = z.object({
   search: z.string(),
@@ -43,7 +45,12 @@ function Project() {
   const { collapsedGroups, setCollapsedGroups } = useCollapsedGroups();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { data: project } = useQuery({
+  const {
+    data: project,
+    refetch,
+    isFetching,
+    isPending,
+  } = useQuery({
     queryKey: [
       'projects',
       Number(params.id),
@@ -98,7 +105,7 @@ function Project() {
 
   return (
     <div className="flex flex-col flex-1 p-8 pt-6 gap-4 bg-muted/40">
-      {project != null && (
+      {project != null ? (
         <>
           {/* Header */}
           <div className="flex justify-between">
@@ -253,6 +260,22 @@ function Project() {
             </Accordion>
           </div>
         </>
+      ) : (
+        !isFetching &&
+        !isPending && (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+            <EmptyState />
+            <h2 className="text-2xl font-semibold tracking-tight">
+              There is nothing here?
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Huh? I thought I left that here... strange.
+            </p>
+            <Button className="mt-4" onClick={() => refetch()}>
+              Give it another shot
+            </Button>
+          </div>
+        )
       )}
     </div>
   );

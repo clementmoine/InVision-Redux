@@ -19,6 +19,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { FetchProjectsParams, fetchProjects } from '@/api/projects';
 
 import EmptyState from '@/assets/illustrations/empty-state.svg?react';
+
 import { Button } from '@/components/ui/button';
 
 function ProjectsTab() {
@@ -61,7 +62,12 @@ function ProjectsTab() {
     return params;
   }, [searchParams, favorites]);
 
-  const { data: projects, refetch } = useQuery({
+  const {
+    data: projects,
+    refetch,
+    isFetching,
+    isPending,
+  } = useQuery({
     queryKey: ['projects', params],
     queryFn: fetchProjects,
     placeholderData: keepPreviousData,
@@ -136,16 +142,21 @@ function ProjectsTab() {
           ))}
         </div>
       ) : (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
-          <EmptyState />
-          <h2 className="text-2xl font-semibold tracking-tight">
-            There is nothing here?
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Huh? I thought I left that here... strange.
-          </p>
-          <Button onClick={() => refetch()}>Give it another shot</Button>
-        </div>
+        !isFetching &&
+        !isPending && (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+            <EmptyState />
+            <h2 className="text-2xl font-semibold tracking-tight">
+              There is nothing here?
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Huh? I thought I left that here... strange.
+            </p>
+            <Button className="mt-4" onClick={() => refetch()}>
+              Give it another shot
+            </Button>
+          </div>
+        )
       )}
 
       {/* Pagination */}

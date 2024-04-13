@@ -5,7 +5,8 @@ from src.download import json_patch_to_local_assets, save_json_data
 from src.utils import color_print, color_input, is_test_mode
 from src.api_requests import fetch_projects, fetch_tags
 from src.api_requests import (
-    get_project_details,
+    get_project_screens,
+    get_project_archived_screens,
     get_screen_details,
     get_screen_inspect_details,
 )
@@ -108,6 +109,12 @@ def browse_screen(screen, project, session):
 
         screen_inspect_details = get_screen_inspect_details(screen, session)
 
+        if screen["isArchived"]:
+            color_print(
+                f"   ⮑  Archived screen {screen['name']} (details) gathered", "green"
+            )
+            return True
+
         if screen_inspect_details:
             screen_inspect_details_patched = json_patch_to_local_assets(
                 screen_inspect_details, project["id"], session
@@ -125,7 +132,6 @@ def browse_screen(screen, project, session):
             color_print(
                 f"   ⮑  Screen {screen['name']} (details, inspect) gathered", "green"
             )
-
             return True
 
     color_print(f"   ✘  Failed to browse the screen {screen['name']}", "red")
@@ -155,17 +161,23 @@ def browse_project(project, session):
 
         return False
 
-    details = get_project_details(project, session)
-    if details:
-        archived_screens_count = details["archivedScreensCount"]
-        screens_count = len(details["screens"])
+    screens = get_project_screens(project, session)
+    if screens:
+        archived_screens_count = screens["archivedScreensCount"]
+
+        if archived_screens_count != 0:
+            screens["archivedscreens"] = get_project_archived_screens(
+                project, session
+            ).get("archivedscreens", [])
+
+        screens_count = len(screens["screens"])
         color_print(
             f"   ⮑  Project browsed ({screens_count} screens, {archived_screens_count} archived)",
             "green",
         )
 
-        details_patched = json_patch_to_local_assets(details, project["id"], session)
-        if not save_json_data(details_patched, project_folder, "screens.json"):
+        screens_patched = json_patch_to_local_assets(screens, project["id"], session)
+        if not save_json_data(screens_patched, project_folder, "screens.json"):
             color_print(f"   ✘  Failed to save screens data", "red")
 
             return False
@@ -175,7 +187,9 @@ def browse_project(project, session):
         with ThreadPoolExecutor(max_workers=min(5, os.cpu_count())) as executor:
             future_to_screen_id = {
                 executor.submit(browse_screen, screen, project, session): screen["id"]
-                for screen in details.get("screens", [])
+                for screen in (
+                    screens.get("screens", []) + screens.get("archivedscreens", [])
+                )
             }
 
             for future in as_completed(future_to_screen_id):
@@ -188,7 +202,7 @@ def browse_project(project, session):
                         f"   ✘  Screen {screen_id} generated an exception: {exc}", "red"
                     )
 
-        if len(browsed_screen_ids) == screens_count:
+        if len(browsed_screen_ids) == screens_count + archived_screens_count:
             color_print(f"   ⮑  All screens browsed properly", "green")
 
             return True
@@ -203,21 +217,29 @@ def browse_project(project, session):
 
 
 def browse_projects(session):
-    projects = fetch_projects(session)
+    projects = fetch_projects(isArchived=False, isCollaborator=True, session=session)
 
-    if projects:
+    archivedProjects = fetch_projects(
+        isArchived=True, isCollaborator=True, session=session
+    )
+
+    allProjects = (projects or []) + (archivedProjects or [])
+
+    if allProjects:
         # In test mode we process one project of each type
         if is_test_mode():
             color_print("╭───────────────────────────────────────────────╮", "yellow")
             color_print("│ Test mode enabled: Fetching only one project! │", "yellow")
             color_print("╰───────────────────────────────────────────────╯", "yellow")
 
-            projects = {project["type"]: project for project in projects}.values()
+            allProjects = {project["type"]: project for project in allProjects}.values()
 
         # WIP : Only manage prototypes
-        projects = [project for project in projects if project["type"] == "prototype"]
+        allProjects = [
+            project for project in allProjects if project["type"] == "prototype"
+        ]
 
-        color_print(f"\nRetrieving {len(projects)} projects:", "green")
+        color_print(f"\nRetrieving {len(allProjects)} projects:", "green")
 
         tags = fetch_tags(session)
         if not save_json_data(tags, os.path.join(DOCS_ROOT, "common"), "tags.json"):
@@ -227,7 +249,7 @@ def browse_projects(session):
 
         successfully_exported_project_ids = set()
 
-        for project in projects:
+        for project in allProjects:
             if tags:
                 project["data"]["tags"] = [
                     tag for tag in tags if project["id"] in tag["prototypeIDs"]
@@ -239,14 +261,14 @@ def browse_projects(session):
         #  Generate index page only for successfully exported projects
         successfully_exported_projects = [
             project
-            for project in projects
+            for project in allProjects
             if project["id"] in successfully_exported_project_ids
         ]
         if successfully_exported_projects:
             # Compare the success to global list to find failed ones
             failed_projects = [
                 project
-                for project in projects
+                for project in allProjects
                 if project not in successfully_exported_projects
             ]
 

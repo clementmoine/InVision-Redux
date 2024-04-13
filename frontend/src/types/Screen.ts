@@ -1,18 +1,28 @@
-import { User, Project } from '@/types';
+import {
+  User,
+  Project,
+  UserDetails,
+  Template,
+  Divider,
+  Hotspot,
+  Conversation,
+  ProjectStatus,
+  ProjectData,
+} from '@/types';
 
-export interface Screen {
+export interface ScreenForProject {
   id: number;
   sort: number;
   name: string;
   isArchived: boolean;
   thumbnailUrl: string;
-  screenGroupId: number;
   isPlaceholder: boolean;
   backgroundColor: string;
+  screenGroupId: Divider['dividerID'];
   updatedAt: number; // Timestamp (ms)
   createdAt: number; // Timestamp (ms)
 
-  // More (less used)
+  // More (less used / unused)
   clientFilename: string;
   conversationCount: number;
   hotspotCount: number;
@@ -26,22 +36,82 @@ export interface Screen {
   serverFileName: string;
   sourceID: number;
   unreadConversationCount: number;
-  updatedByAvatarID: string;
-  updatedByAvatarUrl: string;
-  updatedByUserEmail: string;
+  updatedByAvatarID: UserDetails['avatarID'];
+  updatedByAvatarUrl: User['avatarUrl'];
+  updatedByUserEmail: UserDetails['email'];
   updatedByUserInitials: string;
-  updatedByUserName: string;
+  updatedByUserName: User['name'];
   userID: User['id'];
   workflowStatusClass: string;
   workflowStatusID: number;
 }
+export interface Screen extends ScreenForProject {
+  zoomScrollBehavior: number;
+  backgroundFrame: boolean;
+  backgroundImagePosition: string;
+  width: number;
+  assetID: number;
+  fixedHeaderHeight: number;
+  imageUrl: string;
+  height: number;
+  backgroundAutostretch: boolean;
+  fixedFooterHeight: number;
+  alignment: string;
+  backgroundImageID: string;
+}
 
-export interface ScreenGroup {
-  dividerID: number;
-  expanded: boolean;
-  label: string;
-  position: number;
-  projectID: Project['id'];
-  sort: number;
-  type: 'divider';
+// Note: Some types are unknown due to lack of samples to type them properly
+export interface ScreenDetails {
+  projectBackgroundImages: {
+    id: number;
+    width: number;
+    height: number;
+    imageUrl: string;
+    createdAt: number; // Timestamp (ms)
+    updatedAt: number; // Timestamp (ms)
+    projectID: ProjectData['id'];
+
+    // More (less used / unused)
+    imageVersion: number;
+    serverFileName: string;
+    clientFilename: string;
+  }[];
+  projectMembers: User[];
+  dividers: Divider[];
+  projectBackgroundColors: Array<unknown>;
+  allHotspots: Hotspot[];
+  conversations: Conversation[];
+  placeholders: {
+    filename: string;
+    id: number;
+  };
+  permissions: Record<string, unknown>;
+  activeScreens: Screen[];
+  space: {
+    id: number;
+  };
+  templates: Template[];
+  v: number;
+  screenID: Screen['id'];
+  projectStakeholders: Array<unknown>;
+  project: {
+    userID: User['id'];
+    mobileDeviceID: ProjectData['mobileDeviceID'];
+    homeScreenID: Screen['id'];
+    mobileStatusbarBackgroundColor: `#${string}`;
+    isOverQuota: ProjectData['isOverQuota'];
+    mobileStatusbarFontColor: string;
+    sortTypeID: number;
+    name: ProjectData['name'];
+    id: ProjectData['id'];
+    mobileStatusbarIsOpaque: boolean;
+    isMobile: ProjectData['isMobile'];
+    mobileStatusbarIsVisible: boolean;
+  };
+  projectMemberCount: number;
+  projectStatuses: ProjectStatus[];
+  canViewPrivateComments: boolean;
+  hotspots: Hotspot[];
+  unreadConversationsCount: number;
+  projectOwner: UserDetails;
 }

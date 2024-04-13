@@ -1,4 +1,4 @@
-import { ScreenGroup } from '@/types';
+import { Divider } from '@/types';
 import { Dispatch, SetStateAction, createContext, useState } from 'react';
 
 export type CollapsedGroupsProps = {
@@ -6,7 +6,7 @@ export type CollapsedGroupsProps = {
   storageKey?: string;
 };
 
-export type CollapsedGroups = Set<ScreenGroup['dividerID']>;
+export type CollapsedGroups = Set<Divider['dividerID']>;
 
 export type CollapsedGroupsState = {
   collapsedGroups: CollapsedGroups;
@@ -14,7 +14,7 @@ export type CollapsedGroupsState = {
 };
 
 const initialState: CollapsedGroupsState = {
-  collapsedGroups: new Set<ScreenGroup['dividerID']>(),
+  collapsedGroups: new Set<Divider['dividerID']>(),
   setCollapsedGroups: () => null,
 };
 
@@ -30,9 +30,9 @@ export function CollapsedGroupsProvider({
     () => {
       const storedCollapsedGroups = JSON.parse(
         localStorage.getItem(storageKey) || '[]',
-      ) as Array<ScreenGroup['dividerID']>;
+      ) as Array<Divider['dividerID']>;
 
-      return new Set<ScreenGroup['dividerID']>(storedCollapsedGroups);
+      return new Set<Divider['dividerID']>(storedCollapsedGroups);
     },
   );
 

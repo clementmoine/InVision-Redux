@@ -109,7 +109,7 @@ def fetch_projects():
 @blueprint.route("/projects/<int:project_id>")
 def get_project(project_id):
     # Get search query if provided
-    search_query = request.args.get("search")
+    search_query = request.args.get("search", "")
 
     project_dir = os.path.join(current_app.static_folder, "projects", str(project_id))
     project_json_path = os.path.join(project_dir, "project.json")

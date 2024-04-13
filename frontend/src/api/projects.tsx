@@ -1,4 +1,4 @@
-import { Screen, Project, ProjectWithScreens, Tag } from '@/types';
+import { Project, ProjectWithScreens, Tag } from '@/types';
 import { QueryFunction } from '@tanstack/react-query';
 
 export interface FetchProjectsParams {
@@ -31,7 +31,7 @@ export const fetchProjects: QueryFunction<
 
   // Loop through each property in args and append it to the URL if it exists
   for (const [key, value] of Object.entries(args || {})) {
-    if (value !== undefined && value !== null) {
+    if (value !== undefined && value !== null && value !== '') {
       if (Array.isArray(value)) {
         value.forEach(val => {
           url.searchParams.append(key, val.toString());
@@ -73,7 +73,7 @@ export const getProject: QueryFunction<
 
   // Loop through each property in args and append it to the URL if it exists
   for (const [key, value] of Object.entries(args || {})) {
-    if (value !== undefined && value !== null) {
+    if (value !== undefined && value !== null && value !== '') {
       if (Array.isArray(value)) {
         value.forEach(val => {
           url.searchParams.append(key, val.toString());
@@ -94,34 +94,6 @@ export const getProject: QueryFunction<
     })
     .then(project => {
       return project;
-    })
-    .catch(error => {
-      throw error;
-    });
-};
-
-export const getProjectScreen: QueryFunction<
-  Screen,
-  [string, Project['id'], Screen['id']]
-> = ({ queryKey }) => {
-  const [_key, project_id, screen_id] = queryKey;
-
-  // Prepare the url
-  const url = new URL(
-    `/api/projects/${project_id}/screens/${screen_id}`,
-    window.location.origin,
-  );
-
-  return fetch(url.toString())
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      return response.json();
-    })
-    .then(screen => {
-      return screen;
     })
     .catch(error => {
       throw error;

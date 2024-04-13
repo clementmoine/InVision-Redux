@@ -1,7 +1,5 @@
-import { Tag, User } from '@/types';
-import { Screen, ScreenGroup } from './Screen';
-
-interface ProjectData {
+import { Tag, User, ScreenForProject, Divider } from '@/types';
+export interface ProjectData {
   id: Project['id'];
   type: Project['id'];
   name: string;
@@ -38,10 +36,20 @@ export interface Project {
   image: string;
 }
 
+export interface ProjectStatus {
+  sort: number;
+  colorLabel: string;
+  isDefaultWorkflowStatus: boolean;
+  id: number;
+  workflowStatusClass: string;
+  colorID: number;
+  title: string;
+  projectID: Project['id'];
+}
 export interface ProjectWithScreens extends Project {
   screens: {
-    screens: Screen[];
-    groups: ScreenGroup[];
+    screens: ScreenForProject[];
+    groups: Divider[];
     archivedScreensCount: number;
   };
 }

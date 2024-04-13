@@ -45,8 +45,8 @@ def json_patch_to_local_assets(json_data, project_id, session):
     Returns:
         dict: Updated JSON data with local file paths.
     """
-    assets_dir = os.path.join(DOCS_ROOT, "projects", str(project_id), "assets")
-    os.makedirs(assets_dir, exist_ok=True)
+    project_dir = os.path.join(DOCS_ROOT, "projects", str(project_id))
+    os.makedirs(project_dir, exist_ok=True)
 
     avatars_dir = os.path.join(DOCS_ROOT, "common/avatars")
     os.makedirs(avatars_dir, exist_ok=True)
@@ -76,20 +76,23 @@ def json_patch_to_local_assets(json_data, project_id, session):
                     if "avatars" in dir_name:
                         file_path = os.path.join(avatars_dir, file_name)
 
+                    # Screens and thumbnails
+                    elif (
+                        "screens/thumbnails" in dir_name or "screens/files" in dir_name
+                    ):
+                        screen_id, file_extension = os.path.splitext(file_name)
+
+                        if screen_id:
+                            file_name = f"{'thumbnail' if 'thumbnails' in dir_name else 'image'}{file_extension}"
+                            dir_name = f"screens/{screen_id}"
+
+                        file_path = os.path.join(project_dir, dir_name, file_name)
+
                     # Project assets
                     else:
-                        # Custom file destination for thumbnails and screen image since they are named identically
-                        if (
-                            "screens/thumbnails" in dir_name
-                            or "screens/files" in dir_name
-                        ):
-                            screen_id, file_extension = os.path.splitext(file_name)
-
-                            if screen_id:
-                                file_name = f"{'thumbnail' if 'thumbnails' in dir_name else 'image'}{file_extension}"
-                                dir_name = f"screens/{screen_id}"
-
-                        file_path = os.path.join(assets_dir, dir_name, file_name)
+                        file_path = os.path.join(
+                            project_dir, "assets", dir_name, file_name
+                        )
 
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 

@@ -12,10 +12,10 @@ import {
 } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
-import { Screen as ScreenType } from '@/types';
+import { ScreenForProject } from '@/types';
 
 interface ScreenProps {
-  screen: ScreenType;
+  screen: ScreenForProject;
 }
 
 const Screen: React.FC<ScreenProps> = ({ screen }) => {
