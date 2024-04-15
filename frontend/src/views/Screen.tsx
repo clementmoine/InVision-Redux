@@ -110,6 +110,7 @@ function Screen() {
 
             {/* Image */}
             <img
+              key={screen.id}
               src={`/api/static/${screen.imageUrl}`}
               style={{
                 minWidth: screen.width / zoomLevel,
@@ -138,7 +139,7 @@ function Screen() {
       </div>
 
       {/* Footer */}
-      <footer className="flex h-16 items-center border-t bg-background p-3">
+      <footer className="flex h-16 items-center border-t bg-background p-3 z-[100]">
         <nav className="flex flex-1 gap-1 justify-between">
           <div className="flex flex-1 items-center gap-4 justify-start">
             <Tooltip>

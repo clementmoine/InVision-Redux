@@ -6,7 +6,11 @@ import {
   CSSProperties,
 } from 'react';
 
-import { eventTypes, targetTypes } from '@/constants/hotspots';
+import {
+  eventTypes,
+  overlayPositionOptionsByTitle,
+  targetTypes,
+} from '@/constants/hotspots';
 
 import {
   Popover,
@@ -181,20 +185,94 @@ const Hotspot: React.FC<HotspotProps> = props => {
         screen => screen.id === hotspot.targetScreenID,
       );
 
+      if (!overlayScreen) {
+        return null;
+      }
+
       const { metaData } = hotspot as HotspotWithMetadata<'screenOverlay'>;
 
-      const Container = metaData.stayOnScreen ? Popover : Tooltip;
-      const Trigger = metaData.stayOnScreen ? PopoverTrigger : TooltipTrigger;
-      const Content = metaData.stayOnScreen ? PopoverContent : TooltipContent;
+      const isHover = hotspot.eventTypeID === eventTypes.hover;
 
-      return overlayScreen ? (
+      const Container = isHover ? Tooltip : Popover;
+      const Trigger = isHover ? TooltipTrigger : PopoverTrigger;
+      const Content = isHover ? TooltipContent : PopoverContent;
+
+      // "center" | "end" | "start"
+      let align: 'center' | 'end' | 'start' | undefined = 'start';
+      // "top" | "right" | "bottom" | "left"
+      let side: 'top' | 'right' | 'bottom' | 'left' | undefined = 'top';
+
+      // Set the alignOffset to origin
+      const alignOffset =
+        -hotspot.x / zoomLevel + metaData.overlay.positionOffset.x;
+      const sideOffset =
+        hotspot.y / zoomLevel -
+        overlayScreen.height / 2 -
+        metaData.overlay.positionOffset.y;
+
+      // "Custom" | "Centered" | "Top Left" | "Top Center" | "Top Right" | "Bottom Left" | "Bottom Center" | "Bottom Right"
+      if (
+        metaData.overlay.positionID === overlayPositionOptionsByTitle.Centered
+      ) {
+        side = 'top';
+        align = 'center';
+      } else if (
+        metaData.overlay.positionID ===
+        overlayPositionOptionsByTitle['Top Left']
+      ) {
+        side = 'top';
+        align = 'start';
+      } else if (
+        metaData.overlay.positionID ===
+        overlayPositionOptionsByTitle['Top Center']
+      ) {
+        side = 'top';
+        align = 'center';
+      } else if (
+        metaData.overlay.positionID ===
+        overlayPositionOptionsByTitle['Top Right']
+      ) {
+        side = 'top';
+        align = 'end';
+      } else if (
+        metaData.overlay.positionID ===
+        overlayPositionOptionsByTitle['Bottom Left']
+      ) {
+        side = 'bottom';
+        align = 'start';
+      } else if (
+        metaData.overlay.positionID ===
+        overlayPositionOptionsByTitle['Bottom Center']
+      ) {
+        side = 'bottom';
+        align = 'center';
+      } else if (
+        metaData.overlay.positionID ===
+        overlayPositionOptionsByTitle['Bottom Right']
+      ) {
+        side = 'bottom';
+        align = 'end';
+      }
+
+      return (
         <Container>
           <Trigger
-            data-hotspot-id={hotspot.id}
+            id={hotspot.id.toString()}
             className={className}
             style={style}
-          ></Trigger>
-          <Content className="bg-transparent m-0 p-0 shadow-none border-none rounded-none">
+          />
+
+          <Content
+            side={side}
+            avoidCollisions={false}
+            sideOffset={sideOffset}
+            align={align}
+            alignOffset={alignOffset}
+            data-hotspot-x={hotspot.x / zoomLevel}
+            data-hotspot-y={hotspot.y / zoomLevel}
+            style={{ ['--radix-popover-content-transform-origin']: '0 0' }}
+            className="bg-transparent m-0 p-0 shadow-none border-none rounded-none"
+          >
             <img
               src={`/api/static/${overlayScreen.imageUrl}`}
               style={{
@@ -205,17 +283,17 @@ const Hotspot: React.FC<HotspotProps> = props => {
             />
           </Content>
         </Container>
-      ) : null;
+      );
     } else {
       // Common case (click, double click ...)
       return (
-        <a
-          data-hotspot-id={hotspot.id}
+        <button
+          id={hotspot.id.toString()}
           role="button"
           {...eventProps}
           className={className}
           style={style}
-        ></a>
+        ></button>
       );
     }
   }, [hotspot, zoomLevel, screens, eventProps, visible]);

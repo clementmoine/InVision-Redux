@@ -111,6 +111,17 @@ export const overlayPositionOptions = [
   },
 ] as const;
 
+export const overlayPositionOptionsByTitle = overlayPositionOptions.reduce(
+  (acc, option) => {
+    acc[option.title] = option.id;
+    return acc;
+  },
+  {} as Record<
+    (typeof overlayPositionOptions)[number]['title'],
+    (typeof overlayPositionOptions)[number]['id']
+  >,
+);
+
 /**
  * Possible overlay transition options.
  * - Fade in
