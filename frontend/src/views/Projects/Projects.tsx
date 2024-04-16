@@ -90,7 +90,7 @@ function Projects() {
   }, [favorites.size, setSearchParams]);
 
   return (
-    <div className="flex flex-col flex-1 p-8 pt-6 gap-4 bg-muted/40">
+    <div className="flex flex-col flex-1 gap-4 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex gap-4 justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Projects</h2>

@@ -2,16 +2,16 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Routes, Route, Outlet, Link } from 'react-router-dom';
 
-import { NotFound } from '@/views/NotFound';
-import { Projects } from '@/views/Projects';
-import { Project } from '@/views/Project';
+import Test from '@/views/Test';
 import { Screen } from '@/views/Screen';
+import { Project } from '@/views/Project';
+import { Projects } from '@/views/Projects';
+import { NotFound } from '@/views/NotFound';
 
 import { Redirect } from '@/components/Redirect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 import InVision from '@/assets/invision.svg?react';
-import Test from '@/views/Test';
 
 dayjs.extend(relativeTime);
 
@@ -41,24 +41,28 @@ export default function App() {
 
 function Layout() {
   return (
-    <div className="flex h-screen w-full flex-col">
-      <header className="sticky z-30 top-0 flex h-16 items-center gap-4 border-b bg-background px-4 flex-shrink-0">
-        <nav>
-          <Link
-            to="/"
-            className="flex items-center gap-2 font-semibold flex-shrink-0"
-          >
-            <InVision className="h-6 w-6 text-primary" title="InVision" />
-            InVision
-          </Link>
-        </nav>
+    <div className="flex h-screen w-full flex-col overflow-hidden">
+      <header className="z-30 top-0 left-0 w-full flex h-16 border-b bg-background px-4 flex-shrink-0">
+        <div className="flex justify-between w-full gap-4 items-center max-w-7xl mx-auto">
+          <nav>
+            <Link
+              to="/"
+              className="flex items-center gap-2 font-semibold flex-shrink-0"
+            >
+              <InVision className="h-6 w-6 text-primary" title="InVision" />
+              InVision
+            </Link>
+          </nav>
 
-        <div className="gap-4 ml-auto">
-          <ThemeToggle />
+          <div className="gap-4 ml-auto">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
-      <Outlet />
+      <div className="h-full px-4 py-6 overflow-auto">
+        <Outlet />
+      </div>
     </div>
   );
 }

@@ -17,9 +17,14 @@ function Screen() {
   const [zoomLevel] = useState<number>(0.5);
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden">
+    <div id="screen" className="flex h-screen w-full flex-col overflow-hidden">
       {/* Screen */}
-      <div className="flex h-full w-full bg-muted/40 justify-center overflow-hidden p-0">
+      <div
+        className="flex h-full w-full justify-center overflow-hidden p-0"
+        style={{
+          backgroundColor: 'rgb(var(--screen-background-color))', // Defined after the fetching of the screen
+        }}
+      >
         {params.projectId && params.screenId && (
           <ScreenPreview
             zoomLevel={zoomLevel}

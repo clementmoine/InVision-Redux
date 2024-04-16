@@ -104,7 +104,7 @@ function Project() {
   }, [collapsedGroups, project]);
 
   return (
-    <div className="flex flex-col flex-1 p-8 pt-6 gap-4 bg-muted/40">
+    <div className="flex flex-col flex-1 gap-4 max-w-7xl mx-auto">
       {project != null ? (
         <>
           {/* Header */}
@@ -192,43 +192,44 @@ function Project() {
           </Form>
 
           {/* Screens */}
-          <div className="flex flex-col gap-4">
-            <Accordion
-              type="multiple"
-              onValueChange={expandedGroups => {
-                setCollapsedGroups(collapsedGroups => {
-                  project.screens.groups.forEach(group => {
-                    if (!expandedGroups.includes(group.dividerID.toString())) {
-                      collapsedGroups.add(group.dividerID);
-                    } else {
-                      collapsedGroups.delete(group.dividerID);
-                    }
-                  });
-
-                  return collapsedGroups;
+          <Accordion
+            type="multiple"
+            className="mt-4"
+            onValueChange={expandedGroups => {
+              setCollapsedGroups(collapsedGroups => {
+                project.screens.groups.forEach(group => {
+                  if (!expandedGroups.includes(group.dividerID.toString())) {
+                    collapsedGroups.add(group.dividerID);
+                  } else {
+                    collapsedGroups.delete(group.dividerID);
+                  }
                 });
-              }}
-              value={expandedGroups}
-            >
-              {project.screens.groups
-                .sort((a, b) => a.sort - b.sort)
-                .map((group, index) => {
-                  const screens = project.screens.screens.filter(
-                    screen => screen.screenGroupId === group.dividerID,
-                  );
 
-                  const isLast = project.screens.groups.length === index + 1;
+                return collapsedGroups;
+              });
+            }}
+            value={expandedGroups}
+          >
+            {project.screens.groups
+              .sort((a, b) => a.sort - b.sort)
+              .map((group, index) => {
+                const screens = project.screens.screens.filter(
+                  screen => screen.screenGroupId === group.dividerID,
+                );
 
-                  return (
-                    screens.length > 0 && (
-                      <AccordionItem
-                        key={group.dividerID}
-                        value={group.dividerID.toString()}
-                        className={isLast ? 'border-b-0' : 'border-b'}
-                      >
+                const isLast = project.screens.groups.length === index + 1;
+
+                return (
+                  screens.length > 0 && (
+                    <AccordionItem
+                      key={group.dividerID}
+                      value={group.dividerID.toString()}
+                      className={isLast ? 'border-b-0' : 'border-b'}
+                    >
+                      {group.label != '' && (
                         <AccordionTrigger className="group hover:no-underline text-center">
-                          <div className="flex gap-2 flex-1">
-                            <span className="group-hover:underline">
+                          <div className="flex gap-2 flex-1 justify-center">
+                            <span className="group-hover:underline uppercase text-sm">
                               {group.label}
                             </span>
 
@@ -243,22 +244,22 @@ function Project() {
                             )}
                           </div>
                         </AccordionTrigger>
+                      )}
 
-                        <AccordionContent
-                          dir="ltr"
-                          data-orientation="horizontal"
-                          className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5"
-                        >
-                          {screens.map(screen => (
-                            <ScreenCard key={screen.id} screen={screen} />
-                          ))}
-                        </AccordionContent>
-                      </AccordionItem>
-                    )
-                  );
-                })}
-            </Accordion>
-          </div>
+                      <AccordionContent
+                        dir="ltr"
+                        data-orientation="horizontal"
+                        className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+                      >
+                        {screens.map(screen => (
+                          <ScreenCard key={screen.id} screen={screen} />
+                        ))}
+                      </AccordionContent>
+                    </AccordionItem>
+                  )
+                );
+              })}
+          </Accordion>
         </>
       ) : (
         !isFetching &&

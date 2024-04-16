@@ -1,5 +1,13 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { MouseEvent, useCallback, useRef, useState, useMemo } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import {
+  MouseEvent,
+  useCallback,
+  useRef,
+  useState,
+  useMemo,
+  useEffect,
+} from 'react';
 
 import Hotspot from '@/components/Hotspot';
 import { Button } from '@/components/ui/button';
@@ -9,18 +17,26 @@ import EmptyState from '@/assets/illustrations/empty-state.svg?react';
 import { getScreen } from '@/api/screens';
 
 import { HotspotWithMetadata, Project, Screen, TargetType } from '@/types';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+
 import { targetTypes } from '@/constants/hotspots';
+import { hexToRgb } from '@/utils';
 
 interface ScreenPreviewProps {
   isEmbedded?: boolean;
+  closeParent?: () => void;
   screenId: Screen['id'];
   projectId: Project['id'];
   zoomLevel: number;
 }
 
 function ScreenPreview(props: ScreenPreviewProps) {
-  const { isEmbedded = false, screenId, projectId, zoomLevel } = props;
+  const {
+    isEmbedded = false,
+    closeParent = () => null,
+    screenId,
+    projectId,
+    zoomLevel,
+  } = props;
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -52,6 +68,25 @@ function ScreenPreview(props: ScreenPreviewProps) {
     [data],
   );
 
+  useEffect(() => {
+    if (isEmbedded) {
+      return;
+    }
+
+    const screenContainer = document.querySelector<HTMLDivElement>('#screen');
+
+    if (screenContainer && screen?.backgroundColor) {
+      const color = hexToRgb(screen.backgroundColor || '#fff');
+
+      if (color) {
+        screenContainer.style.setProperty(
+          '--screen-background-color',
+          `${color.r} ${color.g} ${color.b}`,
+        );
+      }
+    }
+  }, [screen, isEmbedded]);
+
   const onHotspotTrigger = useCallback(
     (id: HotspotWithMetadata['id'], targetType: TargetType) => {
       const hotspot = hotspots?.find(hotspot => hotspot.id === id);
@@ -60,21 +95,27 @@ function ScreenPreview(props: ScreenPreviewProps) {
         if (targetType === 'screen') {
           navigate(`/projects/${params.projectId}/${hotspot.targetScreenID}`, {
             state: {
-              previousScreenId: params.screenId,
+              previousScreenId: params.screenId?.toString(),
             },
           });
         } else if (targetType === 'lastScreenVisited') {
           // Navigates back to the last visited screen
           // TODO: Check if a go back then a click on another go back on the previousScreen gets back to this screen
           if (location?.state?.previousScreenId) {
-            navigate(
-              `/projects/${params.projectId}/${location.state.previousScreenId}`,
-              {
-                state: {
-                  previousScreenId: params.screenId,
+            if (location?.state?.previousScreenId !== params.screenId) {
+              navigate(
+                `/projects/${params.projectId}/${location.state.previousScreenId}`,
+                {
+                  state: {
+                    previousScreenId: params.screenId?.toString(),
+                  },
                 },
-              },
-            );
+              );
+            } else {
+              isEmbedded && closeParent();
+            }
+          } else {
+            console.log('No visited screens');
           }
         } else if (
           targetType === 'previousScreenInSort' ||
@@ -96,7 +137,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
                 const adjacentScreenID = screens[adjacentIndex].id;
                 navigate(`/projects/${params.projectId}/${adjacentScreenID}`, {
                   state: {
-                    previousScreenId: hotspot.screenID,
+                    previousScreenId: hotspot.screenID.toString(),
                   },
                 });
               }
@@ -127,11 +168,12 @@ function ScreenPreview(props: ScreenPreviewProps) {
       }
     },
     [
+      closeParent,
       hotspots,
+      isEmbedded,
       location,
       navigate,
-      params.projectId,
-      params.screenId,
+      params,
       screen,
       screens,
     ],
@@ -169,20 +211,31 @@ function ScreenPreview(props: ScreenPreviewProps) {
     <div
       ref={ref}
       id="screen-preview"
-      className="flex w-full h-full overflow-auto justify-center"
+      className="flex w-full h-full overflow-auto"
     >
       {screen ? (
         <div
-          className={`flex relative max-w-full max-h-full`}
+          className={`flex relative mx-auto`}
           style={{
             height: screen.height * zoomLevel,
             width: screen.width * zoomLevel,
           }}
         >
+          {/* Image */}
+          <img
+            key={screen.id}
+            src={`/api/static/${screen.imageUrl}`}
+            style={{
+              minWidth: screen.width * zoomLevel,
+              minHeight: screen.height * zoomLevel,
+              aspectRatio: `${screen.width} / ${screen.height}`,
+            }}
+          />
+
           {/* Hotspots */}
           {hotspots && (
             <div
-              className="absolute inset-0 bg-transparent z-10"
+              className="absolute inset-0 bg-transparent overflow-hidden"
               onClick={onHotspotGroupClick}
             >
               {hotspots.map(hotspot => (
@@ -199,17 +252,6 @@ function ScreenPreview(props: ScreenPreviewProps) {
               ))}
             </div>
           )}
-
-          {/* Image */}
-          <img
-            key={screen.id}
-            src={`/api/static/${screen.imageUrl}`}
-            style={{
-              minWidth: screen.width * zoomLevel,
-              minHeight: screen.height * zoomLevel,
-              aspectRatio: `${screen.width} / ${screen.height}`,
-            }}
-          />
         </div>
       ) : (
         !isFetching &&
