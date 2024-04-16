@@ -14,11 +14,11 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 import { ScreenForProject } from '@/types';
 
-interface ScreenProps {
+interface ScreenCardProps {
   screen: ScreenForProject;
 }
 
-const Screen: React.FC<ScreenProps> = ({ screen }) => {
+const ScreenCard: React.FC<ScreenCardProps> = ({ screen }) => {
   return (
     <Card>
       <CardHeader className="p-0 border-b">
@@ -54,6 +54,6 @@ const Screen: React.FC<ScreenProps> = ({ screen }) => {
     </Card>
   );
 };
-Screen.displayName = 'Screen';
+ScreenCard.displayName = 'ScreenCard';
 
-export { Screen };
+export { ScreenCard };

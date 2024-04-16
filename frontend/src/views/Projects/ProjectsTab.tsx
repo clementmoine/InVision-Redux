@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import defaultValues from '@/constants/defaultValues';
-import { Project } from '@/components/Project';
+import { ProjectCard } from '@/components/ProjectCard';
 import {
   Pagination,
   PaginationContent,
@@ -138,7 +138,7 @@ function ProjectsTab() {
           className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5"
         >
           {projects.data.map(project => (
-            <Project key={project['id']} project={project} />
+            <ProjectCard key={project['id']} project={project} />
           ))}
         </div>
       ) : (

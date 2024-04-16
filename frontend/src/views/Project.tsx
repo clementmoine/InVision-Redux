@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Screen } from '@/components/Screen';
+import { ScreenCard } from '@/components/ScreenCard';
 import {
   AccordionTrigger,
   AccordionItem,
@@ -250,7 +250,7 @@ function Project() {
                           className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5"
                         >
                           {screens.map(screen => (
-                            <Screen key={screen.id} screen={screen} />
+                            <ScreenCard key={screen.id} screen={screen} />
                           ))}
                         </AccordionContent>
                       </AccordionItem>

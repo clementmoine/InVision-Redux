@@ -18,11 +18,11 @@ import { useFavorites } from '@/hooks/useFavorites';
 
 import { Project as ProjectType } from '@/types';
 
-interface ProjectProps {
+interface ProjectCardProps {
   project: ProjectType;
 }
 
-const Project: React.FC<ProjectProps> = ({ project }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const { favorites, setFavorites } = useFavorites();
 
   return (
@@ -101,6 +101,6 @@ const Project: React.FC<ProjectProps> = ({ project }) => {
     </Card>
   );
 };
-Project.displayName = 'Project';
+ProjectCard.displayName = 'ProjectCard';
 
-export { Project };
+export { ProjectCard };

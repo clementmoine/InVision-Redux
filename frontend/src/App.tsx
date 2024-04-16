@@ -11,12 +11,15 @@ import { Redirect } from '@/components/Redirect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 import InVision from '@/assets/invision.svg?react';
+import Test from '@/views/Test';
 
 dayjs.extend(relativeTime);
 
 export default function App() {
   return (
     <Routes>
+      {/* Screens without layout */}
+      <Route path="/test" element={<Test />} />
       {/* Screens without layout */}
       <Route path="/projects/:projectId/:screenId" element={<Screen />} />
 

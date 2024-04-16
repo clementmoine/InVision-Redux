@@ -16,14 +16,14 @@ export type OverlayTransition =
 export type OverlayTransitionID =
   (typeof overlayTransitionOptions)[number]['id'];
 
-export type EventTypes = keyof typeof eventTypes;
-export type EventTypeId = (typeof eventTypes)[EventTypes];
+export type EventType = keyof typeof eventTypes;
+export type EventTypeId = (typeof eventTypes)[EventType];
 
-export type TransitionTypes = keyof typeof transitionTypes;
-export type TransitionTypeId = (typeof transitionTypes)[TransitionTypes];
+export type TransitionType = keyof typeof transitionTypes;
+export type TransitionTypeId = (typeof transitionTypes)[TransitionType];
 
-export type TargetTypes = keyof typeof targetTypes;
-export type TargetTypeId = (typeof targetTypes)[TargetTypes];
+export type TargetType = keyof typeof targetTypes;
+export type TargetTypeId = (typeof targetTypes)[TargetType];
 
 export interface HotspotLinkToScreen {
   metaData: Record<never, never>;
@@ -77,7 +77,7 @@ export interface HotspotLinkToScreenAsOverlay {
   };
 }
 
-export interface Hotspot<TargetType extends TargetTypes = TargetTypes> {
+export interface Hotspot<T extends TargetType = TargetType> {
   isBottomAligned: boolean;
   height: number;
   templateID: Template['id'] | '';
@@ -87,7 +87,7 @@ export interface Hotspot<TargetType extends TargetTypes = TargetTypes> {
   y: number;
   transitionTypeID: TransitionTypeId;
   screenID: Screen['id'];
-  targetTypeID: (typeof targetTypes)[TargetType];
+  targetTypeID: (typeof targetTypes)[T];
   width: number;
   x: number;
   updatedAt: number; // Timestamp (ms)
@@ -97,7 +97,7 @@ export interface Hotspot<TargetType extends TargetTypes = TargetTypes> {
 }
 
 export type HotspotTypeMap = {
-  [targetType in TargetTypes]: targetType extends 'screen'
+  [targetType in TargetType]: targetType extends 'screen'
     ? HotspotLinkToScreen
     : targetType extends 'lastScreenVisited'
       ? HotspotLastScreenVisited
@@ -112,5 +112,5 @@ export type HotspotTypeMap = {
               : unknown;
 };
 
-export type HotspotWithMetadata<TargetType extends TargetTypes = TargetTypes> =
-  Hotspot<TargetType> & HotspotTypeMap[TargetType];
+export type HotspotWithMetadata<T extends TargetType = TargetType> =
+  Hotspot<T> & HotspotTypeMap[T];

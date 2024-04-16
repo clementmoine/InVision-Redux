@@ -1,304 +1,187 @@
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
-  useCallback,
-  useMemo,
-  AnchorHTMLAttributes,
-  CSSProperties,
-} from 'react';
+  inline,
+  useClick,
+  useFloating,
+  useHover,
+  offset,
+  useInteractions,
+  useDismiss,
+  safePolygon,
+  FloatingOverlay,
+} from '@floating-ui/react';
+
+import { MouseEvent, useMemo, useState } from 'react';
+
+import ScreenPreview from '@/components/ScreenPreview';
+
+import { eventTypes, targetTypes } from '@/constants/hotspots';
 
 import {
-  eventTypes,
-  overlayPositionOptionsByTitle,
-  targetTypes,
-} from '@/constants/hotspots';
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { HotspotWithMetadata, EventTypes, Screen } from '@/types';
+  EventType,
+  HotspotWithMetadata,
+  Project,
+  Screen,
+  TargetType,
+} from '@/types';
+import { useLocation } from 'react-router-dom';
 
 interface HotspotProps {
   hotspot: HotspotWithMetadata;
   visible: boolean;
   zoomLevel: number;
-  screens?: Screen[];
-  onTrigger?: (id: HotspotWithMetadata['id']) => void;
+  isEmbedded?: boolean;
+  screenID: Screen['id'];
+  projectId: Project['id'];
+  onTrigger: (
+    id: HotspotWithMetadata['id'],
+    target: TargetType,
+    event: MouseEvent<Element, globalThis.MouseEvent>,
+  ) => void;
 }
 
 const Hotspot: React.FC<HotspotProps> = props => {
-  const { hotspot, visible, onTrigger, screens, zoomLevel } = props;
-
-  const params = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // TODO: Check if it works
-  const navigateToAdjacentScreen = useCallback(
-    (direction: 'previous' | 'next') => {
-      if (screens) {
-        const currentIndex = screens.findIndex(
-          screen => screen.id === hotspot.screenID,
-        );
-
-        if (currentIndex !== -1) {
-          let adjacentIndex: number;
-
-          if (direction === 'previous') {
-            adjacentIndex = currentIndex - 1;
-          } else {
-            adjacentIndex = currentIndex + 1;
-          }
-
-          if (adjacentIndex >= 0 && adjacentIndex < screens.length) {
-            const adjacentScreenID = screens[adjacentIndex].id;
-            navigate(`/projects/${params.projectId}/${adjacentScreenID}`);
-          }
-        }
-      }
-    },
-    [params, navigate, hotspot, screens],
-  );
-
-  // TODO: Check if it works
-  const smoothScrollTo = useCallback(
-    (scrollOffset: number, isSmoothScroll: boolean) => {
-      const screenPreview = document.getElementById('screen-preview');
-
-      if (screenPreview) {
-        screenPreview.scrollTo({
-          top: scrollOffset,
-          behavior: isSmoothScroll ? 'smooth' : 'instant',
-        });
-      }
-    },
-    [],
-  );
-
-  const onHotspotEvent = useCallback(() => {
-    if (hotspot.targetTypeID === targetTypes.screen) {
-      navigate(`/projects/${params.projectId}/${hotspot.targetScreenID}`, {
-        state: {
-          previousScreenId: params.screenId,
-        },
-      });
-    } else if (hotspot.targetTypeID === targetTypes.lastScreenVisited) {
-      // Navigates back to the last visited screen
-      // TODO: Check if a go back then a click on another go back on the previousScreen gets back to this screen
-      if (location.state.previousScreenId) {
-        navigate(
-          `/projects/${params.projectId}/${location.state.previousScreenId}`,
-          {
-            state: {
-              previousScreenId: params.screenId,
-            },
-          },
-        );
-      }
-    } else if (hotspot.targetTypeID === targetTypes.previousScreenInSort) {
-      // Navigates to the previous screen
-      navigateToAdjacentScreen('previous');
-    } else if (hotspot.targetTypeID === targetTypes.nextScreenInSort) {
-      // Navigates to the next screen
-      navigateToAdjacentScreen('next');
-    } else if (hotspot.targetTypeID === targetTypes.externalUrl) {
-      // Open an url in a new tab
-      const { metaData } = hotspot as HotspotWithMetadata<'externalUrl'>;
-      window.open(metaData.url, '_blank', 'noopener,noreferrer,nofollow');
-    } else if (hotspot.targetTypeID === targetTypes.positionOnScreen) {
-      // Scroll to a position on this screen
-      const { metaData } = hotspot as HotspotWithMetadata<'positionOnScreen'>;
-      smoothScrollTo(metaData.scrollOffset, metaData.isSmoothScroll);
-    } else if (hotspot.targetTypeID === targetTypes.screenOverlay) {
-      // Handle screen overlay
-      // Example: Show a modal or overlay on the screen
-    } else {
-      alert('Unhandled target type');
-    }
-  }, [
-    params,
-    navigate,
+  const {
+    isEmbedded = false,
     hotspot,
-    navigateToAdjacentScreen,
-    location,
-    smoothScrollTo,
+    visible,
+    onTrigger,
+    projectId,
+    zoomLevel,
+  } = props;
+
+  const location = useLocation();
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+
+  const targetType = useMemo(() => {
+    return (Object.keys(targetTypes) as TargetType[]).find(
+      key => targetTypes[key] === hotspot.targetTypeID,
+    );
+  }, [hotspot]);
+
+  const eventType = useMemo(() => {
+    return (Object.keys(eventTypes) as EventType[]).find(
+      key => eventTypes[key] === hotspot.eventTypeID,
+    );
+  }, [hotspot]);
+
+  const positionOffset = useMemo(() => {
+    if (targetType === 'screenOverlay') {
+      const { positionOffset } = (
+        hotspot as HotspotWithMetadata<'screenOverlay'>
+      ).metaData.overlay;
+
+      return {
+        x: positionOffset.x,
+        y: positionOffset.y,
+      };
+    }
+  }, [hotspot, targetType]);
+
+  // if (hotspot.id === 1332474403) {
+  //   console.log(hotspot.id, positionOffset);
+  // }
+
+  const { refs, floatingStyles, context } = useFloating({
+    open: isOverlayOpen,
+    onOpenChange: setIsOverlayOpen,
+    transform: false,
+    middleware: [
+      inline({
+        x: 0,
+        y: 0,
+      }),
+      offset({
+        crossAxis: positionOffset?.x || 0,
+        mainAxis: positionOffset?.y || 0,
+      }),
+    ],
+  });
+
+  const hover = useHover(context, {
+    enabled: eventType === 'hover' && targetType === 'screenOverlay',
+    handleClose: safePolygon({
+      requireIntent: false,
+    }),
+  });
+
+  const click = useClick(context, {
+    enabled: eventType === 'click' && targetType === 'screenOverlay',
+    event: eventType === 'pressHold' ? 'mousedown' : 'click',
+  });
+
+  const dismiss = useDismiss(context, {
+    enabled:
+      targetType === 'screenOverlay' &&
+      (hotspot as HotspotWithMetadata<'screenOverlay'>).metaData.overlay
+        .closeOnOutsideClick,
+  });
+
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    hover,
+    click,
+    dismiss,
   ]);
 
-  const handleHotspotEvent = useCallback(() => {
-    onTrigger?.(hotspot.id);
-    onHotspotEvent();
-  }, [hotspot, onHotspotEvent, onTrigger]);
-
-  const eventProps = useMemo(() => {
-    const eventPerType: Record<
-      EventTypes,
-      keyof AnchorHTMLAttributes<HTMLAnchorElement> | null
-    > = {
-      click: 'onClick',
-      doubleTap: 'onDoubleClick',
-      pressHold: null,
-      swipeRight: null,
-      swipeLeft: null,
-      swipeUp: null,
-      swipeDown: null,
-      hover: null,
-      timer: null,
-    };
-
-    const eventType = (
-      Object.keys(eventTypes) as (keyof typeof eventTypes)[]
-    ).find(key => eventTypes[key] === hotspot.eventTypeID);
-
-    if (eventType) {
-      const eventName = eventPerType[eventType];
-      if (eventName) {
-        return {
-          [eventName]: handleHotspotEvent,
-        };
-      }
-    }
-    return {};
-  }, [hotspot.eventTypeID, handleHotspotEvent]);
-
-  const Element = useMemo(() => {
-    // Common className and style for the hotspot
-    const className =
-      'absolute border-blue-400 bg-blue-400/50 border-2 z-20 transition-opacity duration-500';
-
-    const style: CSSProperties = {
-      height: hotspot.height / zoomLevel,
-      width: hotspot.width / zoomLevel,
-      top: hotspot.y / zoomLevel,
-      left: hotspot.x / zoomLevel,
+  const style = useMemo(() => {
+    return {
+      height: hotspot.height * zoomLevel,
+      width: hotspot.width * zoomLevel,
+      top: hotspot.y * zoomLevel,
+      left: hotspot.x * zoomLevel,
       opacity: visible ? 1 : 0,
     };
+  }, [hotspot, visible, zoomLevel]);
 
-    // Tooltip / Popover
-    if (hotspot.targetTypeID === targetTypes.screenOverlay) {
-      const overlayScreen = screens?.find(
-        screen => screen.id === hotspot.targetScreenID,
-      );
+  return (
+    <>
+      <button
+        data-hotspotid={hotspot.id.toString()}
+        data-screenid={hotspot.screenID.toString()}
+        ref={refs.setReference}
+        style={style}
+        className={
+          'absolute border-blue-400 bg-blue-400/50 border-2 z-20 transition-opacity duration-500'
+        }
+        {...getReferenceProps({
+          onClick: event => {
+            event.stopPropagation();
 
-      if (!overlayScreen) {
-        return null;
-      }
+            if (targetType === 'screenOverlay') {
+              location.state = {
+                previousScreenId: hotspot.screenID,
+              };
+            }
 
-      const { metaData } = hotspot as HotspotWithMetadata<'screenOverlay'>;
+            onTrigger(hotspot.id, targetType!, event);
+          },
+        })}
+      />
 
-      const isHover = hotspot.eventTypeID === eventTypes.hover;
-
-      const Container = isHover ? Tooltip : Popover;
-      const Trigger = isHover ? TooltipTrigger : PopoverTrigger;
-      const Content = isHover ? TooltipContent : PopoverContent;
-
-      // "center" | "end" | "start"
-      let align: 'center' | 'end' | 'start' | undefined = 'start';
-      // "top" | "right" | "bottom" | "left"
-      let side: 'top' | 'right' | 'bottom' | 'left' | undefined = 'top';
-
-      // Set the alignOffset to origin
-      const alignOffset =
-        -hotspot.x / zoomLevel + metaData.overlay.positionOffset.x;
-      const sideOffset =
-        hotspot.y / zoomLevel -
-        overlayScreen.height / 2 -
-        metaData.overlay.positionOffset.y;
-
-      // "Custom" | "Centered" | "Top Left" | "Top Center" | "Top Right" | "Bottom Left" | "Bottom Center" | "Bottom Right"
-      if (
-        metaData.overlay.positionID === overlayPositionOptionsByTitle.Centered
-      ) {
-        side = 'top';
-        align = 'center';
-      } else if (
-        metaData.overlay.positionID ===
-        overlayPositionOptionsByTitle['Top Left']
-      ) {
-        side = 'top';
-        align = 'start';
-      } else if (
-        metaData.overlay.positionID ===
-        overlayPositionOptionsByTitle['Top Center']
-      ) {
-        side = 'top';
-        align = 'center';
-      } else if (
-        metaData.overlay.positionID ===
-        overlayPositionOptionsByTitle['Top Right']
-      ) {
-        side = 'top';
-        align = 'end';
-      } else if (
-        metaData.overlay.positionID ===
-        overlayPositionOptionsByTitle['Bottom Left']
-      ) {
-        side = 'bottom';
-        align = 'start';
-      } else if (
-        metaData.overlay.positionID ===
-        overlayPositionOptionsByTitle['Bottom Center']
-      ) {
-        side = 'bottom';
-        align = 'center';
-      } else if (
-        metaData.overlay.positionID ===
-        overlayPositionOptionsByTitle['Bottom Right']
-      ) {
-        side = 'bottom';
-        align = 'end';
-      }
-
-      return (
-        <Container>
-          <Trigger
-            id={hotspot.id.toString()}
-            className={className}
-            style={style}
-          />
-
-          <Content
-            side={side}
-            avoidCollisions={false}
-            sideOffset={sideOffset}
-            align={align}
-            alignOffset={alignOffset}
-            data-hotspot-x={hotspot.x / zoomLevel}
-            data-hotspot-y={hotspot.y / zoomLevel}
-            style={{ ['--radix-popover-content-transform-origin']: '0 0' }}
-            className="bg-transparent m-0 p-0 shadow-none border-none rounded-none"
+      {isOverlayOpen && !isEmbedded && (
+        <>
+          <div
+            ref={refs.setFloating}
+            style={{
+              ...floatingStyles,
+              top: `${positionOffset?.y}px`,
+              left: `${positionOffset?.x}px`,
+            }}
+            className="z-100"
+            {...getFloatingProps()}
           >
-            <img
-              src={`/api/static/${overlayScreen.imageUrl}`}
-              style={{
-                width: overlayScreen.width / zoomLevel,
-                height: overlayScreen.height / zoomLevel,
-                aspectRatio: `${overlayScreen.width / zoomLevel} / ${overlayScreen.height / zoomLevel}`,
-              }}
+            <ScreenPreview
+              isEmbedded
+              screenId={hotspot.targetScreenID}
+              projectId={projectId}
+              zoomLevel={zoomLevel}
             />
-          </Content>
-        </Container>
-      );
-    } else {
-      // Common case (click, double click ...)
-      return (
-        <button
-          id={hotspot.id.toString()}
-          role="button"
-          {...eventProps}
-          className={className}
-          style={style}
-        ></button>
-      );
-    }
-  }, [hotspot, zoomLevel, screens, eventProps, visible]);
+          </div>
 
-  return Element;
+          <FloatingOverlay />
+        </>
+      )}
+    </>
+  );
 };
 
 export default Hotspot;
