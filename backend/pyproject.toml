@@ -8,6 +8,7 @@ authors = ["Clément MOINE <clement.moine86@gmail.com>"]
 python = "^3.12"
 flask = "^3.0.2"
 python-dotenv = "^1.0.1"
+unidecode = "^1.3.8"
 
 
 [build-system]

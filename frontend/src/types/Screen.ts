@@ -60,6 +60,21 @@ export interface Screen extends ScreenForProject {
   backgroundImageID: string;
 }
 
+export interface ArchivedScreenDetails {
+  project: {
+    id: Project['id'];
+    name: Project['data']['name'];
+  };
+  screen: {
+    clientFilename: Screen['clientFilename'];
+    height: Screen['height'];
+    id: Screen['id'];
+    imageUrl: Screen['imageUrl'];
+    name: Screen['name'];
+    width: Screen['width'];
+  };
+}
+
 // Note: Some types are unknown due to lack of samples to type them properly
 export interface ScreenDetails {
   projectBackgroundImages: {

@@ -3,7 +3,7 @@ import { QueryFunction } from '@tanstack/react-query';
 
 export interface FetchProjectsParams {
   project_ids?: Array<Project['id']>;
-  type?: 'board' | 'prototype';
+  type?: 'board' | 'prototype' | 'archived';
   tag?: Tag['id'];
   page?: number;
   limit?: number;

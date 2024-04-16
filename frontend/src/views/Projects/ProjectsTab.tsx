@@ -48,7 +48,12 @@ function ProjectsTab() {
             return;
           }
 
-          params[key] = value == 'prototypes' ? 'prototype' : 'board';
+          params[key] =
+            value == 'prototypes'
+              ? 'prototype'
+              : value === 'boards'
+                ? 'board'
+                : 'archived';
         } else if (key === 'sort') {
           if (value === 'updatedAt' || value === 'name') {
             params[key] = value;

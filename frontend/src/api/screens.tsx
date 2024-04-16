@@ -1,8 +1,8 @@
-import { Project, Screen, ScreenDetails } from '@/types';
+import { Project, Screen, ScreenDetails, ArchivedScreenDetails } from '@/types';
 import { QueryFunction } from '@tanstack/react-query';
 
 export const getScreen: QueryFunction<
-  ScreenDetails,
+  ScreenDetails | ArchivedScreenDetails,
   [string, Project['id'], Screen['id']]
 > = ({ queryKey }) => {
   const [_key, project_id, screen_id] = queryKey;

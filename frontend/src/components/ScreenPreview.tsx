@@ -16,7 +16,13 @@ import EmptyState from '@/assets/illustrations/empty-state.svg?react';
 
 import { getScreen } from '@/api/screens';
 
-import { HotspotWithMetadata, Project, Screen, TargetType } from '@/types';
+import {
+  ArchivedScreenDetails,
+  HotspotWithMetadata,
+  Project,
+  Screen,
+  TargetType,
+} from '@/types';
 
 import { targetTypes } from '@/constants/hotspots';
 import { hexToRgb } from '@/utils';
@@ -53,18 +59,27 @@ function ScreenPreview(props: ScreenPreviewProps) {
     placeholderData: keepPreviousData,
   });
 
-  const hotspots = useMemo(() => data?.hotspots, [data]);
-
-  const screens = useMemo(
-    () => data?.activeScreens.sort((a, b) => a.sort - b.sort),
+  const hotspots = useMemo(
+    () => (data && 'hotspots' in data ? data.hotspots : undefined),
     [data],
   );
 
-  const screen = useMemo(
+  const screens = useMemo(
     () =>
-      data?.activeScreens.find(
-        activeScreen => activeScreen.id === data.screenID,
-      ),
+      data && 'activeScreens' in data
+        ? data.activeScreens.sort((a, b) => a.sort - b.sort)
+        : undefined,
+    [data],
+  );
+
+  const screen = useMemo<ArchivedScreenDetails['screen'] | Screen | undefined>(
+    () =>
+      data &&
+      ('activeScreens' in data
+        ? data.activeScreens?.find(
+            activeScreen => activeScreen.id === data.screenID,
+          )
+        : data.screen),
     [data],
   );
 
@@ -75,8 +90,12 @@ function ScreenPreview(props: ScreenPreviewProps) {
 
     const screenContainer = document.querySelector<HTMLDivElement>('#screen');
 
-    if (screenContainer && screen?.backgroundColor) {
-      const color = hexToRgb(screen.backgroundColor || '#fff');
+    if (screen && screenContainer) {
+      const color = hexToRgb(
+        'backgroundColor' in screen && screen.backgroundColor
+          ? screen.backgroundColor
+          : '#fff',
+      );
 
       if (color) {
         screenContainer.style.setProperty(

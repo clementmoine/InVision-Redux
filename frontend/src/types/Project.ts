@@ -50,6 +50,7 @@ export interface ProjectWithScreens extends Project {
   screens: {
     screens: ScreenForProject[];
     groups: Divider[];
+    archivedscreens: ScreenForProject[];
     archivedScreensCount: number;
   };
 }

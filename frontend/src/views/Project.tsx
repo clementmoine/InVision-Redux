@@ -17,6 +17,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScreenCard } from '@/components/ScreenCard';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   AccordionTrigger,
   AccordionItem,
@@ -191,75 +192,118 @@ function Project() {
             </form>
           </Form>
 
-          {/* Screens */}
-          <Accordion
-            type="multiple"
-            className="mt-4"
-            onValueChange={expandedGroups => {
-              setCollapsedGroups(collapsedGroups => {
-                project.screens.groups.forEach(group => {
-                  if (!expandedGroups.includes(group.dividerID.toString())) {
-                    collapsedGroups.add(group.dividerID);
-                  } else {
-                    collapsedGroups.delete(group.dividerID);
-                  }
-                });
+          <Tabs
+            value={searchParams.get('type') ?? defaultValues.projects.type}
+            defaultValue={defaultValues.projects.type}
+            className="flex flex-col gap-4 h-full w-full"
+            onValueChange={value => {
+              setSearchParams(searchParams => {
+                if (value == 'all') {
+                  searchParams.delete('type');
+                } else {
+                  searchParams.set('type', value);
+                }
 
-                return collapsedGroups;
+                searchParams.delete('page');
+
+                return searchParams;
               });
             }}
-            value={expandedGroups}
           >
-            {project.screens.groups
-              .sort((a, b) => a.sort - b.sort)
-              .map((group, index) => {
-                const screens = project.screens.screens.filter(
-                  screen => screen.screenGroupId === group.dividerID,
-                );
+            {/* Toolbar (tabs, search, filters) */}
+            {project.screens.archivedScreensCount > 0 && (
+              <div className="flex justify-between gap-4">
+                {/* Left Part */}
+                <div className="flex gap-4 items-center">
+                  {/* Tabs list */}
+                  <TabsList>
+                    <TabsTrigger value="all">All</TabsTrigger>
+                    <TabsTrigger value="archived">Archived</TabsTrigger>
+                  </TabsList>
+                </div>
+              </div>
+            )}
 
-                const isLast = project.screens.groups.length === index + 1;
+            {/* Screens */}
+            <Accordion
+              type="multiple"
+              className="mt-4"
+              onValueChange={expandedGroups => {
+                setCollapsedGroups(collapsedGroups => {
+                  project.screens.groups.forEach(group => {
+                    if (!expandedGroups.includes(group.dividerID.toString())) {
+                      collapsedGroups.add(group.dividerID);
+                    } else {
+                      collapsedGroups.delete(group.dividerID);
+                    }
+                  });
 
-                return (
-                  screens.length > 0 && (
-                    <AccordionItem
-                      key={group.dividerID}
-                      value={group.dividerID.toString()}
-                      className={isLast ? 'border-b-0' : 'border-b'}
-                    >
-                      {group.label != '' && (
-                        <AccordionTrigger className="group hover:no-underline text-center">
-                          <div className="flex gap-2 flex-1 justify-center">
-                            <span className="group-hover:underline uppercase text-sm">
-                              {group.label}
-                            </span>
+                  return collapsedGroups;
+                });
+              }}
+              value={expandedGroups}
+            >
+              {project.screens.groups
+                .sort((a, b) => a.sort - b.sort)
+                .map(group => {
+                  const type =
+                    searchParams.get('type') === 'archived'
+                      ? 'archivedscreens'
+                      : 'screens';
+                  const screens = project.screens?.[type]?.filter(
+                    screen => screen.screenGroupId === group.dividerID,
+                  );
 
-                            {collapsedGroups.has(group.dividerID) ? (
-                              <Badge className="pointer-events-none bg-destructive">
-                                {screens.length} screens not shown
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-muted-foreground pointer-events-none">
-                                {screens.length}
-                              </Badge>
-                            )}
-                          </div>
-                        </AccordionTrigger>
-                      )}
-
-                      <AccordionContent
-                        dir="ltr"
-                        data-orientation="horizontal"
-                        className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+                  return (
+                    screens?.length > 0 && (
+                      <AccordionItem
+                        key={group.dividerID}
+                        value={group.dividerID.toString()}
+                        className="border-b-0"
                       >
-                        {screens.map(screen => (
-                          <ScreenCard key={screen.id} screen={screen} />
-                        ))}
-                      </AccordionContent>
-                    </AccordionItem>
-                  )
-                );
-              })}
-          </Accordion>
+                        {group.label != '' && (
+                          <AccordionTrigger className="group hover:no-underline text-center gap-4">
+                            <div className="h-0 border-b flex-1 border-current" />
+                            <div className="flex gap-2 justify-center">
+                              <span className="group-hover:underline uppercase text-sm">
+                                {group.label}
+                              </span>
+
+                              {collapsedGroups.has(group.dividerID) ? (
+                                <Badge
+                                  variant="destructive"
+                                  className="pointer-events-none"
+                                >
+                                  {screens.length} screens not shown
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className="pointer-events-none"
+                                >
+                                  {screens.length}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="h-0 border-b flex-1 border-current" />
+                          </AccordionTrigger>
+                        )}
+
+                        <AccordionContent
+                          dir="ltr"
+                          data-orientation="horizontal"
+                          className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
+                        >
+                          {screens.map(screen => (
+                            <ScreenCard key={screen.id} screen={screen} />
+                          ))}
+                        </AccordionContent>
+                      </AccordionItem>
+                    )
+                  );
+                })}
+            </Accordion>
+          </Tabs>
         </>
       ) : (
         !isFetching &&

@@ -1,6 +1,7 @@
 import os
 import json
 import math
+from unidecode import unidecode
 
 from flask import Blueprint, jsonify, current_app, request
 
@@ -50,9 +51,20 @@ def fetch_projects():
                         project_data = project.get("data")
 
                         if (
-                            (  # Project type matches the requested type
-                                not project_type
-                                or project_data.get("type") == project_type
+                            (
+                                # Archived type is requested
+                                (
+                                    project_type == "archived"
+                                    and project_data.get("isArchived")
+                                )
+                                # Any type requested excluding archived
+                                or (
+                                    (
+                                        not project_type
+                                        or (project_data.get("type") == project_type)
+                                    )
+                                    and not project_data.get("isArchived")
+                                )
                             )
                             and (  # Project tags includes the requested tag
                                 not project_tag
@@ -64,8 +76,8 @@ def fetch_projects():
                             )
                             and (  # Project name matches the search query
                                 not search_query
-                                or search_query.lower()
-                                in project_data.get("name", "").lower()
+                                or unidecode(search_query.lower())
+                                in unidecode(project_data.get("name", "").lower())
                             )
                         ):
                             if not project_ids or project_id in project_ids:
@@ -127,9 +139,19 @@ def get_project(project_id):
                 filtered_screens = [
                     screen
                     for screen in screens_data.get("screens", [])
-                    if search_query.lower() in screen.get("name", "").lower()
+                    if unidecode(search_query.lower())
+                    in unidecode(screen.get("name", "").lower())
                 ]
                 screens_data["screens"] = filtered_screens
+
+                # Filter the archived screens
+                filtered_archived_screens = [
+                    screen
+                    for screen in screens_data.get("archivedscreens", [])
+                    if unidecode(search_query.lower())
+                    in unidecode(screen.get("name", "").lower())
+                ]
+                screens_data["archivedscreens"] = filtered_archived_screens
 
                 # Add the screens_data to the project_data
                 project_data["screens"] = screens_data
