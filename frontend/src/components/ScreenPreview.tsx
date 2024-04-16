@@ -139,6 +139,9 @@ function ScreenPreview(props: ScreenPreviewProps) {
 
   const onHotspotGroupClick = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
+      // Prevent click to be propagated to the above hotspots
+      event.stopPropagation();
+
       const hotspotClicked =
         'hotspotid' in (event.target as HTMLElement).dataset;
 
