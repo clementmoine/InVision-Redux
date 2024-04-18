@@ -285,7 +285,7 @@ function Project() {
                               ) : (
                                 <Badge
                                   variant="outline"
-                                  className="pointer-events-none"
+                                  className="pointer-events-none bg-background border-foreground"
                                 >
                                   {screens.length}
                                 </Badge>

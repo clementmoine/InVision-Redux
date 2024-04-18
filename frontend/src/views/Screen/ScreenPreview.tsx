@@ -52,8 +52,6 @@ function ScreenPreview(props: ScreenPreviewProps) {
     (id: HotspotWithMetadata['id'], targetType: TargetType) => {
       const hotspot = hotspots?.find(hotspot => hotspot.id === id);
 
-      console.log(targetType, hotspot);
-
       if (hotspot) {
         if (targetType === 'screen') {
           navigate(`/projects/${projectId}/${hotspot.targetScreenID}`, {
@@ -196,7 +194,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
       >
         {/* Image */}
         <img
-          decoding="async"
+          decoding="sync"
           src={`/api/static/${screen.imageUrl}`}
           style={{
             minWidth: screen.width * zoomLevel,

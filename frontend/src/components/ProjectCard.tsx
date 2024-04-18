@@ -30,7 +30,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
       <CardHeader className="p-0 border-b">
         <AspectRatio
           ratio={9 / 6}
-          className="relative bg-muted overflow-hidden rounded-md"
+          className="relative bg-white overflow-hidden rounded-md"
         >
           <Link
             to={`/projects/${project.id}`}
@@ -63,7 +63,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         </AspectRatio>
       </CardHeader>
 
-      <CardContent className="flex flex-row gap-4 px-4 py-3 justify-between">
+      <CardContent className="flex flex-row gap-4 justify-between py-4 px-6">
         <div className="flex flex-col gap-1 overflow-hidden">
           <Link to={`/projects/${project.id}`}>
             <CardTitle className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">

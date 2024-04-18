@@ -210,6 +210,7 @@ function Screen() {
             allScreens.length > 1 &&
             screenIndex != null && (
               <MiniPagination
+                loop
                 start={1}
                 end={allScreens?.length}
                 initialValue={screenIndex + 1}
@@ -230,7 +231,7 @@ function Screen() {
       </div>
 
       {/* Footer */}
-      <footer className="flex h-16 items-center border-t bg-background p-3 z-[100] overflow-hidden">
+      <footer className="flex h-16 items-center border-t p-3 z-[100] overflow-hidden bg-background">
         <nav className="flex flex-1 gap-1 justify-between overflow-hidden">
           <div className="flex flex-1 overflow-hidden items-center gap-4 justify-start">
             <Tooltip>

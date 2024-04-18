@@ -24,7 +24,10 @@ const ScreenCard: React.FC<ScreenCardProps> = ({ screen }) => {
       <CardHeader className="p-0 border-b">
         <AspectRatio
           ratio={9 / 6}
-          className="relative bg-muted overflow-hidden rounded-md"
+          className="relative bg-white overflow-hidden rounded-md"
+          style={{
+            backgroundColor: screen.backgroundColor,
+          }}
         >
           <Link to={`/projects/${screen.projectID}/${screen.id}`}>
             {screen.thumbnailUrl ? (
@@ -40,16 +43,14 @@ const ScreenCard: React.FC<ScreenCardProps> = ({ screen }) => {
         </AspectRatio>
       </CardHeader>
 
-      <CardContent className="flex flex-row gap-4 px-4 py-3 justify-between">
-        <div className="flex flex-col gap-1 overflow-hidden">
-          <Link to={`/projects/${screen.projectID}/${screen.id}`}>
-            <CardTitle className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">
-              {screen.name}
-            </CardTitle>
-          </Link>
+      <CardContent className="flex flex-col gap-1 justify-between py-4 px-6">
+        <Link to={`/projects/${screen.projectID}/${screen.id}`}>
+          <CardTitle className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">
+            {screen.name}
+          </CardTitle>
+        </Link>
 
-          <CardDescription>{dayjs(screen.updatedAt).fromNow()}</CardDescription>
-        </div>
+        <CardDescription>{dayjs(screen.updatedAt).fromNow()}</CardDescription>
       </CardContent>
     </Card>
   );

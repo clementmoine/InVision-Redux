@@ -47,9 +47,9 @@ function Layout() {
           <nav>
             <Link
               to="/"
-              className="flex items-center gap-2 font-semibold flex-shrink-0"
+              className="flex items-center gap-2 font-semibold flex-shrink-0 text-foreground"
             >
-              <InVision className="h-6 w-6 text-primary" title="InVision" />
+              <InVision className="h-6 w-6" title="InVision" />
               InVision
             </Link>
           </nav>
@@ -60,7 +60,7 @@ function Layout() {
         </div>
       </header>
 
-      <div className="h-full px-4 py-6 overflow-auto">
+      <div className="h-full px-4 py-6 overflow-auto bg-muted/40">
         <Outlet />
       </div>
     </div>
