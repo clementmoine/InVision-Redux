@@ -43,6 +43,18 @@ export const targetTypes = {
 } as const;
 
 /**
+ * Possible target types.
+ * 1: Normal
+ * 2: Disable horizontal scrolling
+ * 3: Zoom out to browser width
+ */
+export const zoomScrollBehaviors = {
+  NORMAL: 1,
+  DISABLE_HORIZONTAL_SCROLLING: 2,
+  ZOOM_OUT_TO_BROWSER_WIDTH: 3,
+} as const;
+
+/**
  * Possible transition types.
  * 1: None
  * 2: Push Right

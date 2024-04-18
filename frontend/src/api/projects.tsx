@@ -31,7 +31,7 @@ export const fetchProjects: QueryFunction<
 
   // Loop through each property in args and append it to the URL if it exists
   for (const [key, value] of Object.entries(args || {})) {
-    if (value !== undefined && value !== null && value !== '') {
+    if (value != null && value !== '') {
       if (Array.isArray(value)) {
         value.forEach(val => {
           url.searchParams.append(key, val.toString());
@@ -73,7 +73,7 @@ export const getProject: QueryFunction<
 
   // Loop through each property in args and append it to the URL if it exists
   for (const [key, value] of Object.entries(args || {})) {
-    if (value !== undefined && value !== null && value !== '') {
+    if (value != null && value !== '') {
       if (Array.isArray(value)) {
         value.forEach(val => {
           url.searchParams.append(key, val.toString());

@@ -25,8 +25,11 @@ export type TransitionTypeId = (typeof transitionTypes)[TransitionType];
 export type TargetType = keyof typeof targetTypes;
 export type TargetTypeId = (typeof targetTypes)[TargetType];
 
-export interface HotspotLinkToScreen {
-  metaData: Record<never, never>;
+export interface HotspotLinkToScreen<E extends EventType = EventType> {
+  metaData: {
+    redirectAfter: E extends 'timer' ? number : undefined;
+    stayOnScreen: E extends 'timer' ? undefined : boolean;
+  };
 }
 
 export interface HotspotLastScreenVisited {
@@ -96,9 +99,9 @@ export interface Hotspot<T extends TargetType = TargetType> {
   isScrollTo: boolean;
 }
 
-export type HotspotTypeMap = {
+export type HotspotTypeMap<E extends EventType = EventType> = {
   [targetType in TargetType]: targetType extends 'screen'
-    ? HotspotLinkToScreen
+    ? HotspotLinkToScreen<E>
     : targetType extends 'lastScreenVisited'
       ? HotspotLastScreenVisited
       : targetType extends 'previousScreenInSort' | 'nextScreenInSort'
@@ -112,5 +115,7 @@ export type HotspotTypeMap = {
               : unknown;
 };
 
-export type HotspotWithMetadata<T extends TargetType = TargetType> =
-  Hotspot<T> & HotspotTypeMap[T];
+export type HotspotWithMetadata<
+  T extends TargetType = TargetType,
+  E extends EventType = EventType,
+> = Hotspot<T> & HotspotTypeMap<E>[T];

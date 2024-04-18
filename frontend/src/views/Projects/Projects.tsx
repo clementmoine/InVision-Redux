@@ -5,6 +5,7 @@ import { useCallback, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowDownAZ, Search, Tag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { Helmet } from 'react-helmet-async';
 import {
   Form,
   FormControl,
@@ -91,6 +92,11 @@ function Projects() {
 
   return (
     <div className="flex flex-col flex-1 gap-4 max-w-7xl mx-auto">
+      {/* Helmet title */}
+      <Helmet>
+        <title>Projects - InVision</title>
+      </Helmet>
+
       {/* Header */}
       <div className="flex gap-4 justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Projects</h2>

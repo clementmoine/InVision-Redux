@@ -13,4 +13,6 @@ const project: Partial<Record<keyof GetProjectParams, string>> = {
   search: '',
 };
 
-export default { projects, project };
+const title = 'InVision';
+
+export default { projects, project, title };

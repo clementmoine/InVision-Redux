@@ -5,6 +5,7 @@ import { Search, Share, StarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useParams, Link } from 'react-router-dom';
 
 import {
@@ -108,8 +109,13 @@ function Project() {
     <div className="flex flex-col flex-1 gap-4 max-w-7xl mx-auto">
       {project != null ? (
         <>
+          {/* Helmet title */}
+          <Helmet>
+            <title>{project.data.name} - InVision</title>
+          </Helmet>
+
           {/* Header */}
-          <div className="flex justify-between">
+          <div className="flex flex-wrap justify-between gap-2">
             <div className="flex flex-col gap-1">
               <div className="flex gap-4">
                 <h2 className="text-3xl font-bold tracking-tight self-start">
@@ -179,7 +185,7 @@ function Project() {
                         <Input
                           type="search"
                           placeholder="Search screens..."
-                          className="rounded-lg bg-background pl-8 w-[320px]"
+                          className="rounded-lg bg-background pl-8 max-w-[320px]"
                           onInput={e => onInput(e.currentTarget.value)}
                           {...field}
                         />

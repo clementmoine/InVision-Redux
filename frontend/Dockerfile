@@ -29,6 +29,7 @@ COPY . .
 
 # # Expose the port that the application listens on.
 # EXPOSE 3000
+ENV IN_DOCKER_CONTAINER true
 
 # Run the application.
 CMD yarn dev
