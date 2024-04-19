@@ -236,6 +236,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
         <img
           decoding="sync"
           src={`/api/static/${screen.imageUrl}`}
+          className="object-contain"
           style={{
             marginTop:
               'fixedHeaderHeight' in screen
