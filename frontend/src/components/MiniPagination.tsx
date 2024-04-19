@@ -86,7 +86,7 @@ const MiniPagination: React.FC<ZoomProps> = (props: ZoomProps) => {
         </TooltipContent>
       </Tooltip>
 
-      <p className="text-md">{`${currentPage} / ${end}`}</p>
+      <p className="text-sm font-medium">{`${currentPage} of ${end}`}</p>
 
       <Tooltip>
         <TooltipTrigger asChild>

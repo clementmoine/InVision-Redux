@@ -13,6 +13,8 @@ const project: Partial<Record<keyof GetProjectParams, string>> = {
   search: '',
 };
 
+const initialZoom = 0.5;
+
 const title = 'InVision';
 
-export default { projects, project, title };
+export default { projects, project, title, initialZoom };

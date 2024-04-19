@@ -23,6 +23,11 @@ const Zoom: React.FC<ZoomProps> = (props: ZoomProps) => {
 
   const [zoomLevel, setZoomLevel] = useState(initialValue);
 
+  const handleReset = useCallback(() => {
+    setZoomLevel(initialValue);
+    onChange?.(initialValue);
+  }, [initialValue, onChange]);
+
   const handleZoomIn = useCallback(() => {
     setZoomLevel(prevZoom => {
       let step = 0.1; // Default step size
@@ -77,7 +82,20 @@ const Zoom: React.FC<ZoomProps> = (props: ZoomProps) => {
       </Tooltip>
 
       {/* Zoom level as percent */}
-      <p className="text-md">{`${Math.round(zoomLevel * 100)}%`}</p>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="disabled:opacity-100"
+            onClick={handleReset}
+            disabled={zoomLevel === initialValue}
+          >{`${Math.round(zoomLevel * 100)}%`}</Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          Reset to {Math.round(initialValue * 100)}%
+        </TooltipContent>
+      </Tooltip>
 
       <Tooltip>
         <TooltipTrigger asChild>

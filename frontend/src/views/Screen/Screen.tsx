@@ -11,16 +11,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-
-import EmptyState from '@/assets/illustrations/empty-state.svg?react';
-
-import ScreenPreview from '@/views/Screen/ScreenPreview';
-
-import { getScreen } from '@/api/screens';
-
-import { ArchivedScreenDetails, Screen as ScreenType } from '@/types';
-
-import { hexToRgb } from '@/utils';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -31,6 +21,18 @@ import {
 } from '@/components/ui/breadcrumb';
 import Zoom from '@/components/Zoom';
 import MiniPagination from '@/components/MiniPagination';
+
+import EmptyState from '@/assets/illustrations/empty-state.svg?react';
+
+import ScreenPreview from '@/views/Screen/ScreenPreview';
+
+import { getScreen } from '@/api/screens';
+
+import { ArchivedScreenDetails, Screen as ScreenType } from '@/types';
+
+import { hexToRgb } from '@/utils';
+
+import defaultValues from '@/constants/defaultValues';
 
 import style from './Screen.module.scss';
 
@@ -132,7 +134,7 @@ function Screen() {
     [data],
   );
 
-  const [zoomLevel, setZoomLevel] = useState<number>(0.5);
+  const [zoomLevel, setZoomLevel] = useState<number>(defaultValues.initialZoom);
 
   const screenBackgroundColor = useMemo(() => {
     if (screen) {
@@ -238,7 +240,10 @@ function Screen() {
           />
         )}
 
-        <Zoom onChange={setZoomLevel} initialValue={zoomLevel} />
+        <Zoom
+          onChange={setZoomLevel}
+          initialValue={defaultValues.initialZoom}
+        />
       </aside>
 
       {/* Footer */}
