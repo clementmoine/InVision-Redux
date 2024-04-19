@@ -8,6 +8,8 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 
+import { cn } from '@/lib/utils';
+
 interface ZoomProps {
   onChange?: (level: number) => void;
   className?: string | undefined;
@@ -55,7 +57,10 @@ const Zoom: React.FC<ZoomProps> = (props: ZoomProps) => {
 
   return (
     <div
-      className={`inline-flex items-center justify-center gap-2 flex-nowrap border rounded-md p-1 bg-background ${className}`}
+      className={cn(
+        'inline-flex items-center justify-center gap-2 flex-nowrap border rounded-md p-1 bg-background',
+        className,
+      )}
     >
       <Tooltip>
         <TooltipTrigger asChild>

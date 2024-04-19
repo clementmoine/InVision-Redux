@@ -8,6 +8,7 @@ import { Project } from '@/views/Project';
 import { Projects } from '@/views/Projects';
 import { NotFound } from '@/views/NotFound';
 
+import { About } from '@/components/About';
 import { Redirect } from '@/components/Redirect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -47,15 +48,18 @@ function Layout() {
           <nav>
             <Link
               to="/"
-              className="flex items-center gap-2 font-semibold flex-shrink-0 text-foreground"
+              className="flex items-center gap-2 h-16 font-semibold flex-shrink-0 text-foreground"
             >
-              <InVision className="h-6 w-6" title="InVision" />
-              InVision
+              <InVision className="h-6 w-auto" title="InVision" />
+              <h1>
+                <span className="sr-only">InVision </span>Redux
+              </h1>
             </Link>
           </nav>
 
-          <div className="gap-4 ml-auto">
+          <div className="flex gap-4 ml-auto">
             <ThemeToggle />
+            <About />
           </div>
         </div>
       </header>

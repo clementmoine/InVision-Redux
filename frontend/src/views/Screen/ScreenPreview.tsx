@@ -61,7 +61,6 @@ function ScreenPreview(props: ScreenPreviewProps) {
           });
         } else if (targetType === 'lastScreenVisited') {
           // Navigates back to the last visited screen
-          // TODO: Check if a go back then a click on another go back on the previousScreen gets back to this screen
           if (location?.state?.previousScreenId) {
             if (location.state.previousScreenId !== params.screenId) {
               navigate(
@@ -183,22 +182,71 @@ function ScreenPreview(props: ScreenPreviewProps) {
     <div
       ref={ref}
       id="screen-preview"
-      className="flex w-full h-full overflow-auto"
+      className="flex relative w-full h-full overflow-auto"
     >
       <div
-        className={`flex relative mx-auto`}
+        className="relative mx-auto flex-shrink-0 overflow-hidden"
         style={{
-          height: screen.height * zoomLevel,
           width: screen.width * zoomLevel,
+          height:
+            'fixedHeaderHeight' in screen
+              ? `${(screen.height - screen.fixedHeaderHeight - screen.fixedFooterHeight) * zoomLevel}px`
+              : 'auto',
+          marginTop:
+            'fixedHeaderHeight' in screen
+              ? `${screen.fixedHeaderHeight * zoomLevel}px`
+              : 0,
+          marginBottom:
+            'fixedFooterHeight' in screen
+              ? `${screen.fixedFooterHeight * zoomLevel}px`
+              : 0,
         }}
       >
+        {/* Fixed header */}
+        {'fixedHeaderHeight' in screen && screen.fixedHeaderHeight > 0 && (
+          <div
+            className="fixed top-0 z-50 overflow-hidden"
+            style={{
+              height: `${screen.fixedHeaderHeight * zoomLevel}px`,
+              width: screen.width * zoomLevel,
+              backgroundImage: `url("/api/static/${screen.imageUrl}")`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'top center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+        )}
+
+        {/* Fixed footer */}
+        {'fixedFooterHeight' in screen && screen.fixedFooterHeight > 0 && (
+          <div
+            className="fixed bottom-16 z-50 overflow-hidden"
+            style={{
+              height: `${screen.fixedFooterHeight * zoomLevel}px`,
+              width: screen.width * zoomLevel,
+              backgroundImage: `url("/api/static/${screen.imageUrl}")`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'bottom center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+        )}
+
         {/* Image */}
         <img
           decoding="sync"
           src={`/api/static/${screen.imageUrl}`}
           style={{
+            marginTop:
+              'fixedHeaderHeight' in screen
+                ? -(screen.fixedHeaderHeight * zoomLevel)
+                : 0,
+            width: screen.width * zoomLevel,
+            height: screen.height * zoomLevel,
             minWidth: screen.width * zoomLevel,
             minHeight: screen.height * zoomLevel,
+            maxWidth: screen.width * zoomLevel,
+            maxHeight: screen.height * zoomLevel,
             aspectRatio: `${screen.width} / ${screen.height}`,
           }}
         />
@@ -206,8 +254,14 @@ function ScreenPreview(props: ScreenPreviewProps) {
         {/* Hotspots */}
         {hotspots && (
           <div
-            className="absolute inset-0 bg-transparent overflow-hidden"
+            className="absolute left-0 inset-0 bg-transparent overflow-hidden"
             onClick={onHotspotGroupClick}
+            style={{
+              top:
+                'fixedHeaderHeight' in screen
+                  ? -(screen.fixedHeaderHeight * zoomLevel)
+                  : 0,
+            }}
           >
             {hotspots.map(hotspot => (
               <Hotspot
@@ -222,6 +276,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
                 allHotspots={allHotspots}
                 onTrigger={onHotspotTrigger}
                 screenID={0}
+                closeParent={closeParent}
               />
             ))}
           </div>

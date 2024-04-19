@@ -235,7 +235,7 @@ def get_screen_details(screen, session):
     )
     params = {
         "screenID": screen["id"],
-        "trigger": "navigation.screen",  # Possible values: (navigation.mode, navigation.screen, initial-load, event.reload)
+        "trigger": "initial-load",  # Possible values: (navigation.mode, navigation.screen, initial-load, event.reload)
     }
 
     headers = {"x-xsrf-token": session.cookies.get("XSRF-TOKEN")}

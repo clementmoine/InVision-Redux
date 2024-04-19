@@ -1,8 +1,9 @@
+import clsx from 'clsx';
 import { useMemo, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Clock, Code2, Eye, Share, Workflow } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
 
 import {
   Tooltip,
@@ -30,6 +31,8 @@ import {
 } from '@/components/ui/breadcrumb';
 import Zoom from '@/components/Zoom';
 import MiniPagination from '@/components/MiniPagination';
+
+import style from './Screen.module.scss';
 
 function Screen() {
   const params = useParams();
@@ -70,7 +73,8 @@ function Screen() {
   );
 
   const allHotspots = useMemo(
-    () => (data != null && 'hotspots' in data ? data.allHotspots : undefined),
+    () =>
+      data != null && 'allHotspots' in data ? data.allHotspots : undefined,
     [data],
   );
 
@@ -123,6 +127,11 @@ function Screen() {
     return Array.from(imageUrls);
   }, [allScreens, hotspots, screenIndex]);
 
+  const isMobile = useMemo(
+    () => data != null && 'isMobile' in data.project && data.project.isMobile,
+    [data],
+  );
+
   const [zoomLevel, setZoomLevel] = useState<number>(0.5);
 
   const screenBackgroundColor = useMemo(() => {
@@ -150,8 +159,12 @@ function Screen() {
       <div className="relative flex h-screen w-full flex-col overflow-hidden">
         {/* Screen */}
         <div
-          className="flex h-full w-full justify-center overflow-hidden p-0"
+          className={clsx(
+            'flex h-full w-full justify-center overflow-hidden p-0',
+            { [style['is-mobile']]: isMobile },
+          )}
           style={{
+            marginBottom: '4rem',
             backgroundColor: 'rgb(var(--screen-background-color))', // Defined after the fetching of the screen
           }}
         >
@@ -203,35 +216,33 @@ function Screen() {
             )
           )}
         </div>
-
-        {/* Tools */}
-        <aside className="absolute flex bottom-4 right-4 z-[100] gap-4">
-          {allScreens != null &&
-            allScreens.length > 1 &&
-            screenIndex != null && (
-              <MiniPagination
-                loop
-                start={1}
-                end={allScreens?.length}
-                initialValue={screenIndex + 1}
-                onChange={page => {
-                  const targetScreen = allScreens[page - 1];
-
-                  navigate(`/projects/${params.projectId}/${targetScreen.id}`, {
-                    state: {
-                      previousScreenId: params.screenId?.toString(),
-                    },
-                  });
-                }}
-              />
-            )}
-
-          <Zoom onChange={setZoomLevel} initialValue={zoomLevel} />
-        </aside>
       </div>
 
+      {/* Tools */}
+      <aside className="fixed flex bottom-20 right-4 z-[100] gap-4">
+        {allScreens != null && allScreens.length > 1 && screenIndex != null && (
+          <MiniPagination
+            loop
+            start={1}
+            end={allScreens?.length}
+            initialValue={screenIndex + 1}
+            onChange={page => {
+              const targetScreen = allScreens[page - 1];
+
+              navigate(`/projects/${params.projectId}/${targetScreen.id}`, {
+                state: {
+                  previousScreenId: params.screenId?.toString(),
+                },
+              });
+            }}
+          />
+        )}
+
+        <Zoom onChange={setZoomLevel} initialValue={zoomLevel} />
+      </aside>
+
       {/* Footer */}
-      <footer className="flex h-16 items-center border-t p-3 z-[100] overflow-hidden bg-background">
+      <footer className="flex fixed bottom-0 w-full h-16 items-center border-t p-3 z-[100] overflow-hidden bg-background flex-shrink-0">
         <nav className="flex flex-1 gap-1 justify-between overflow-hidden">
           <div className="flex flex-1 overflow-hidden items-center gap-4 justify-start">
             <Tooltip>

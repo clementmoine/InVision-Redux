@@ -184,7 +184,13 @@ function Project() {
                         <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                         <Input
                           type="search"
-                          placeholder="Search screens..."
+                          placeholder={`Search in ${
+                            project?.screens?.[
+                              searchParams.get('type') === 'archived'
+                                ? 'archivedscreens'
+                                : 'screens'
+                            ]?.length ?? 0
+                          } screens...`}
                           className="rounded-lg bg-background pl-8 max-w-[320px]"
                           onInput={e => onInput(e.currentTarget.value)}
                           {...field}

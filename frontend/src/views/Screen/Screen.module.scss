@@ -1,0 +1,24 @@
+.is-mobile:hover {
+  div,
+  img {
+    cursor: default;
+    cursor:
+      url('/mobile/cursors/default.png') 39 39,
+      auto !important;
+  }
+
+  a,
+  button {
+    cursor: default;
+    cursor:
+      url('/mobile/cursors/hover.png') 39 39,
+      auto !important;
+  }
+
+  :active {
+    cursor: default;
+    cursor:
+      url('/mobile/cursors/tap.png') 39 39,
+      auto !important;
+  }
+}
