@@ -85,34 +85,6 @@ const Hotspot: React.FC<HotspotProps> = props => {
     );
   }, [hotspot]);
 
-  useEffect(() => {
-    if (targetType === 'screen' && eventType === 'timer') {
-      const { redirectAfter } = (
-        hotspot as HotspotWithMetadata<typeof targetType, typeof eventType>
-      ).metaData; // ms
-
-      // Clear any previous timeout if present
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      timeoutRef.current = setTimeout(() => {
-        location.state = {
-          previousScreenId: hotspot.screenID.toString(),
-        };
-
-        onTrigger(hotspot.id, targetType!);
-      }, redirectAfter);
-    }
-
-    return () => {
-      // Clear any previous timeout if present
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [eventType, hotspot, location, onTrigger, targetType]);
-
   const positionOffset = useMemo(() => {
     if (targetType === 'screenOverlay') {
       const { positionOffset } = (
@@ -154,44 +126,6 @@ const Hotspot: React.FC<HotspotProps> = props => {
     }
   }, [targetType, hotspot]);
 
-  const { refs, context } = useFloating({
-    open: isOverlayOpen,
-    onOpenChange: setIsOverlayOpen,
-  });
-
-  const hover = useHover(context, {
-    enabled:
-      eventType === 'hover' &&
-      (targetType === 'screenOverlay' ||
-        (targetType === 'screen' &&
-          !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
-            .stayOnScreen)),
-    handleClose: safePolygon({
-      requireIntent: false,
-    }),
-  });
-
-  const click = useClick(context, {
-    enabled: eventType === 'click' && targetType === 'screenOverlay',
-    event: eventType === 'pressHold' ? 'mousedown' : 'click',
-  });
-
-  const dismiss = useDismiss(context, {
-    enabled:
-      (targetType === 'screenOverlay' &&
-        (hotspot as HotspotWithMetadata<'screenOverlay'>).metaData.overlay
-          .closeOnOutsideClick) ||
-      (targetType === 'screen' &&
-        !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
-          .stayOnScreen),
-  });
-
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    hover,
-    click,
-    dismiss,
-  ]);
-
   const closeOverlay = useCallback(() => {
     setIsOverlayOpen(false);
   }, [setIsOverlayOpen]);
@@ -215,6 +149,71 @@ const Hotspot: React.FC<HotspotProps> = props => {
 
     return targetHotspots;
   }, [allHotspots, hotspot, targetType]);
+
+  // Timer hotspot
+  useEffect(() => {
+    if (targetType === 'screen' && eventType === 'timer') {
+      const { redirectAfter } = (
+        hotspot as HotspotWithMetadata<typeof targetType, typeof eventType>
+      ).metaData; // ms
+
+      // Clear any previous timeout if present
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        location.state = {
+          previousScreenId: hotspot.screenID.toString(),
+        };
+
+        onTrigger(hotspot.id, targetType!);
+      }, redirectAfter);
+    }
+
+    return () => {
+      // Clear any previous timeout if present
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [eventType, hotspot, location, onTrigger, targetType]);
+
+  const { refs, context } = useFloating({
+    open: isOverlayOpen,
+    onOpenChange: setIsOverlayOpen,
+  });
+
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    // Hover
+    useHover(context, {
+      enabled:
+        eventType === 'hover' &&
+        (targetType === 'screenOverlay' ||
+          (targetType === 'screen' &&
+            !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
+              .stayOnScreen)),
+      handleClose: safePolygon({
+        requireIntent: false,
+      }),
+    }),
+    // Click
+    useClick(context, {
+      enabled: eventType === 'click' && targetType === 'screenOverlay',
+      event: eventType === 'pressHold' ? 'mousedown' : 'click',
+    }),
+    // Dismiss for click to close when clicking outside
+    useDismiss(context, {
+      enabled:
+        eventType === 'click' &&
+        ((targetType === 'screenOverlay' &&
+          (hotspot as HotspotWithMetadata<'screenOverlay'>).metaData.overlay
+            .closeOnOutsideClick) ||
+          (targetType === 'screen' &&
+            !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
+              .stayOnScreen)),
+    }),
+  ]);
 
   const style = useMemo(() => {
     return {

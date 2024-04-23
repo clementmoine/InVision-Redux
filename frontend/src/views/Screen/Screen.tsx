@@ -162,7 +162,7 @@ function Screen() {
         {/* Screen */}
         <div
           className={clsx(
-            'flex h-full w-full justify-center overflow-hidden p-0',
+            'flex h-full w-full justify-center overflow-hidden p-0 select-none',
             { [style['is-mobile']]: isMobile },
           )}
           style={{
