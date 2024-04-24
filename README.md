@@ -6,6 +6,30 @@ InVision Redux is a complete app designed to help users backup their projects fr
 
 > Important note: Nicolas Cage could not be included in the final product.
 
+## Work in Progress
+
+Some features are not handled yet, here is the roadmap/to-do list :
+
+- [x] Manage all event types (swipe, long press, double tap ...)
+- [ ] Manage transitions
+- [ ] Fixed header / footer
+  - [x] Display these
+  - [ ] Manage hotspots in fixed footer and header
+- [ ] Add keyboard shortcuts in the preview mode
+- [ ] Inspect mode
+- [ ] History mode
+- [ ] Flow mode
+- [ ] Quick navigate with "paginated preview" (click on the current screen name)
+- [ ] Share button (QR Code and url copy to keyboard)
+
+Some features are intentionally not meant to be done (at least for the ongoing version) :
+
+- Build mode
+- Comments
+- Notifications
+- Edit in general
+- Upload new screens
+
 ## Getting Started
 
 To begin using InVision Redux, follow these steps:
