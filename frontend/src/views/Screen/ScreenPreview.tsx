@@ -12,8 +12,6 @@ import {
   TargetType,
 } from '@/types';
 
-import { targetTypes } from '@/constants/hotspots';
-
 interface ScreenPreviewProps {
   isEmbedded?: boolean;
   closeParent?: () => void;
@@ -115,29 +113,28 @@ function ScreenPreview(props: ScreenPreviewProps) {
 
           if (screenPreview) {
             screenPreview.scrollTo({
-              top: metaData.scrollOffset,
+              top:
+                metaData.scrollOffset -
+                ('fixedHeaderHeight' in screen ? screen.fixedHeaderHeight : 0),
               behavior: metaData.isSmoothScroll ? 'smooth' : 'instant',
             });
           }
-        } else if (hotspot.targetTypeID === targetTypes.screenOverlay) {
-          // Handle screen overlay
-          // Example: Show a modal or overlay on the screen
         } else {
           alert('Unhandled target type');
         }
       }
     },
     [
-      allScreens,
-      closeParent,
       hotspots,
-      isEmbedded,
-      params,
-      location,
       navigate,
       projectId,
-      screen,
       screenId,
+      location,
+      params.screenId,
+      isEmbedded,
+      closeParent,
+      screen,
+      allScreens,
     ],
   );
 
@@ -205,7 +202,8 @@ function ScreenPreview(props: ScreenPreviewProps) {
         {/* Fixed header */}
         {'fixedHeaderHeight' in screen && screen.fixedHeaderHeight > 0 && (
           <div
-            className="fixed top-0 z-50 overflow-hidden"
+            // className="fixed top-0 z-50 overflow-hidden"
+            className="fixed top-0 overflow-hidden"
             style={{
               height: `${screen.fixedHeaderHeight * zoomLevel}px`,
               width: screen.width * zoomLevel,
@@ -220,7 +218,8 @@ function ScreenPreview(props: ScreenPreviewProps) {
         {/* Fixed footer */}
         {'fixedFooterHeight' in screen && screen.fixedFooterHeight > 0 && (
           <div
-            className="fixed bottom-16 z-50 overflow-hidden"
+            // className="fixed bottom-16 z-50 overflow-hidden"
+            className="fixed bottom-16 overflow-hidden"
             style={{
               height: `${screen.fixedFooterHeight * zoomLevel}px`,
               width: screen.width * zoomLevel,

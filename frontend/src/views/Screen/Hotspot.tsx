@@ -5,11 +5,11 @@ import {
   useInteractions,
   useDismiss,
   safePolygon,
+  OpenChangeReason,
 } from '@floating-ui/react';
 
 import {
   CSSProperties,
-  MouseEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -35,6 +35,9 @@ import {
   TargetType,
 } from '@/types';
 import { useLocation } from 'react-router-dom';
+import { useDoubleClick } from '@/hooks/useDoubleClick';
+import { useLongPress } from '@/hooks/useLongPress';
+import { useSwipe } from '@/hooks/useSwipe';
 
 interface HotspotProps {
   hotspot: HotspotWithMetadata;
@@ -49,7 +52,7 @@ interface HotspotProps {
   onTrigger: (
     id: HotspotWithMetadata['id'],
     target: TargetType,
-    event?: MouseEvent<Element, globalThis.MouseEvent>,
+    event?: Event,
   ) => void;
   closeParent?: () => void;
 }
@@ -59,7 +62,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
     isEmbedded = false,
     hotspot,
     visible,
-    screen,
+    screen: currentScreen,
     allHotspots,
     onTrigger,
     projectId,
@@ -92,8 +95,8 @@ const Hotspot: React.FC<HotspotProps> = props => {
       ).metaData.overlay;
 
       if (
-        'zoomScrollBehavior' in screen &&
-        screen.zoomScrollBehavior ===
+        'zoomScrollBehavior' in currentScreen &&
+        currentScreen.zoomScrollBehavior ===
           zoomScrollBehaviors.ZOOM_OUT_TO_BROWSER_WIDTH
       ) {
         return {
@@ -107,7 +110,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
         y: positionOffset.y * 2 * zoomLevel,
       };
     }
-  }, [hotspot, screen, targetType, zoomLevel]);
+  }, [hotspot, currentScreen, targetType, zoomLevel]);
 
   const position = useMemo(() => {
     if (targetType === 'screenOverlay') {
@@ -130,86 +133,156 @@ const Hotspot: React.FC<HotspotProps> = props => {
     setIsOverlayOpen(false);
   }, [setIsOverlayOpen]);
 
-  const targetScreen = useMemo(
-    () => allScreens?.find(screen => hotspot.targetScreenID === screen.id),
-    [allScreens, hotspot],
-  );
+  const [previousScreen, nextScreen] = useMemo(() => {
+    if (allScreens) {
+      const currentScreenIndex = allScreens.findIndex(
+        s => s.id === currentScreen.id,
+      );
 
-  const targetScreenHotspots = useMemo(() => {
-    const targetHotspots = allHotspots?.filter(
-      h => h.screenID === hotspot.targetScreenID,
-    );
+      if (currentScreenIndex != -1 && currentScreenIndex != null) {
+        let prevIndex = currentScreenIndex - 1;
+        let nextIndex = currentScreenIndex + 1;
 
-    if (
-      targetType === 'screen' &&
-      !(hotspot as HotspotWithMetadata<typeof targetType>).metaData.stayOnScreen
-    ) {
-      targetHotspots?.unshift(hotspot);
+        if (prevIndex < 0) {
+          prevIndex = allScreens?.length;
+        }
+
+        if (nextIndex >= allScreens?.length) {
+          nextIndex = 0;
+        }
+
+        return [allScreens[prevIndex], allScreens[nextIndex]];
+      }
     }
 
-    return targetHotspots;
-  }, [allHotspots, hotspot, targetType]);
+    return [undefined, undefined];
+  }, [allScreens, currentScreen.id]);
 
-  // Timer hotspot
-  useEffect(() => {
-    if (targetType === 'screen' && eventType === 'timer') {
-      const { redirectAfter } = (
-        hotspot as HotspotWithMetadata<typeof targetType, typeof eventType>
-      ).metaData; // ms
+  const targetScreen = useMemo(() => {
+    return allScreens?.find(screen => {
+      const targetScreenID =
+        hotspot.targetTypeID === targetTypes.lastScreenVisited
+          ? location?.state?.previousScreenId
+          : hotspot.targetTypeID === targetTypes.nextScreenInSort
+            ? nextScreen?.id
+            : hotspot.targetTypeID === targetTypes.previousScreenInSort
+              ? previousScreen?.id
+              : hotspot.targetScreenID;
 
-      // Clear any previous timeout if present
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      return targetScreenID === screen.id;
+    });
+  }, [allScreens, hotspot, location, nextScreen, previousScreen]);
+
+  const targetScreenHotspots = useMemo(() => {
+    if (targetScreen) {
+      const targetHotspots = allHotspots?.filter(
+        h => h.screenID === targetScreen.id,
+      );
+
+      if (
+        targetType &&
+        eventType === 'hover' &&
+        targetType !== 'externalUrl' &&
+        targetType !== 'positionOnScreen' &&
+        !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
+          .stayOnScreen
+      ) {
+        targetHotspots?.unshift(hotspot);
       }
 
-      timeoutRef.current = setTimeout(() => {
+      return targetHotspots;
+    }
+  }, [allHotspots, eventType, hotspot, targetScreen, targetType]);
+
+  // Handle open (for floating and trigger hotspot actions)
+  const handleOpen = useCallback(
+    (
+      open: boolean,
+      event?: Event | undefined,
+      _reason?: OpenChangeReason | undefined,
+    ) => {
+      // Open the screen in overlay (floating ui)
+      if (
+        targetType &&
+        (targetType === 'screenOverlay' ||
+          (eventType === 'hover' &&
+            targetType !== 'externalUrl' &&
+            targetType !== 'positionOnScreen' &&
+            !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
+              .stayOnScreen))
+      ) {
         location.state = {
           previousScreenId: hotspot.screenID.toString(),
         };
 
-        onTrigger(hotspot.id, targetType!);
-      }, redirectAfter);
-    }
+        setIsOverlayOpen(open);
 
-    return () => {
-      // Clear any previous timeout if present
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+        return;
       }
-    };
-  }, [eventType, hotspot, location, onTrigger, targetType]);
+
+      // Navigate to the screen
+      if (open) {
+        event?.stopPropagation();
+
+        onTrigger(hotspot.id, targetType!, event);
+      }
+    },
+    [eventType, hotspot, location, onTrigger, targetType],
+  );
 
   const { refs, context } = useFloating({
     open: isOverlayOpen,
-    onOpenChange: setIsOverlayOpen,
+    onOpenChange: handleOpen,
   });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
     // Hover
     useHover(context, {
-      enabled:
-        eventType === 'hover' &&
-        (targetType === 'screenOverlay' ||
-          (targetType === 'screen' &&
-            !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
-              .stayOnScreen)),
+      enabled: eventType === 'hover',
       handleClose: safePolygon({
         requireIntent: false,
       }),
     }),
     // Click
     useClick(context, {
-      enabled: eventType === 'click' && targetType === 'screenOverlay',
+      enabled: eventType === 'click',
       event: eventType === 'pressHold' ? 'mousedown' : 'click',
     }),
+    // Double tap
+    useDoubleClick(context, {
+      enabled: eventType === 'doubleTap',
+    }),
+    // Long press
+    useLongPress(context, {
+      enabled: eventType === 'pressHold',
+    }),
+    // Swipe
+    useSwipe(context, {
+      enabled:
+        eventType === 'swipeLeft' ||
+        eventType === 'swipeRight' ||
+        eventType === 'swipeDown' ||
+        eventType === 'swipeUp',
+      direction:
+        eventType === 'swipeLeft'
+          ? 'left'
+          : eventType === 'swipeRight'
+            ? 'right'
+            : eventType === 'swipeDown'
+              ? 'down'
+              : eventType === 'swipeUp'
+                ? 'up'
+                : undefined,
+    }),
+
     // Dismiss for click to close when clicking outside
     useDismiss(context, {
       enabled:
-        eventType === 'click' &&
-        ((targetType === 'screenOverlay' &&
-          (hotspot as HotspotWithMetadata<'screenOverlay'>).metaData.overlay
-            .closeOnOutsideClick) ||
-          (targetType === 'screen' &&
+        targetType &&
+        (targetType === 'screenOverlay' ||
+          (eventType === 'hover' &&
+            targetType !== 'externalUrl' &&
+            targetType !== 'positionOnScreen' &&
             !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
               .stayOnScreen)),
     }),
@@ -220,22 +293,17 @@ const Hotspot: React.FC<HotspotProps> = props => {
       height: hotspot.height * zoomLevel,
       width: hotspot.width * zoomLevel,
       top: hotspot.isBottomAligned
-        ? (screen.height - hotspot.y - hotspot.height) * zoomLevel
+        ? (currentScreen.height - hotspot.y - hotspot.height) * zoomLevel
         : hotspot.y * zoomLevel,
       left: hotspot.x * zoomLevel,
       opacity: visible ? 1 : 0,
     };
-  }, [screen, hotspot, visible, zoomLevel]);
+  }, [currentScreen, hotspot, visible, zoomLevel]);
 
   const overlayContainerStyle = useMemo(() => {
     const style: CSSProperties = {};
 
-    if (
-      targetType === 'screenOverlay' ||
-      (targetType === 'screen' &&
-        !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
-          .stayOnScreen)
-    ) {
+    if (targetType) {
       style.position =
         targetType === 'screenOverlay' &&
         position !== 'Custom' &&
@@ -274,49 +342,52 @@ const Hotspot: React.FC<HotspotProps> = props => {
     return style;
   }, [hotspot, position, targetType]);
 
+  // Timer hotspot
+  useEffect(() => {
+    if (targetType === 'screen' && eventType === 'timer') {
+      const { redirectAfter } = (
+        hotspot as HotspotWithMetadata<typeof targetType, typeof eventType>
+      ).metaData; // ms
+
+      // Clear any previous timeout if present
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(() => {
+        location.state = {
+          previousScreenId: hotspot.screenID.toString(),
+        };
+
+        onTrigger(hotspot.id, targetType!);
+      }, redirectAfter);
+    }
+
+    return () => {
+      // Clear any previous timeout if present
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [eventType, hotspot, location, onTrigger, targetType]);
+
   return (
     <>
       <button
         ref={refs.setReference}
         {...getReferenceProps({
           onMouseLeave: () => {
+            // Mouse leave on the hotspot when embedded
             if (
-              eventType === 'hover' &&
               isEmbedded &&
-              targetType === 'screen' &&
+              targetType &&
+              eventType === 'hover' &&
+              targetType !== 'externalUrl' && // No stay on screen on these
+              targetType !== 'positionOnScreen' && // No stay on screen on these
               !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
                 .stayOnScreen
             ) {
               closeParent?.();
-            }
-          },
-          onMouseEnter: event => {
-            if (eventType === 'hover') {
-              event.stopPropagation();
-
-              if (
-                targetType === 'screen' &&
-                (hotspot as HotspotWithMetadata<typeof targetType>).metaData
-                  .stayOnScreen
-              ) {
-                location.state = {
-                  previousScreenId: hotspot.screenID.toString(),
-                };
-                onTrigger(hotspot.id, targetType!, event);
-              }
-            }
-          },
-          onClick: event => {
-            if (eventType === 'click') {
-              event.stopPropagation();
-
-              if (targetType === 'screenOverlay') {
-                location.state = {
-                  previousScreenId: hotspot.screenID.toString(),
-                };
-              }
-
-              onTrigger(hotspot.id, targetType!, event);
             }
           },
         })}
@@ -331,7 +402,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
       {isOverlayOpen && !isEmbedded && targetScreen && (
         <>
           <div
-            className="inset-0 z-20 flex items-center justify-center"
+            className="inset-0 z-100 flex items-center justify-center"
             style={{
               ...overlayContainerStyle,
               backgroundColor: `rgb(var(--screen-background-color) / ${
@@ -361,7 +432,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
                 hotspots={targetScreenHotspots}
                 allHotspots={allHotspots}
                 closeParent={closeOverlay}
-                screenId={hotspot.targetScreenID}
+                screenId={targetScreen.id}
               />
             </div>
           </div>

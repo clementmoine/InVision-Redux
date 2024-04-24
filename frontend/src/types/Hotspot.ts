@@ -33,12 +33,16 @@ export interface HotspotLinkToScreen<E extends EventType = EventType> {
 }
 
 export interface HotspotLastScreenVisited {
-  metaData: Record<never, never>;
+  metaData: {
+    stayOnScreen: boolean;
+  };
   targetScreenID: 0;
 }
 
 export interface HotspotPreviousNextScreenVisited {
-  metaData: Record<never, never>;
+  metaData: {
+    stayOnScreen: boolean;
+  };
   targetScreenID: 0;
 }
 
