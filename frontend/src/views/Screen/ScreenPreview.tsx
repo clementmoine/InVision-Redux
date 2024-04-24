@@ -1,6 +1,13 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
-import { MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import Hotspot from '@/views/Screen/Hotspot';
 
@@ -166,6 +173,82 @@ function ScreenPreview(props: ScreenPreviewProps) {
     [],
   );
 
+  // Organize the hotspots depending on their y value if the are located in the header/footer or the screen
+  const [inHeaderHotpots, inFooterHotspots, restHotspots] = useMemo(() => {
+    if (hotspots) {
+      if ('fixedHeaderHeight' in screen) {
+        return hotspots.reduce(
+          (acc, hotspot) => {
+            const hotspotY = hotspot.isBottomAligned
+              ? (screen.height - hotspot.y - hotspot.height) * zoomLevel
+              : hotspot.y * zoomLevel;
+
+            const hotspotHeight = hotspot.height * zoomLevel;
+
+            const fixedHeaderHeight = screen.fixedHeaderHeight * zoomLevel;
+
+            const fixedFooterHeight = screen.fixedFooterHeight * zoomLevel;
+
+            const fixedFooterY =
+              (screen.height - screen.fixedFooterHeight) * zoomLevel;
+
+            let isInHeader = false;
+
+            // If there is a fixed header
+            if (fixedHeaderHeight > 0) {
+              isInHeader = hotspotY < fixedHeaderHeight;
+
+              if (isInHeader) {
+                acc[0].push(hotspot);
+              }
+            }
+
+            let isInFooter = false;
+
+            // If there is a fixed footer
+            if (fixedFooterHeight > 0) {
+              isInFooter =
+                fixedFooterY > 0 &&
+                (hotspotY >= fixedFooterY ||
+                  hotspotY + hotspotHeight > fixedFooterY);
+
+              if (isInFooter) {
+                // Patch the hotspot y to be relative to the to of the fixedFooter
+                if (!hotspot.isBottomAligned) {
+                  hotspot = {
+                    ...hotspot,
+                    y: hotspot.y - fixedFooterY / zoomLevel,
+                  };
+                }
+
+                acc[1].push(hotspot);
+              }
+            }
+
+            const isInScreen =
+              (!isInHeader && !isInFooter) ||
+              (isInHeader && hotspotY + hotspotHeight > fixedHeaderHeight) ||
+              (isInFooter && hotspotY < fixedFooterY);
+            if (isInScreen) {
+              acc[2].push(hotspot);
+            }
+
+            return acc;
+          },
+          [[], [], []] as [
+            HotspotWithMetadata[],
+            HotspotWithMetadata[],
+            HotspotWithMetadata[],
+          ],
+        );
+      }
+
+      return [undefined, undefined, hotspots];
+    }
+
+    return [undefined, undefined, undefined];
+  }, [hotspots, screen, zoomLevel]);
+
   useEffect(() => {
     return () => {
       // Clear any previous timeout if present
@@ -179,8 +262,10 @@ function ScreenPreview(props: ScreenPreviewProps) {
     <div
       ref={ref}
       id="screen-preview"
-      className="flex relative w-full h-full overflow-auto"
+      data-screen-id={screen.id.toString()}
+      className="flex flex-col relative w-full h-full overflow-auto"
     >
+      {/* Screen with hotspots */}
       <div
         className="relative mx-auto flex-shrink-0 overflow-hidden"
         style={{
@@ -199,38 +284,6 @@ function ScreenPreview(props: ScreenPreviewProps) {
               : 0,
         }}
       >
-        {/* Fixed header */}
-        {'fixedHeaderHeight' in screen && screen.fixedHeaderHeight > 0 && (
-          <div
-            // className="fixed top-0 z-50 overflow-hidden"
-            className="fixed top-0 overflow-hidden"
-            style={{
-              height: `${screen.fixedHeaderHeight * zoomLevel}px`,
-              width: screen.width * zoomLevel,
-              backgroundImage: `url("/api/static/${screen.imageUrl}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'top center',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
-        )}
-
-        {/* Fixed footer */}
-        {'fixedFooterHeight' in screen && screen.fixedFooterHeight > 0 && (
-          <div
-            // className="fixed bottom-16 z-50 overflow-hidden"
-            className="fixed bottom-16 overflow-hidden"
-            style={{
-              height: `${screen.fixedFooterHeight * zoomLevel}px`,
-              width: screen.width * zoomLevel,
-              backgroundImage: `url("/api/static/${screen.imageUrl}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'bottom center',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
-        )}
-
         {/* Image */}
         <img
           decoding="sync"
@@ -252,7 +305,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
         />
 
         {/* Hotspots */}
-        {hotspots && (
+        {restHotspots && (
           <div
             className="absolute left-0 inset-0 bg-transparent overflow-hidden"
             onClick={onHotspotGroupClick}
@@ -263,7 +316,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
                   : 0,
             }}
           >
-            {hotspots.map(hotspot => (
+            {restHotspots.map(hotspot => (
               <Hotspot
                 key={`${projectId}/${screenId}/${hotspot.id}`}
                 screen={screen}
@@ -281,7 +334,85 @@ function ScreenPreview(props: ScreenPreviewProps) {
             ))}
           </div>
         )}
+
+        {/* Fixed header */}
+        {'fixedHeaderHeight' in screen && screen.fixedHeaderHeight > 0 && (
+          <div
+            className="fixed header top-0 overflow-hidden"
+            style={{
+              height: `${screen.fixedHeaderHeight * zoomLevel}px`,
+              width: screen.width * zoomLevel,
+              backgroundImage: `url("/api/static/${screen.imageUrl}")`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'top center',
+              backgroundRepeat: 'no-repeat',
+            }}
+            onClick={onHotspotGroupClick}
+          >
+            {inHeaderHotpots &&
+              inHeaderHotpots.map(hotspot => (
+                <Hotspot
+                  key={`${projectId}/${screenId}/${hotspot.id}`}
+                  screen={screen}
+                  hotspot={hotspot}
+                  projectId={projectId}
+                  zoomLevel={zoomLevel}
+                  visible={showHotspots}
+                  isEmbedded={isEmbedded}
+                  allScreens={allScreens}
+                  allHotspots={allHotspots}
+                  onTrigger={onHotspotTrigger}
+                  screenID={0}
+                  closeParent={closeParent}
+                />
+              ))}
+          </div>
+        )}
+
+        {/* Fixed footer */}
+        {'fixedFooterHeight' in screen && screen.fixedFooterHeight > 0 && (
+          <div
+            className="fixed footer bottom-16 overflow-hidden"
+            style={{
+              height: `${screen.fixedFooterHeight * zoomLevel}px`,
+              width: screen.width * zoomLevel,
+              backgroundImage: `url("/api/static/${screen.imageUrl}")`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'bottom center',
+              backgroundRepeat: 'no-repeat',
+            }}
+            onClick={onHotspotGroupClick}
+          >
+            {inFooterHotspots &&
+              inFooterHotspots.map(hotspot => (
+                <Hotspot
+                  key={`${projectId}/${screenId}/${hotspot.id}`}
+                  screen={screen}
+                  hotspot={hotspot}
+                  projectId={projectId}
+                  zoomLevel={zoomLevel}
+                  visible={showHotspots}
+                  isEmbedded={isEmbedded}
+                  allScreens={allScreens}
+                  allHotspots={allHotspots}
+                  onTrigger={onHotspotTrigger}
+                  screenID={0}
+                  closeParent={closeParent}
+                />
+              ))}
+          </div>
+        )}
       </div>
+
+      {/* Overlay */}
+      <div
+        id={`overlay-${screen.id}`}
+        className="overlay inset-0 absolute mx-auto flex-shrink-0 overflow-hidden empty:hidden"
+        style={{
+          width: screen.width * zoomLevel,
+          height: screen.height * zoomLevel,
+        }}
+      />
     </div>
   );
 }

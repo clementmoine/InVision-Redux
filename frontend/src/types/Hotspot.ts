@@ -32,16 +32,20 @@ export interface HotspotLinkToScreen<E extends EventType = EventType> {
   };
 }
 
-export interface HotspotLastScreenVisited {
+export interface HotspotLastScreenVisited<E extends EventType = EventType> {
   metaData: {
-    stayOnScreen: boolean;
+    redirectAfter: E extends 'timer' ? number : undefined;
+    stayOnScreen: E extends 'timer' ? undefined : boolean;
   };
   targetScreenID: 0;
 }
 
-export interface HotspotPreviousNextScreenVisited {
+export interface HotspotPreviousNextScreenVisited<
+  E extends EventType = EventType,
+> {
   metaData: {
-    stayOnScreen: boolean;
+    redirectAfter: E extends 'timer' ? number : undefined;
+    stayOnScreen: E extends 'timer' ? undefined : boolean;
   };
   targetScreenID: 0;
 }
@@ -107,9 +111,9 @@ export type HotspotTypeMap<E extends EventType = EventType> = {
   [targetType in TargetType]: targetType extends 'screen'
     ? HotspotLinkToScreen<E>
     : targetType extends 'lastScreenVisited'
-      ? HotspotLastScreenVisited
+      ? HotspotLastScreenVisited<E>
       : targetType extends 'previousScreenInSort' | 'nextScreenInSort'
-        ? HotspotPreviousNextScreenVisited
+        ? HotspotPreviousNextScreenVisited<E>
         : targetType extends 'externalUrl'
           ? HotspotExternalURL
           : targetType extends 'positionOnScreen'

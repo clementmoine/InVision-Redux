@@ -12,9 +12,9 @@ Some features are not handled yet, here is the roadmap/to-do list :
 
 - [x] Manage all event types (swipe, long press, double tap ...)
 - [ ] Manage transitions
-- [ ] Fixed header / footer
+- [x] Fixed header / footer
   - [x] Display these
-  - [ ] Manage hotspots in fixed footer and header
+  - [x] Manage hotspots in fixed footer and header
 - [ ] Add keyboard shortcuts in the preview mode
 - [ ] Inspect mode
 - [ ] History mode

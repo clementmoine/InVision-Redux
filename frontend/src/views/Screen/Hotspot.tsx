@@ -6,6 +6,7 @@ import {
   useDismiss,
   safePolygon,
   OpenChangeReason,
+  FloatingPortal,
 } from '@floating-ui/react';
 
 import {
@@ -344,10 +345,12 @@ const Hotspot: React.FC<HotspotProps> = props => {
 
   // Timer hotspot
   useEffect(() => {
-    if (targetType === 'screen' && eventType === 'timer') {
-      const { redirectAfter } = (
-        hotspot as HotspotWithMetadata<typeof targetType, typeof eventType>
-      ).metaData; // ms
+    if (
+      targetType &&
+      'redirectAfter' in hotspot.metaData &&
+      eventType === 'timer'
+    ) {
+      const { redirectAfter } = hotspot.metaData; // ms
 
       // Clear any previous timeout if present
       if (timeoutRef.current) {
@@ -400,7 +403,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
       />
 
       {isOverlayOpen && !isEmbedded && targetScreen && (
-        <>
+        <FloatingPortal id={`overlay-${currentScreen.id}`}>
           <div
             className="inset-0 z-100 flex items-center justify-center"
             style={{
@@ -436,7 +439,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
               />
             </div>
           </div>
-        </>
+        </FloatingPortal>
       )}
     </>
   );
