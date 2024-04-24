@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 import { useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -23,8 +23,9 @@ import Zoom from '@/components/Zoom';
 import MiniPagination from '@/components/MiniPagination';
 
 import EmptyState from '@/assets/illustrations/empty-state.svg?react';
+import ToDo from '@/assets/illustrations/to-do.svg?react';
 
-import ScreenPreview from '@/views/Screen/ScreenPreview';
+import Preview from '@/views/Screen/Preview/Preview';
 
 import { getScreen } from '@/api/screens';
 
@@ -41,7 +42,12 @@ function Screen() {
   const navigate = useNavigate();
 
   const { data, isFetching, isPending, refetch } = useQuery({
-    queryKey: ['projects', Number(params.projectId), Number(params.screenId)],
+    queryKey: [
+      'projects',
+      Number(params.projectId),
+      Number(params.screenId),
+      params.mode,
+    ],
     queryFn: getScreen,
     placeholderData: keepPreviousData,
   });
@@ -76,13 +82,22 @@ function Screen() {
 
   const allHotspots = useMemo(
     () =>
-      data != null && 'allHotspots' in data ? data.allHotspots : undefined,
-    [data],
+      (params.mode ?? 'preview') === 'preview' &&
+      data != null &&
+      'allHotspots' in data
+        ? data.allHotspots
+        : undefined,
+    [data, params.mode],
   );
 
   const hotspots = useMemo(
-    () => (data != null && 'hotspots' in data ? data.hotspots : undefined),
-    [data],
+    () =>
+      (params.mode ?? 'preview') === 'preview'
+        ? data != null && 'hotspots' in data
+          ? data.hotspots
+          : undefined
+        : [],
+    [data, params.mode],
   );
 
   const preloadImageUrls = useMemo(() => {
@@ -161,7 +176,7 @@ function Screen() {
       <div className="relative flex h-screen w-full flex-col overflow-hidden">
         {/* Screen */}
         <div
-          className={clsx(
+          className={cn(
             'flex h-full w-full justify-center overflow-hidden p-0 select-none',
             { [style['is-mobile']]: isMobile },
           )}
@@ -187,15 +202,42 @@ function Screen() {
                 ))}
               </Helmet>
 
-              <ScreenPreview
-                zoomLevel={zoomLevel}
-                screen={screen}
-                hotspots={hotspots}
-                allScreens={allScreens}
-                allHotspots={allHotspots}
-                screenId={Number(params.screenId)}
-                projectId={Number(params.projectId)}
-              />
+              {(params.mode ?? 'preview') === 'preview' && (
+                <Preview
+                  zoomLevel={zoomLevel}
+                  screen={screen}
+                  hotspots={hotspots}
+                  allScreens={allScreens}
+                  allHotspots={allHotspots}
+                  screenId={Number(params.screenId)}
+                  projectId={Number(params.projectId)}
+                />
+              )}
+
+              {(params.mode ?? 'preview') !== 'preview' && (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+                  <ToDo />
+
+                  <h2 className="text-2xl font-semibold tracking-tight">
+                    Work in progress
+                  </h2>
+
+                  <p className="text-sm text-muted-foreground">
+                    Huh? Magician never reveals his secret come back later!...
+                  </p>
+
+                  <Button
+                    className="mt-4"
+                    onClick={() =>
+                      navigate(
+                        `/projects/${params.projectId}/${params.screenId}/preview`,
+                      )
+                    }
+                  >
+                    Go back to a safe place
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             !isFetching &&
@@ -231,11 +273,14 @@ function Screen() {
             onChange={page => {
               const targetScreen = allScreens[page - 1];
 
-              navigate(`/projects/${params.projectId}/${targetScreen.id}`, {
-                state: {
-                  previousScreenId: params.screenId?.toString(),
+              navigate(
+                `/projects/${params.projectId}/${targetScreen.id}/${params.mode ?? 'preview'}`,
+                {
+                  state: {
+                    previousScreenId: params.screenId?.toString(),
+                  },
                 },
-              });
+              );
             }}
           />
         )}
@@ -294,8 +339,18 @@ function Screen() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-lg bg-accent text-accent-foreground"
+                  className={cn(
+                    'rounded-lg',
+                    (params.mode ?? 'preview') === 'preview'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
                   aria-label="Preview Mode"
+                  onClick={() =>
+                    navigate(
+                      `/projects/${params.projectId}/${params.screenId}/preview`,
+                    )
+                  }
                 >
                   <Eye className="size-5" />
                 </Button>
@@ -311,8 +366,18 @@ function Screen() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-lg text-muted-foreground"
                   aria-label="Flow Mode"
+                  className={cn(
+                    'rounded-lg',
+                    (params.mode ?? 'preview') === 'flow'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                  onClick={() =>
+                    navigate(
+                      `/projects/${params.projectId}/${params.screenId}/flow`,
+                    )
+                  }
                 >
                   <Workflow className="size-5" />
                 </Button>
@@ -328,8 +393,18 @@ function Screen() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-lg text-muted-foreground"
                   aria-label="Inspect"
+                  className={cn(
+                    'rounded-lg',
+                    (params.mode ?? 'preview') === 'inspect'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                  onClick={() =>
+                    navigate(
+                      `/projects/${params.projectId}/${params.screenId}/inspect`,
+                    )
+                  }
                 >
                   <Code2 className="size-5" />
                 </Button>
@@ -345,8 +420,18 @@ function Screen() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="rounded-lg text-muted-foreground"
                   aria-label="History Mode"
+                  className={cn(
+                    'rounded-lg',
+                    (params.mode ?? 'preview') === 'history'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                  onClick={() =>
+                    navigate(
+                      `/projects/${params.projectId}/${params.screenId}/history`,
+                    )
+                  }
                 >
                   <Clock className="size-5" />
                 </Button>

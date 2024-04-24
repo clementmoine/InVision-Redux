@@ -15,10 +15,12 @@ Some features are not handled yet, here is the roadmap/to-do list :
 - [x] Fixed header / footer
   - [x] Display these
   - [x] Manage hotspots in fixed footer and header
-- [ ] Add keyboard shortcuts in the preview mode
-- [ ] Inspect mode
-- [ ] History mode
-- [ ] Flow mode
+- [ ] Manage modes :
+  - [x] Manage the mode in url
+  - [ ] Keyboard shortcuts
+  - [ ] History mode
+  - [ ] Inspect mode
+  - [ ] Flow mode
 - [ ] Quick navigate with "paginated preview" (click on the current screen name)
 - [ ] Share button (QR Code and url copy to keyboard)
 

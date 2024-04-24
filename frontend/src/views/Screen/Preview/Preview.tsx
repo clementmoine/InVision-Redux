@@ -9,7 +9,7 @@ import {
   useState,
 } from 'react';
 
-import Hotspot from '@/views/Screen/Hotspot';
+import Hotspot from '@/views/Screen/Preview/Hotspot';
 
 import {
   ArchivedScreenDetails,
@@ -59,7 +59,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
 
       if (hotspot) {
         if (targetType === 'screen') {
-          navigate(`/projects/${projectId}/${hotspot.targetScreenID}`, {
+          navigate(`/projects/${projectId}/${hotspot.targetScreenID}/preview`, {
             state: {
               previousScreenId: screenId?.toString(),
             },
@@ -69,7 +69,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
           if (location?.state?.previousScreenId) {
             if (location.state.previousScreenId !== params.screenId) {
               navigate(
-                `/projects/${projectId}/${location.state.previousScreenId}`,
+                `/projects/${projectId}/${location.state.previousScreenId}/preview`,
                 {
                   state: {
                     previousScreenId: params.screenId?.toString(),
@@ -100,7 +100,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
 
               if (adjacentIndex >= 0 && adjacentIndex < allScreens.length) {
                 const adjacentScreenID = allScreens[adjacentIndex].id;
-                navigate(`/projects/${projectId}/${adjacentScreenID}`, {
+                navigate(`/projects/${projectId}/${adjacentScreenID}/preview`, {
                   state: {
                     previousScreenId: hotspot.screenID.toString(),
                   },

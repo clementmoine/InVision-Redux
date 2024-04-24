@@ -8,7 +8,7 @@ import {
   OpenChangeReason,
   FloatingPortal,
 } from '@floating-ui/react';
-
+import { useLocation } from 'react-router-dom';
 import {
   CSSProperties,
   useCallback,
@@ -17,8 +17,6 @@ import {
   useRef,
   useState,
 } from 'react';
-
-import ScreenPreview from '@/views/Screen/ScreenPreview';
 
 import {
   eventTypes,
@@ -35,10 +33,12 @@ import {
   Screen,
   TargetType,
 } from '@/types';
-import { useLocation } from 'react-router-dom';
+
 import { useDoubleClick } from '@/hooks/useDoubleClick';
 import { useLongPress } from '@/hooks/useLongPress';
 import { useSwipe } from '@/hooks/useSwipe';
+
+import Preview from '@/views/Screen/Preview/Preview';
 
 interface HotspotProps {
   hotspot: HotspotWithMetadata;
@@ -426,7 +426,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
                     : undefined,
               }}
             >
-              <ScreenPreview
+              <Preview
                 isEmbedded
                 allScreens={allScreens}
                 screen={targetScreen}

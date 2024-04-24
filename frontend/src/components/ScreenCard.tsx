@@ -29,7 +29,7 @@ const ScreenCard: React.FC<ScreenCardProps> = ({ screen }) => {
             backgroundColor: screen.backgroundColor,
           }}
         >
-          <Link to={`/projects/${screen.projectID}/${screen.id}`}>
+          <Link to={`/projects/${screen.projectID}/${screen.id}/preview`}>
             {screen.thumbnailUrl ? (
               <img
                 className="absolute inset-0 h-full w-full object-cover transition-all hover:scale-105"
@@ -44,7 +44,7 @@ const ScreenCard: React.FC<ScreenCardProps> = ({ screen }) => {
       </CardHeader>
 
       <CardContent className="flex flex-col gap-1 justify-between py-4 px-6">
-        <Link to={`/projects/${screen.projectID}/${screen.id}`}>
+        <Link to={`/projects/${screen.projectID}/${screen.id}/preview`}>
           <CardTitle className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">
             {screen.name}
           </CardTitle>

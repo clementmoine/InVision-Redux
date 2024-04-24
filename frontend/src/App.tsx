@@ -22,7 +22,10 @@ export default function App() {
       {/* Screens without layout */}
       <Route path="/test" element={<Test />} />
       {/* Screens without layout */}
-      <Route path="/projects/:projectId/:screenId" element={<Screen />} />
+      <Route
+        path="/projects/:projectId/:screenId/:mode?"
+        element={<Screen />}
+      />
 
       {/* Screens with layout */}
       <Route path="/" element={<Layout />}>
