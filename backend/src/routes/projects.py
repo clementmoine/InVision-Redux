@@ -163,6 +163,9 @@ def get_project(project_id):
         return f"Error fetching project: {e}", 500
 
 
+@blueprint.route(
+    "/projects/<int:project_id>/screens/<int:screen_id>", defaults={"mode": "preview"}
+)
 @blueprint.route("/projects/<int:project_id>/screens/<int:screen_id>/<string:mode>")
 def get_project_screen(project_id, screen_id, mode):
     screen_dir = os.path.join(

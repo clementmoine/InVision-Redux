@@ -4,32 +4,53 @@ InVision Redux is a complete app designed to help users backup their projects fr
 
 ![Description de l'image](./screenshot.png)
 
-> Important note: Nicolas Cage could not be included in the final product.
+> Important note: Nicolas Cage could not be included in the final product (sorry).
 
 ## Work in Progress
 
-Some features are not handled yet, here is the roadmap/to-do list :
+Some features are not handled yet, here is the not prioritized roadmap/to-do list :
 
-- [x] Manage all event types (swipe, long press, double tap ...)
-- [ ] Manage transitions
-- [x] Fixed header / footer
-  - [x] Display these
-  - [x] Manage hotspots in fixed footer and header
-- [ ] Manage modes :
+- [ ] Share button (QR Code and url copy to keyboard)
+- [ ] Manage all modes (excluding build and comments) :
   - [x] Manage the mode in url
   - [ ] Keyboard shortcuts
+  - [ ] Preview mode
+    - [ ] Quick navigate to a screen with thumbnails (dropdown on the current screen)
+    - [ ] Manage the hotspots
+      - [ ] Navigate to a screen (with id, previous, next or last visited)
+      - [ ] Display a screen as overlay
+        - [ ] Fix to permit scroll when overlay is higher than the original screen
+        - [x] Open / close overlay
+      - [ ] Manage transitions
+      - [x] Manage all event types (swipe, long press, double tap ...)
+    - [x] Fixed header / footer
+      - [x] Display these
+      - [x] Manage hotspots in fixed footer and header
+      - [ ] Fix to follow the horizontal scroll
   - [ ] History mode
+    - [ ] Display the screen history
+    - [ ] Side by side comparison
   - [ ] Inspect mode
-  - [ ] Flow mode
-- [ ] Quick navigate with "paginated preview" (click on the current screen name)
-- [ ] Share button (QR Code and url copy to keyboard)
+    - [ ] Left panel
+      - [ ] List the layers
+      - [ ] Select a layer and display annotations and fonts / styles / code etc.
+    - [ ] Right panel
+      - [ ] Display the fonts / styles / code etc.
+      - [ ] Export assets
+      - [ ] Variables ? (to be tested, never used that)
+    - [ ] Screen panel
+      - [x] Display the screen
+      - [ ] Display the annotations on hover
+      - [ ] Visual select of a layer
+    - [ ] Flow mode
+      - [ ] Display the screens in a flow chart
 
 Some features are intentionally not meant to be done (at least for the ongoing version) :
 
 - Build mode
 - Comments
 - Notifications
-- Edit in general
+- Edit in general (rename, settings etc.)
 - Upload new screens
 
 ## Getting Started

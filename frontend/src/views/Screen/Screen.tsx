@@ -26,6 +26,7 @@ import EmptyState from '@/assets/illustrations/empty-state.svg?react';
 import ToDo from '@/assets/illustrations/to-do.svg?react';
 
 import Preview from '@/views/Screen/Preview/Preview';
+import Inspect from '@/views/Screen/Inspect/Inspect';
 
 import { getScreen } from '@/api/screens';
 
@@ -42,12 +43,7 @@ function Screen() {
   const navigate = useNavigate();
 
   const { data, isFetching, isPending, refetch } = useQuery({
-    queryKey: [
-      'projects',
-      Number(params.projectId),
-      Number(params.screenId),
-      params.mode,
-    ],
+    queryKey: ['projects', Number(params.projectId), Number(params.screenId)],
     queryFn: getScreen,
     placeholderData: keepPreviousData,
   });
@@ -145,8 +141,12 @@ function Screen() {
   }, [allScreens, hotspots, screenIndex]);
 
   const isMobile = useMemo(
-    () => data != null && 'isMobile' in data.project && data.project.isMobile,
-    [data],
+    () =>
+      params.mode === 'preview' &&
+      data != null &&
+      'isMobile' in data.project &&
+      data.project.isMobile,
+    [data, params.mode],
   );
 
   const [zoomLevel, setZoomLevel] = useState<number>(defaultValues.initialZoom);
@@ -214,7 +214,17 @@ function Screen() {
                 />
               )}
 
-              {(params.mode ?? 'preview') !== 'preview' && (
+              {(params.mode ?? 'preview') === 'inspect' && (
+                <Inspect
+                  zoomLevel={zoomLevel}
+                  screen={screen}
+                  allScreens={allScreens}
+                  screenId={Number(params.screenId)}
+                  projectId={Number(params.projectId)}
+                />
+              )}
+
+              {!['preview', 'inspect'].includes(params.mode ?? 'preview') && (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
                   <ToDo />
 
@@ -317,7 +327,7 @@ function Screen() {
               <BreadcrumbList className="flex-nowrap flex-1 overflow-hidden">
                 <BreadcrumbItem className="hidden overflow-hidden lg:flex">
                   <BreadcrumbLink
-                    href={`/projects/${data?.project.id}`}
+                    href={`/projects/${params.projectId}`}
                     className="text-nowrap overflow-hidden text-ellipsis"
                   >
                     {data?.project.name}
