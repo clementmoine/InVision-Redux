@@ -17,6 +17,9 @@ RUN poetry install
 ADD src ./src
 RUN poetry install
 
+# Expose the port that the application listens on.
+EXPOSE 8080
+
 # Set the default command
 ENV FLASK_APP src/app:app
 CMD poetry run flask run --host 0.0.0.0 --port 8080 --debug

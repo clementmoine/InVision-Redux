@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import Hotkeys from 'react-hot-keys';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   Tooltip,
@@ -72,14 +73,16 @@ const MiniPagination: React.FC<ZoomProps> = (props: ZoomProps) => {
     >
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handlePrevious}
-            disabled={!loop && currentPage === start}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
+          <Hotkeys keyName="left" allowRepeat onKeyDown={handlePrevious}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handlePrevious}
+              disabled={!loop && currentPage === start}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </Hotkeys>
         </TooltipTrigger>
         <TooltipContent>
           Previous <kbd>(←)</kbd>
@@ -90,14 +93,16 @@ const MiniPagination: React.FC<ZoomProps> = (props: ZoomProps) => {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleNext}
-            disabled={!loop && currentPage === end}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+          <Hotkeys keyName="right" allowRepeat onKeyDown={handleNext}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleNext}
+              disabled={!loop && currentPage === end}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Hotkeys>
         </TooltipTrigger>
         <TooltipContent>
           Next <kbd>(→)</kbd>

@@ -404,7 +404,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
         )}
       </div>
 
-      {/* Overlay */}
+      {/* Overlay (this contains the modals or any hovering screen) */}
       <div
         id={`overlay-${screen.id}`}
         className="overlay inset-0 absolute mx-auto flex-shrink-0 overflow-hidden empty:hidden"

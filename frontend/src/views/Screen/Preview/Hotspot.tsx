@@ -213,10 +213,23 @@ const Hotspot: React.FC<HotspotProps> = props => {
               .stayOnScreen))
       ) {
         location.state = {
-          previousScreenId: hotspot.screenID.toString(),
+          previousScreenId: currentScreen.id.toString(),
         };
 
         setIsOverlayOpen(open);
+
+        if (targetScreen) {
+          // Set the overlay width
+          const overlay = document.getElementById(
+            `overlay-${currentScreen.id}`,
+          );
+
+          console.log(overlay);
+          if (overlay) {
+            overlay.style.width = `${targetScreen.width * zoomLevel}px`;
+            overlay.style.height = `${targetScreen.height * zoomLevel}px`;
+          }
+        }
 
         return;
       }
@@ -228,7 +241,15 @@ const Hotspot: React.FC<HotspotProps> = props => {
         onTrigger(hotspot.id, targetType!, event);
       }
     },
-    [eventType, hotspot, location, onTrigger, targetType],
+    [
+      currentScreen,
+      eventType,
+      hotspot,
+      location,
+      onTrigger,
+      targetScreen,
+      targetType,
+    ],
   );
 
   const { refs, context } = useFloating({
