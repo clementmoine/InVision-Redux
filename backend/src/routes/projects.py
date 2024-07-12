@@ -161,33 +161,3 @@ def get_project(project_id):
         return "Project not found", 404
     except Exception as e:
         return f"Error fetching project: {e}", 500
-
-
-@blueprint.route(
-    "/projects/<int:project_id>/screens/<int:screen_id>", defaults={"mode": "preview"}
-)
-@blueprint.route("/projects/<int:project_id>/screens/<int:screen_id>/<string:mode>")
-def get_project_screen(project_id, screen_id, mode):
-    screen_dir = os.path.join(
-        current_app.static_folder,
-        "projects",
-        str(project_id),
-        "screens",
-        str(screen_id),
-    )
-
-    if mode == "preview":
-        screen_json_path = os.path.join(screen_dir, "screen.json")
-    elif mode == "inspect":
-        screen_json_path = os.path.join(screen_dir, "inspect.json")
-
-    try:
-        if os.path.exists(screen_json_path):
-            with open(screen_json_path, "r") as screen_file:
-                screen_data = json.load(screen_file)
-
-        return jsonify(screen_data)
-    except FileNotFoundError:
-        return "Screen not found", 404
-    except Exception as e:
-        return f"Error fetching screen: {e}", 500

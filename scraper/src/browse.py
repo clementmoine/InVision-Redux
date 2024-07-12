@@ -3,12 +3,13 @@ import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from src.download import json_patch_to_local_assets, save_json_data
 from src.utils import color_print, color_input, is_test_mode
-from src.api_requests import fetch_projects, fetch_tags
 from src.api_requests import (
-    get_project_screens,
-    get_project_archived_screens,
+    fetch_tags,
+    fetch_projects,
     get_screen_details,
+    get_project_screens,
     get_screen_inspect_details,
+    get_project_archived_screens,
 )
 
 # Constants for directories

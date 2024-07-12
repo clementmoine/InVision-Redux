@@ -13,6 +13,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Folder, Type } from 'lucide-react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { getScreenInspect } from '@/api/screens';
 
 interface ScreenInspectProps {
   screenId: Screen['id'];
@@ -29,6 +31,12 @@ function ScreenInspect(props: ScreenInspectProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { data, isFetching, isPending, refetch } = useQuery({
+    queryKey: ['projects', Number(params.projectId), Number(params.screenId)],
+    queryFn: getScreenInspect,
+    placeholderData: keepPreviousData,
+  });
+
   return (
     <ResizablePanelGroup
       id="screen-inspect"
@@ -37,6 +45,7 @@ function ScreenInspect(props: ScreenInspectProps) {
     >
       {/* Layers */}
       <ResizablePanel minSize={10} className="bg-background">
+        {data.name}
         <Accordion type="multiple">
           <AccordionItem value="group-1" className="border-b-0">
             <AccordionTrigger className="p-2">
