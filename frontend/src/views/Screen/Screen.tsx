@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import Hotkeys from 'react-hot-keys';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -168,6 +168,26 @@ function Screen() {
     return '255 255 255';
   }, [screen]);
 
+  const handlePageChange = useCallback(
+    (page: number) => {
+      if (!allScreens) {
+        return;
+      }
+
+      const targetScreen = allScreens[page - 1];
+
+      navigate(
+        `/projects/${params.projectId}/${targetScreen.id}/${params.mode ?? 'preview'}`,
+        {
+          state: {
+            previousScreenId: params.screenId?.toString(),
+          },
+        },
+      );
+    },
+    [allScreens, navigate, params],
+  );
+
   return (
     <div
       id="screen"
@@ -225,6 +245,7 @@ function Screen() {
                 />
               )}
 
+              {/* Work in progress for tabs not developed yet */}
               {!['preview', 'inspect'].includes(params.mode ?? 'preview') && (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
                   <ToDo />
@@ -251,6 +272,7 @@ function Screen() {
               )}
             </>
           ) : (
+            // Screen not found
             !isFetching &&
             !isPending && (
               <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
@@ -281,18 +303,7 @@ function Screen() {
             start={1}
             end={allScreens?.length}
             initialValue={screenIndex + 1}
-            onChange={page => {
-              const targetScreen = allScreens[page - 1];
-
-              navigate(
-                `/projects/${params.projectId}/${targetScreen.id}/${params.mode ?? 'preview'}`,
-                {
-                  state: {
-                    previousScreenId: params.screenId?.toString(),
-                  },
-                },
-              );
-            }}
+            onChange={handlePageChange}
           />
         )}
 

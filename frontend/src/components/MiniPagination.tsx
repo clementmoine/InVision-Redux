@@ -1,6 +1,6 @@
 import Hotkeys from 'react-hot-keys';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, MouseEvent } from 'react';
 
 import {
   Tooltip,
@@ -38,31 +38,41 @@ const MiniPagination: React.FC<ZoomProps> = (props: ZoomProps) => {
     }
   }, [currentPage, initialValue]);
 
-  const handlePrevious = useCallback(() => {
-    setCurrentPage(currentPage => {
-      let newPage = currentPage - 1;
+  const handlePrevious = useCallback(
+    (event: MouseEvent | KeyboardEvent) => {
+      event.preventDefault();
 
-      if (loop && newPage < start) {
-        newPage = end;
-      }
+      setCurrentPage(currentPage => {
+        let newPage = currentPage - 1;
 
-      onChange?.(newPage);
-      return newPage;
-    });
-  }, [loop, start, end, onChange]);
+        if (loop && newPage < start) {
+          newPage = end;
+        }
 
-  const handleNext = useCallback(() => {
-    setCurrentPage(currentPage => {
-      let newPage = currentPage + 1;
+        onChange?.(newPage);
+        return newPage;
+      });
+    },
+    [loop, start, end, onChange],
+  );
 
-      if (loop && newPage > end) {
-        newPage = start;
-      }
+  const handleNext = useCallback(
+    (event: MouseEvent | KeyboardEvent) => {
+      event.preventDefault();
 
-      onChange?.(newPage);
-      return newPage;
-    });
-  }, [loop, start, end, onChange]);
+      setCurrentPage(currentPage => {
+        let newPage = currentPage + 1;
+
+        if (loop && newPage > end) {
+          newPage = start;
+        }
+
+        onChange?.(newPage);
+        return newPage;
+      });
+    },
+    [loop, start, end, onChange],
+  );
 
   return (
     <div
@@ -73,11 +83,15 @@ const MiniPagination: React.FC<ZoomProps> = (props: ZoomProps) => {
     >
       <Tooltip>
         <TooltipTrigger asChild>
-          <Hotkeys keyName="left" allowRepeat onKeyDown={handlePrevious}>
+          <Hotkeys
+            keyName="left"
+            allowRepeat
+            onKeyDown={(_, event) => handlePrevious(event)}
+          >
             <Button
               variant="ghost"
               size="icon"
-              onClick={handlePrevious}
+              onClick={event => handlePrevious(event)}
               disabled={!loop && currentPage === start}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -93,11 +107,15 @@ const MiniPagination: React.FC<ZoomProps> = (props: ZoomProps) => {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Hotkeys keyName="right" allowRepeat onKeyDown={handleNext}>
+          <Hotkeys
+            keyName="right"
+            allowRepeat
+            onKeyDown={(_, event) => handleNext(event)}
+          >
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleNext}
+              onClick={event => handleNext(event)}
               disabled={!loop && currentPage === end}
             >
               <ChevronRight className="h-4 w-4" />

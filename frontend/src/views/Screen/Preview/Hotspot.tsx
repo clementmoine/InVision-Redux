@@ -242,13 +242,14 @@ const Hotspot: React.FC<HotspotProps> = props => {
       }
     },
     [
-      currentScreen,
+      currentScreen.id,
       eventType,
       hotspot,
       location,
       onTrigger,
       targetScreen,
       targetType,
+      zoomLevel,
     ],
   );
 

@@ -59,6 +59,16 @@ function ScreenPreview(props: ScreenPreviewProps) {
 
       if (hotspot) {
         if (targetType === 'screen') {
+          // If the current screen is the same as the target close the parent hotspot
+          if (
+            isEmbedded &&
+            hotspot.targetScreenID.toString() === params.screenId
+          ) {
+            closeParent();
+
+            return;
+          }
+
           navigate(`/projects/${projectId}/${hotspot.targetScreenID}/preview`, {
             state: {
               previousScreenId: screenId?.toString(),
@@ -286,6 +296,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
       >
         {/* Image */}
         <img
+          key={screen.id}
           decoding="sync"
           src={`/api/static/${screen.imageUrl}`}
           className="object-contain"
@@ -407,7 +418,8 @@ function ScreenPreview(props: ScreenPreviewProps) {
       {/* Overlay (this contains the modals or any hovering screen) */}
       <div
         id={`overlay-${screen.id}`}
-        className="overlay inset-0 absolute mx-auto flex-shrink-0 overflow-hidden empty:hidden"
+        className="overlay inset-0 absolute flex-shrink-0 empty:hidden"
+        // className="overlay inset-0 absolute flex-shrink-0 empty:hidden mx-auto overflow-hidden"
         style={{
           width: screen.width * zoomLevel,
           height: screen.height * zoomLevel,
