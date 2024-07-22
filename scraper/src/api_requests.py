@@ -30,7 +30,11 @@ def request(session, method, *args, **kwargs):
             time.sleep(cooldown)  # Wait before restart
             retries += 1
         else:
-            print(f"Failed to fetch data: {response.text}")
+            error_message = "Unknown error"
+            if response:
+                error_message = response.text
+
+            color_print(f"Failed to fetch data: {error_message}", "red")
             return None
     print("Maximum number of retries reached. Aborting.")
     return None
@@ -45,7 +49,11 @@ def login_classic(email, password, session):
     if response and response.status_code == 200:
         return session.cookies.get_dict()
     else:
-        color_print(f"Classic authentication failed: {response.text}", "red")
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Classic authentication failed: {error_message}", "red")
 
         return None
 
@@ -58,12 +66,16 @@ def login_api(email, password, session):
     # response = session.post(url=url, headers=headers, data=data)
     response = request(session, "POST", url=url, headers=headers, data=data)
 
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # session.cookies.update(response.cookies)
 
         return session.cookies.get_dict()
     else:
-        color_print("API authentication failed: {response.text}", "red")
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"API authentication failed: {error_message}", "red")
 
         return None
 
@@ -83,7 +95,11 @@ def get_user_id(session):
 
         return user_id
     else:
-        color_print(f"Failed to get user id: {response.text}", "red")
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Failed to get user id: {error_message}", "red")
         return None
 
 
@@ -102,7 +118,11 @@ def fetch_tags(session):
 
         return tags
     else:
-        color_print(f"Failed to fetch tags: {response.text}", "red")
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Failed to fetch tags: {error_message}", "red")
         return None
 
 
@@ -114,7 +134,7 @@ def fetch_projects(isArchived, isCollaborator, session):
     # response = session.get(url=url, headers=headers, params=params)
     response = request(session, "GET", url=url, headers=headers, params=params)
 
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # if response.cookies:
         #     session.cookies.update(response.cookies)
 
@@ -122,7 +142,11 @@ def fetch_projects(isArchived, isCollaborator, session):
 
         return projects
     else:
-        color_print(f"Failed to fetch projects: {response.text}", "red")
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Failed to fetch projects: {error_message}", "red")
         return None
 
 
@@ -196,8 +220,12 @@ def get_project_archived_screens(project, session):
 
         return project_details
     else:
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
         color_print(
-            f"Failed to fetch projects archived screens: {response.text}", "red"
+            f"Failed to fetch projects archived screens: {error_message}", "red"
         )
         return None
 
@@ -222,7 +250,11 @@ def get_project_screens(project, session):
 
         return project_details
     else:
-        color_print(f"Failed to fetch projects screens: {response.text}", "red")
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Failed to fetch projects screens: {error_message}", "red")
         return None
 
 
@@ -252,7 +284,11 @@ def get_screen_details(screen, session):
 
         return screen_details
     else:
-        color_print(f"Failed to fetch screen details: {response.text}", "red")
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Failed to fetch screen details: {error_message}", "red")
         return None
 
 
@@ -275,7 +311,11 @@ def get_project_assets(project, session):
 
         return project_assets
     else:
-        color_print(f"Failed to fetch screen inspect details: {response.text}", "red")
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Failed to fetch screen inspect details: {error_message}", "red")
         return None
 
 
@@ -299,5 +339,9 @@ def get_screen_inspect_details(screen, session):
 
         return screen_inspect_details
     else:
-        color_print(f"Failed to fetch screen inspect details: {response.text}", "red")
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Failed to fetch screen inspect details: {error_message}", "red")
         return None
