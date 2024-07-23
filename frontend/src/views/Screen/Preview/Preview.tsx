@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  UIEvent,
 } from 'react';
 
 import Hotspot from '@/views/Screen/Preview/Hotspot';
@@ -110,6 +111,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
 
               if (adjacentIndex >= 0 && adjacentIndex < allScreens.length) {
                 const adjacentScreenID = allScreens[adjacentIndex].id;
+
                 navigate(`/projects/${projectId}/${adjacentScreenID}/preview`, {
                   state: {
                     previousScreenId: hotspot.screenID.toString(),
@@ -121,6 +123,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
         } else if (targetType === 'externalUrl') {
           // Open an url in a new tab
           const { metaData } = hotspot as HotspotWithMetadata<'externalUrl'>;
+
           window.open(metaData.url, '_blank', 'noopener,noreferrer,nofollow');
         } else if (targetType === 'positionOnScreen') {
           // Scroll to a position on this screen
@@ -268,16 +271,43 @@ function ScreenPreview(props: ScreenPreviewProps) {
     };
   }, []);
 
+  // Keep sync of the scroll on the fixed footer / header
+  const handlePreviewScroll = useCallback(
+    (e: UIEvent<HTMLDivElement>) => {
+      const scrollLeft = e.currentTarget?.scrollLeft;
+
+      const fixedHeader =
+        'fixedHeaderHeight' in screen &&
+        screen.fixedHeaderHeight > 0 &&
+        document.getElementById('screen-preview-fixed-header');
+
+      const fixedFooter =
+        'fixedFooterHeight' in screen &&
+        screen.fixedFooterHeight > 0 &&
+        document.getElementById('screen-preview-fixed-footer');
+
+      if (fixedHeader) {
+        fixedHeader.style.transform = `translate(-${scrollLeft}px)`;
+      }
+
+      if (fixedFooter) {
+        fixedFooter.style.transform = `translate(-${scrollLeft}px)`;
+      }
+    },
+    [screen],
+  );
+
   return (
     <div
       ref={ref}
       id="screen-preview"
       data-screen-id={screen.id.toString()}
-      className="flex flex-col relative w-full h-full overflow-auto"
+      onScroll={handlePreviewScroll}
+      className="flex flex-col relative mx-auto overflow-auto"
     >
       {/* Screen with hotspots */}
       <div
-        className="relative mx-auto flex-shrink-0 overflow-hidden"
+        className="relative flex-shrink-0 overflow-hidden"
         style={{
           width: screen.width * zoomLevel,
           height:
@@ -296,7 +326,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
       >
         {/* Image */}
         <img
-          key={screen.id}
+          // key={screen.id}
           decoding="sync"
           src={`/api/static/${screen.imageUrl}`}
           className="object-contain"
@@ -349,6 +379,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
         {/* Fixed header */}
         {'fixedHeaderHeight' in screen && screen.fixedHeaderHeight > 0 && (
           <div
+            id="screen-preview-fixed-header"
             className="fixed header top-0 overflow-hidden"
             style={{
               height: `${screen.fixedHeaderHeight * zoomLevel}px`,
@@ -383,6 +414,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
         {/* Fixed footer */}
         {'fixedFooterHeight' in screen && screen.fixedFooterHeight > 0 && (
           <div
+            id="screen-preview-fixed-footer"
             className="fixed footer bottom-16 overflow-hidden"
             style={{
               height: `${screen.fixedFooterHeight * zoomLevel}px`,
@@ -419,7 +451,6 @@ function ScreenPreview(props: ScreenPreviewProps) {
       <div
         id={`overlay-${screen.id}`}
         className="overlay inset-0 absolute flex-shrink-0 empty:hidden"
-        // className="overlay inset-0 absolute flex-shrink-0 empty:hidden mx-auto overflow-hidden"
         style={{
           width: screen.width * zoomLevel,
           height: screen.height * zoomLevel,
@@ -428,6 +459,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
     </div>
   );
 }
+
 ScreenPreview.displayName = 'ScreenPreview';
 
 export default ScreenPreview;

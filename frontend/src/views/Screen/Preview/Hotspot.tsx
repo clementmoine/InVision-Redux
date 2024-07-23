@@ -224,7 +224,6 @@ const Hotspot: React.FC<HotspotProps> = props => {
             `overlay-${currentScreen.id}`,
           );
 
-          console.log(overlay);
           if (overlay) {
             overlay.style.width = `${targetScreen.width * zoomLevel}px`;
             overlay.style.height = `${targetScreen.height * zoomLevel}px`;
