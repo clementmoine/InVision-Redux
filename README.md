@@ -13,20 +13,20 @@ Some features are not handled yet, here is the not prioritized roadmap/to-do lis
 - [ ] Share button (QR Code and url copy to keyboard)
 - [ ] Manage all modes (excluding build and comments) :
   - [x] Manage the mode in url
-  - [ ] Keyboard shortcuts
+  - [x] Keyboard shortcuts
   - [ ] Preview mode
     - [ ] Quick navigate to a screen with thumbnails (dropdown on the current screen)
     - [ ] Manage the hotspots
-      - [ ] Navigate to a screen (with id, previous, next or last visited)
-      - [ ] Display a screen as overlay
-        - [ ] Fix to permit scroll when overlay is higher than the original screen
+      - [x] Navigate to a screen (with id, previous, next or last visited)
+      - [x] Display a screen as overlay
+        - [x] Fix to permit scroll when overlay is higher than the original screen
         - [x] Open / close overlay
       - [ ] Manage transitions
       - [x] Manage all event types (swipe, long press, double tap ...)
     - [x] Fixed header / footer
       - [x] Display these
       - [x] Manage hotspots in fixed footer and header
-      - [ ] Fix to follow the horizontal scroll
+      - [x] Fix to follow the horizontal scroll
   - [ ] History mode
     - [ ] Display the screen history
     - [ ] Side by side comparison
