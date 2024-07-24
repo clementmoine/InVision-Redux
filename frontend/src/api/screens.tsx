@@ -37,7 +37,7 @@ export const getScreen: QueryFunction<
 
 export const getScreenInspect: QueryFunction<
   ScreenInspect,
-  [string, Project['id'], Screen['id']]
+  [string, Project['id'], Screen['id'], 'inspect']
 > = ({ queryKey }) => {
   const [_key, project_id, screen_id] = queryKey;
 
