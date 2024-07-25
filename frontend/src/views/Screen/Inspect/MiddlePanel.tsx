@@ -5,10 +5,11 @@ import {
   useEffect,
   useState,
   useRef,
-  useMemo,
 } from 'react';
 
 import { ArchivedScreenDetails, Screen, Layer, ScreenInspect } from '@/types';
+import DistanceDisplay from './DistanceDisplay';
+import { cn } from '@/lib/utils';
 
 interface InspectMiddlePanelProps {
   data?: ScreenInspect;
@@ -187,6 +188,10 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
 
           if (layerUnderMouse) {
             setSelectedLayer(layerUnderMouse);
+
+            if (layerUnderMouse.type === 'group') {
+              expandGroupAndParents(selectedLayer);
+            }
           } else {
             // Vérifier si le clic est en dehors de l'image
             if (
@@ -206,6 +211,8 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       getMousePosition,
       findLayerUnderMouse,
       setSelectedLayer,
+      expandGroupAndParents,
+      selectedLayer,
       screen.width,
       screen.height,
       zoomLevel,
@@ -238,12 +245,6 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
     [isDragging, getMousePosition, findLayerUnderMouse, setHoveredLayer],
   );
 
-  useEffect(() => {
-    if (selectedLayer?.id) {
-      expandGroupAndParents(selectedLayer);
-    }
-  }, [expandGroupAndParents, selectedLayer]);
-
   // Handle mouse up event to stop dragging
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -266,46 +267,6 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
     }
   }, []);
 
-  const calculateDistance = useCallback(
-    (selectedLayer: Layer | undefined, hoveredLayer: Layer | undefined) => {
-      if (!selectedLayer || !hoveredLayer)
-        return { distance: 0, x1: 0, y1: 0, x2: 0, y2: 0 };
-
-      const selectedRight = selectedLayer.x + selectedLayer.width;
-      const selectedLeft = selectedLayer.x;
-      const hoveredRight = hoveredLayer.x + hoveredLayer.width;
-      const hoveredLeft = hoveredLayer.x;
-
-      let distance: number;
-      let x1: number, y1: number, x2: number, y2: number;
-
-      if (hoveredLeft > selectedRight) {
-        // Hovered layer is to the right of the selected layer
-        distance = hoveredLeft - selectedRight;
-        x1 = selectedRight;
-        y1 = selectedLayer.y + selectedLayer.height / 2;
-        x2 = hoveredLeft;
-        y2 = hoveredLayer.y + hoveredLayer.height / 2;
-      } else {
-        // Hovered layer is to the left of the selected layer
-        distance = selectedLeft - hoveredRight;
-        x1 = selectedLeft;
-        y1 = selectedLayer.y + selectedLayer.height / 2;
-        x2 = hoveredRight;
-        y2 = hoveredLayer.y + hoveredLayer.height / 2;
-      }
-
-      return {
-        distance,
-        x1: x1 * 2 * zoomLevel,
-        y1: y1 * 2 * zoomLevel,
-        x2: x2 * 2 * zoomLevel,
-        y2: y2 * 2 * zoomLevel,
-      };
-    },
-    [zoomLevel],
-  );
-
   useEffect(() => {
     const containerElement = containerRef.current;
     if (containerElement) {
@@ -327,18 +288,12 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
     };
   }, [handleMouseMove, handleMouseUp, handleKeyDown, handleKeyUp]);
 
-  const { distance, x1, y1, x2, y2 } = useMemo(
-    () => calculateDistance(selectedLayer, hoveredLayer),
-    [calculateDistance, selectedLayer, hoveredLayer],
-  );
-
   return (
     <div
       ref={containerRef}
-      className="flex relative bg-muted overflow-auto p-16 h-full"
-      style={{
-        cursor: isDragging ? 'grabbing' : isSpacePressed ? 'grab' : 'auto',
-      }}
+      className={cn('flex relative bg-muted overflow-auto p-16 h-full', {
+        'cursor-grabbing': isSpacePressed,
+      })}
       onMouseDown={handleMouseDown}
     >
       {/* Annotations */}
@@ -355,44 +310,12 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
           aspectRatio: `${screen.width} / ${screen.height}`,
         }}
       >
-        {/* Line between selected and hovered layer */}
-        {selectedLayer && hoveredLayer && (
-          <>
-            {/* Line between selected and hovered layer */}
-            <div
-              className="absolute"
-              style={{
-                top: Math.min(y1, y2),
-                left: Math.min(x1, x2),
-                width: Math.abs(x2 - x1),
-                height: '2px', // Line thickness
-                backgroundColor: 'blue', // Line color
-                transform: 'translateY(-1px)', // Adjust for line thickness
-                zIndex: 1,
-              }}
-            />
-
-            {/* Distance text */}
-            <div
-              className="absolute text-blue-500"
-              style={{
-                top: Math.min(y1, y2) - 20,
-                left: (x1 + x2) / 2,
-                transform: 'translateX(-50%)',
-                zIndex: 2,
-                backgroundColor: 'white', // Background for better readability
-                padding: '2px 5px',
-                borderRadius: '4px',
-                border: '1px solid blue',
-              }}
-            >
-              {Math.abs(distance)
-                .toFixed(2)
-                .replace(/\.?0+$/, '')}
-              px
-            </div>
-          </>
-        )}
+        {/* Distance */}
+        <DistanceDisplay
+          zoomLevel={zoomLevel}
+          selectedLayer={selectedLayer}
+          hoveredLayer={hoveredLayer}
+        />
 
         {/* Hovered layer */}
         {hoveredLayer && (
@@ -448,6 +371,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
     </div>
   );
 }
+
 InspectMiddlePanel.displayName = 'InspectMiddlePanel';
 
 export default InspectMiddlePanel;
