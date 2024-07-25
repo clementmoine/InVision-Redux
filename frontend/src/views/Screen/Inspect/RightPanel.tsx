@@ -91,8 +91,8 @@ function InspectRightPanel(props: InspectRightPanelProps) {
 
           {/* Values */}
           <ol className="flex flex-col overflow-hidden gap-3">
-            {gradient.stops.map(stop => (
-              <li className="uppercase text-nowrap">
+            {gradient.stops.map((stop, index) => (
+              <li className="uppercase text-nowrap" key={index}>
                 <span className="text-nowrap">
                   {rgbToHex(stop.color[0], stop.color[1], stop.color[2])}
                 </span>
@@ -505,20 +505,18 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                   className="flex flex-col px-2 text-sm text-popover-foreground"
                 >
                   {selectedLayer.gradients.map((gradient, index) => (
-                    <>
-                      <li key={index}>
-                        <ul>
-                          {renderInfo(
-                            'Fill',
-                            gradient.type === 'linear'
-                              ? `Linear gradient, ${(Math.atan2(gradient.to.y - gradient.from.y, gradient.to.x - gradient.from.x) * (180 / Math.PI) + 450) % 360}°`
-                              : `Radial gradient, circle`,
-                          )}
+                    <li key={index}>
+                      <ul>
+                        {renderInfo(
+                          'Fill',
+                          gradient.type === 'linear'
+                            ? `Linear gradient, ${(Math.atan2(gradient.to.y - gradient.from.y, gradient.to.x - gradient.from.x) * (180 / Math.PI) + 450) % 360}°`
+                            : `Radial gradient, circle`,
+                        )}
 
-                          {renderGradient(gradient)}
-                        </ul>
-                      </li>
-                    </>
+                        {renderGradient(gradient)}
+                      </ul>
+                    </li>
                   ))}
                 </ul>
               )}

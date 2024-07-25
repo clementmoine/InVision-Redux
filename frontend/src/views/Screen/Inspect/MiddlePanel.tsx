@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
   useRef,
+  useMemo,
 } from 'react';
 
 import { ArchivedScreenDetails, Screen, Layer, ScreenInspect } from '@/types';
@@ -69,27 +70,33 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
     return allLayers;
   }, [data, selectedLayer]);
 
-  const getMousePosition = (
-    e: MouseEvent | React.MouseEvent,
-    container: HTMLDivElement | null,
-  ) => {
-    if (!container) return { x: 0, y: 0 };
+  const getMousePosition = useCallback(
+    (e: MouseEvent | React.MouseEvent, container: HTMLDivElement | null) => {
+      if (!container) return { x: 0, y: 0 };
 
-    const rect = container.getBoundingClientRect();
-    const computedStyle = window.getComputedStyle(container);
-    const mouseX =
-      e.clientX -
-      rect.left -
-      parseFloat(computedStyle.paddingLeft) +
-      container.scrollLeft;
-    const mouseY =
-      e.clientY -
-      rect.top -
-      parseFloat(computedStyle.paddingTop) +
-      container.scrollTop;
+      const rect = container.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(container);
+      const paddingLeft = parseFloat(computedStyle.paddingLeft);
+      const paddingTop = parseFloat(computedStyle.paddingTop);
 
-    return { x: mouseX, y: mouseY };
-  };
+      const containerWidth = rect.width - paddingLeft * 2;
+      // const containerHeight = rect.height - paddingTop * 2;
+
+      const offsetX = Math.max(
+        (containerWidth - screen.width * zoomLevel) / 2,
+        0,
+      );
+      const offsetY = 0;
+
+      const mouseX =
+        e.clientX - rect.left - paddingLeft - offsetX + container.scrollLeft;
+      const mouseY =
+        e.clientY - rect.top - paddingTop - offsetY + container.scrollTop;
+
+      return { x: mouseX, y: mouseY };
+    },
+    [screen.width, zoomLevel],
+  );
 
   const expandGroupAndParents = useCallback(
     (layer: Layer | undefined) => {
@@ -180,11 +187,29 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
 
           if (layerUnderMouse) {
             setSelectedLayer(layerUnderMouse);
+          } else {
+            // Vérifier si le clic est en dehors de l'image
+            if (
+              x < 0 ||
+              x > screen.width * zoomLevel ||
+              y < 0 ||
+              y > screen.height * zoomLevel
+            ) {
+              setSelectedLayer(undefined);
+            }
           }
         }
       }
     },
-    [isSpacePressed, findLayerUnderMouse, setSelectedLayer],
+    [
+      isSpacePressed,
+      getMousePosition,
+      findLayerUnderMouse,
+      setSelectedLayer,
+      screen.width,
+      screen.height,
+      zoomLevel,
+    ],
   );
 
   // Handle mouse move event for dragging or hovering over layers
@@ -210,7 +235,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
         }
       }
     },
-    [isDragging, findLayerUnderMouse, setHoveredLayer],
+    [isDragging, getMousePosition, findLayerUnderMouse, setHoveredLayer],
   );
 
   useEffect(() => {
@@ -241,6 +266,46 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
     }
   }, []);
 
+  const calculateDistance = useCallback(
+    (selectedLayer: Layer | undefined, hoveredLayer: Layer | undefined) => {
+      if (!selectedLayer || !hoveredLayer)
+        return { distance: 0, x1: 0, y1: 0, x2: 0, y2: 0 };
+
+      const selectedRight = selectedLayer.x + selectedLayer.width;
+      const selectedLeft = selectedLayer.x;
+      const hoveredRight = hoveredLayer.x + hoveredLayer.width;
+      const hoveredLeft = hoveredLayer.x;
+
+      let distance: number;
+      let x1: number, y1: number, x2: number, y2: number;
+
+      if (hoveredLeft > selectedRight) {
+        // Hovered layer is to the right of the selected layer
+        distance = hoveredLeft - selectedRight;
+        x1 = selectedRight;
+        y1 = selectedLayer.y + selectedLayer.height / 2;
+        x2 = hoveredLeft;
+        y2 = hoveredLayer.y + hoveredLayer.height / 2;
+      } else {
+        // Hovered layer is to the left of the selected layer
+        distance = selectedLeft - hoveredRight;
+        x1 = selectedLeft;
+        y1 = selectedLayer.y + selectedLayer.height / 2;
+        x2 = hoveredRight;
+        y2 = hoveredLayer.y + hoveredLayer.height / 2;
+      }
+
+      return {
+        distance,
+        x1: x1 * 2 * zoomLevel,
+        y1: y1 * 2 * zoomLevel,
+        x2: x2 * 2 * zoomLevel,
+        y2: y2 * 2 * zoomLevel,
+      };
+    },
+    [zoomLevel],
+  );
+
   useEffect(() => {
     const containerElement = containerRef.current;
     if (containerElement) {
@@ -261,6 +326,11 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, [handleMouseMove, handleMouseUp, handleKeyDown, handleKeyUp]);
+
+  const { distance, x1, y1, x2, y2 } = useMemo(
+    () => calculateDistance(selectedLayer, hoveredLayer),
+    [calculateDistance, selectedLayer, hoveredLayer],
+  );
 
   return (
     <div
@@ -285,6 +355,45 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
           aspectRatio: `${screen.width} / ${screen.height}`,
         }}
       >
+        {/* Line between selected and hovered layer */}
+        {selectedLayer && hoveredLayer && (
+          <>
+            {/* Line between selected and hovered layer */}
+            <div
+              className="absolute"
+              style={{
+                top: Math.min(y1, y2),
+                left: Math.min(x1, x2),
+                width: Math.abs(x2 - x1),
+                height: '2px', // Line thickness
+                backgroundColor: 'blue', // Line color
+                transform: 'translateY(-1px)', // Adjust for line thickness
+                zIndex: 1,
+              }}
+            />
+
+            {/* Distance text */}
+            <div
+              className="absolute text-blue-500"
+              style={{
+                top: Math.min(y1, y2) - 20,
+                left: (x1 + x2) / 2,
+                transform: 'translateX(-50%)',
+                zIndex: 2,
+                backgroundColor: 'white', // Background for better readability
+                padding: '2px 5px',
+                borderRadius: '4px',
+                border: '1px solid blue',
+              }}
+            >
+              {Math.abs(distance)
+                .toFixed(2)
+                .replace(/\.?0+$/, '')}
+              px
+            </div>
+          </>
+        )}
+
         {/* Hovered layer */}
         {hoveredLayer && (
           <div

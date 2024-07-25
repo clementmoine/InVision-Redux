@@ -133,7 +133,7 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
         </a>
       );
     },
-    [expandedGroupIds, selectedLayer, setSelectedLayer],
+    [expandedGroupIds, selectedLayer, setHoveredLayer, setSelectedLayer],
   );
 
   const layers = useMemo(() => {
