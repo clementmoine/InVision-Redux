@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import Hotkeys from 'react-hot-keys';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import Zoom from '@/components/Zoom';
 import MiniPagination from '@/components/MiniPagination';
+import { Toaster } from '@/components/ui/toaster';
 
 import EmptyState from '@/assets/illustrations/empty-state.svg?react';
 import ToDo from '@/assets/illustrations/to-do.svg?react';
@@ -33,15 +34,34 @@ import { getScreen } from '@/api/screens';
 
 import { ArchivedScreenDetails, Screen as ScreenType } from '@/types';
 
-import { hexToRgb } from '@/utils';
+import { copyToClipboard, hexToRgb } from '@/utils';
 
 import defaultValues from '@/constants/defaultValues';
 
 import style from './Screen.module.scss';
+import useLocalStorage from '@/hooks/useLocalStorage';
+import { useToast } from '@/components/ui/use-toast';
 
 function Screen() {
   const params = useParams();
   const navigate = useNavigate();
+
+  const { toast } = useToast();
+
+  const [rightPanelWidth, setRightPanelWidth] = useState<number>(0);
+
+  const { onChange } = useLocalStorage('inspect_panels');
+
+  useEffect(() => {
+    onChange((_, value) => {
+      const parsedValue = JSON.parse(value || '{}');
+      const layout = (
+        (Object.values(parsedValue)?.[0] as { layout: number[] }) || undefined
+      )?.layout;
+
+      setRightPanelWidth(layout[2]);
+    });
+  }, [onChange]);
 
   const { data, isFetching, isPending, refetch } = useQuery({
     queryKey: ['projects', Number(params.projectId), Number(params.screenId)],
@@ -194,6 +214,16 @@ function Screen() {
       className="flex h-screen w-full flex-col overflow-hidden"
       style={{ ['--screen-background-color']: screenBackgroundColor }}
     >
+      <Toaster
+        className="empty:overflow-visible !bottom-32 overflow-hidden"
+        style={{
+          transform:
+            params.mode === 'inspect'
+              ? `translateX(-${rightPanelWidth}vw)`
+              : undefined,
+        }}
+      />
+
       <div className="relative flex h-screen w-full flex-col overflow-hidden">
         {/* Screen */}
         <div
@@ -296,7 +326,15 @@ function Screen() {
       </div>
 
       {/* Tools */}
-      <aside className="fixed flex bottom-20 right-4 z-[100] gap-4">
+      <aside
+        className="fixed flex bottom-20 right-4 z-[100] gap-4"
+        style={{
+          transform:
+            params.mode === 'inspect'
+              ? `translateX(-${rightPanelWidth}vw)`
+              : undefined,
+        }}
+      >
         {allScreens != null && allScreens.length > 1 && screenIndex != null && (
           <MiniPagination
             loop
@@ -502,14 +540,23 @@ function Screen() {
           </div>
 
           <div className="flex flex-1 items-center gap-4 justify-end">
-            <Button
-              variant="default"
-              className="rounded-lg gap-2"
-              aria-label="Back"
-            >
-              <Share className="size-5" />
-              Share
-            </Button>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="default"
+                  className="rounded-lg gap-2"
+                  aria-label="Back"
+                  onClick={() => copyToClipboard(window.location.href, toast)}
+                >
+                  <Share className="size-5" />
+                  Share
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent side="left" sideOffset={5}>
+                Copy to clipboard
+              </TooltipContent>
+            </Tooltip>
           </div>
         </nav>
       </footer>

@@ -620,8 +620,11 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
             line.to.y = hBottom * 2 * zoomLevel + layerOutlineWidth;
 
             hoverLine.orientation = 'horizontal';
-            hoverLine.from = { x: line.from.x, y: hBottom + 1 };
-            hoverLine.to = { x: hLeft, y: hBottom + 1 };
+            hoverLine.from = { x: line.from.x, y: hBottom * 2 * zoomLevel + 1 };
+            hoverLine.to = {
+              x: hLeft * 2 * zoomLevel,
+              y: hBottom * 2 * zoomLevel + 1,
+            };
           } else {
             console.info('unhandled top', from, to);
           }
@@ -657,8 +660,11 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
             line.to.y = sBottom * 2 * zoomLevel + layerOutlineWidth;
 
             hoverLine.orientation = 'horizontal';
-            hoverLine.from = { x: line.from.x, y: hTop - 2 };
-            hoverLine.to = { x: hLeft, y: hTop - 2 };
+            hoverLine.from = { x: line.from.x, y: hTop * 2 * zoomLevel - 2 };
+            hoverLine.to = {
+              x: hLeft * 2 * zoomLevel,
+              y: hTop * 2 * zoomLevel - 2,
+            };
           } else {
             console.info('unhandled bottom', from, to);
           }
@@ -684,8 +690,14 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
             line.to.x = hRight * 2 * zoomLevel + layerOutlineWidth;
 
             hoverLine.orientation = 'vertical';
-            hoverLine.from = { x: hRight, y: hTop };
-            hoverLine.to = { x: hRight, y: midPoint.y };
+            hoverLine.from = {
+              x: hRight * 2 * zoomLevel + 1,
+              y: hTop * 2 * zoomLevel,
+            };
+            hoverLine.to = {
+              x: hRight * 2 * zoomLevel + 1,
+              y: line.to.y,
+            };
           } else if (from === 'sLeft' && to === 'hLeft') {
             midPoint.x = sLeft - Math.abs(sLeft - hLeft) / 2;
 
@@ -721,8 +733,11 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
             line.to.x = sRight * 2 * zoomLevel + layerOutlineWidth;
 
             hoverLine.orientation = 'vertical';
-            hoverLine.from = { x: hLeft, y: hTop };
-            hoverLine.to = { x: hLeft, y: midPoint.y };
+            hoverLine.from = {
+              x: hLeft * 2 * zoomLevel - 2,
+              y: hTop * 2 * zoomLevel,
+            };
+            hoverLine.to = { x: hLeft * 2 * zoomLevel - 2, y: line.to.y };
           } else if (from === 'sRight' && to === 'hRight') {
             midPoint.x = sRight - Math.abs(sRight - hRight) / 2;
 

@@ -10,7 +10,7 @@ InVision Redux is a complete app designed to help users backup their projects fr
 
 Some features are not handled yet, here is the not prioritized roadmap/to-do list :
 
-- [ ] Share button (QR Code and url copy to keyboard)
+- [x] Share button (QR Code and url copy to keyboard)
 - [ ] Manage all modes (excluding build and comments) :
   - [x] Manage the mode in url
   - [x] Keyboard shortcuts
@@ -32,16 +32,16 @@ Some features are not handled yet, here is the not prioritized roadmap/to-do lis
     - [ ] Side by side comparison
   - [ ] Inspect mode
     - [ ] Left panel
-      - [ ] List the layers
-      - [ ] Select a layer and display annotations and fonts / styles / code etc.
+      - [x] List the layers
+      - [x] Select a layer and display annotations and fonts / styles / code etc.
     - [ ] Right panel
-      - [ ] Display the fonts / styles / code etc.
+      - [x] Display the fonts / styles / code etc.
       - [ ] Export assets
       - [ ] Variables ? (to be tested, never used that)
-    - [ ] Screen panel
+    - [x] Screen panel
       - [x] Display the screen
-      - [ ] Display the annotations on hover
-      - [ ] Visual select of a layer
+      - [x] Display the annotations on hover
+      - [x] Visual select of a layer
     - [ ] Flow mode
       - [ ] Display the screens in a flow chart
 

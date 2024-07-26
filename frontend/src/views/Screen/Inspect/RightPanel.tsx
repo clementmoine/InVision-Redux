@@ -10,10 +10,16 @@ import {
 import { useCallback, MouseEvent, SetStateAction, Dispatch } from 'react';
 
 import { cn } from '@/lib/utils';
-import { rgbToHex } from '@/utils';
+import { copyToClipboard, rgbToHex } from '@/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Layer, Color, Gradient, ScreenInspect } from '@/types';
+import {
+  Layer,
+  Color,
+  Gradient,
+  ScreenInspect,
+  ArchivedScreenDetails,
+} from '@/types';
 import {
   Tooltip,
   TooltipContent,
@@ -24,55 +30,69 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { useToast } from '@/components/ui/use-toast';
 
 interface InspectRightPanelProps {
   data?: ScreenInspect;
   selectedLayer?: Layer;
   expandedGroupIds: Layer['id'][];
+  screen: Screen | ArchivedScreenDetails['screen'];
   setSelectedLayer: Dispatch<SetStateAction<Layer | undefined>>;
   setExpandedGroupIds: Dispatch<SetStateAction<Layer['id'][]>>;
 }
 
 function InspectRightPanel(props: InspectRightPanelProps) {
-  const { selectedLayer, setSelectedLayer, expandedGroupIds } = props;
+  const { data, selectedLayer, setSelectedLayer, expandedGroupIds } = props;
+  const { toast } = useToast();
 
-  const renderInfo = useCallback((label?: string, value?: string) => {
-    return (
-      !!value && (
-        <li>
-          <a
-            role="button"
-            className="flex gap-2 hover:bg-muted rounded-lg px-4 py-2"
-          >
-            {!!label && (
-              <span className="text-muted-foreground text-nowrap">
-                {label}:
-              </span>
-            )}
-            <span className="text-nowrap first-letter:uppercase">{value}</span>
-          </a>
-        </li>
-      )
-    );
-  }, []);
+  const renderInfo = useCallback(
+    (label?: string, value?: string) => {
+      return (
+        !!value && (
+          <li>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <a
+                  role="button"
+                  onClick={() => copyToClipboard(value, toast)}
+                  className="flex gap-2 hover:bg-muted rounded-lg px-4 py-2"
+                >
+                  {!!label && (
+                    <span className="text-muted-foreground text-nowrap">
+                      {label}:
+                    </span>
+                  )}
+                  <span className="text-nowrap first-letter:uppercase">
+                    {value}
+                  </span>
+                </a>
+              </TooltipTrigger>
 
-  const renderGradient = useCallback((gradient: Gradient) => {
-    const gradientStops = gradient.stops
-      .map(
-        stop =>
-          `rgba(${stop.color[0]}, ${stop.color[1]}, ${stop.color[2]}, ${stop.color[3]})`,
-      )
-      .join(', ');
+              <TooltipContent side="left" sideOffset={5}>
+                Copy to clipboard
+              </TooltipContent>
+            </Tooltip>
+          </li>
+        )
+      );
+    },
+    [toast],
+  );
 
-    return (
-      <li>
-        <a
-          role="button"
-          className="flex flex-row gap-2 text-sm items-stretch hover:bg-muted rounded-lg px-4 py-2"
-        >
+  const renderGradient = useCallback(
+    (gradient: Gradient) => {
+      const gradientStops = gradient.stops
+        .map(
+          stop =>
+            `rgba(${stop.color[0]}, ${stop.color[1]}, ${stop.color[2]}, ${stop.color[3]})`,
+        )
+        .join(', ');
+
+      return (
+        <li className="flex px-4 gap-2">
           {/* Checker background for transparent colors 🏁 */}
           <span
-            className="flex w-5 h-auto shrink-0 rounded-sm outline relative overflow-hidden text-neutral-200"
+            className="flex w-5 h-auto shrink-0 rounded-sm border relative overflow-hidden text-neutral-200"
             style={{
               backgroundImage:
                 'linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%), linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%)',
@@ -90,23 +110,118 @@ function InspectRightPanel(props: InspectRightPanelProps) {
           </span>
 
           {/* Values */}
-          <ol className="flex flex-col overflow-hidden gap-3">
-            {gradient.stops.map((stop, index) => (
-              <li className="uppercase text-nowrap" key={index}>
-                <span className="text-nowrap">
-                  {rgbToHex(stop.color[0], stop.color[1], stop.color[2])}
-                </span>
-                <span className="text-nowrap"> @ </span>
-                <span className="text-nowrap">
-                  {(stop.location * 100).toFixed(2).replace(/\.?0+$/, '')}%
-                </span>
-              </li>
-            ))}
+          <ol className="flex flex-col overflow-hidden gap-0">
+            {gradient.stops.map((stop, index) => {
+              const [r, g, b, alpha] = stop.color;
+
+              const value =
+                alpha === 1
+                  ? // Hex
+                    rgbToHex(r, g, b)?.toUpperCase()
+                  : // RGBA
+                    `rgba(${Number(r)}, ${Number(g)}, ${Number(b)}, ${Number(
+                      alpha,
+                    )
+                      .toFixed(2)
+                      .replace(/\.?0+$/, '')})`;
+
+              return (
+                <li key={index}>
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <a
+                        role="button"
+                        onClick={() => copyToClipboard(value, toast)}
+                        className="uppercase text-nowrap flex flex-row gap-2 text-sm items-stretch hover:bg-muted rounded-lg p-2"
+                      >
+                        <span className="text-nowrap">{value}</span>
+                        <span className="text-nowrap"> @ </span>
+                        <span className="text-nowrap">
+                          {(stop.location * 100)
+                            .toFixed(2)
+                            .replace(/\.?0+$/, '')}
+                          %
+                        </span>
+                      </a>
+                    </TooltipTrigger>
+
+                    <TooltipContent side="left" sideOffset={5}>
+                      Copy to clipboard
+                    </TooltipContent>
+                  </Tooltip>
+                </li>
+              );
+            })}
           </ol>
-        </a>
-      </li>
+        </li>
+      );
+    },
+    [toast],
+  );
+
+  const renderDocumentColors = useCallback(() => {
+    return (
+      <ul className="flex flex-wrap gap-1">
+        {data?.screen_colors.map((color, index) => {
+          const [r, g, b, alpha = 1, label = undefined] = color;
+
+          const value =
+            alpha === 1
+              ? // Hex
+                rgbToHex(r, g, b)?.toUpperCase()
+              : // RGBA
+                `rgba(${Number(r)}, ${Number(g)}, ${Number(b)}, ${Number(alpha)
+                  .toFixed(2)
+                  .replace(/\.?0+$/, '')})`;
+
+          return (
+            <li key={index}>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <a
+                    href="#"
+                    role="button"
+                    onClick={() => copyToClipboard(value, toast)}
+                    className="flex w-5 h-5 shrink-0 rounded-sm border relative overflow-hidden text-neutral-200"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%), linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%)',
+                      backgroundSize: '10px 10px',
+                      backgroundPosition: '0 0, 5px 5px',
+                    }}
+                  >
+                    {/* Preview of the color */}
+                    <span
+                      className="absolute inset-0"
+                      style={{
+                        backgroundColor: `rgba(${r}, ${g}, ${b}, ${Number(alpha)
+                          .toFixed(2)
+                          .replace(/\.?0+$/, '')})`,
+                      }}
+                    />
+                  </a>
+                </TooltipTrigger>
+
+                <TooltipContent side="bottom" sideOffset={5}>
+                  <span className="flex flex-col overflow-hidden">
+                    {/* Label */}
+                    {label && (
+                      <span className="lowercase first-letter:uppercase text-ellipsis whitespace-nowrap overflow-hidden">
+                        {label}
+                      </span>
+                    )}
+
+                    {/* Value */}
+                    {value}
+                  </span>
+                </TooltipContent>
+              </Tooltip>
+            </li>
+          );
+        })}
+      </ul>
     );
-  }, []);
+  }, [data?.screen_colors, toast]);
 
   const renderColor = useCallback(
     (color: Color | undefined, index?: number | string) => {
@@ -114,60 +229,68 @@ function InspectRightPanel(props: InspectRightPanelProps) {
 
       const [r, g, b, alpha = 1, label = undefined] = color;
 
+      const value =
+        alpha === 1
+          ? // Hex
+            rgbToHex(r, g, b)?.toUpperCase()
+          : // RGBA
+            `rgba(${Number(r)}, ${Number(g)}, ${Number(b)}, ${Number(alpha)
+              .toFixed(2)
+              .replace(/\.?0+$/, '')})`;
+
       return (
         <li key={index}>
-          <a
-            role="button"
-            className="flex flex-row gap-2 text-sm items-center hover:bg-muted rounded-lg px-4 py-2"
-          >
-            {/* Checker background for transparent colors 🏁 */}
-            <span
-              className="flex w-5 h-5 shrink-0 rounded-sm outline relative overflow-hidden text-neutral-200"
-              style={{
-                backgroundImage:
-                  'linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%), linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%)',
-                backgroundSize: '10px 10px',
-                backgroundPosition: '0 0, 5px 5px',
-              }}
-            >
-              {/* Preview of the color */}
-              <span
-                className="absolute inset-0"
-                style={{
-                  backgroundColor: `rgba(${r}, ${g}, ${b}, ${Number(alpha)
-                    .toFixed(2)
-                    .replace(/\.?0+$/, '')})`,
-                }}
-              />
-            </span>
-
-            {/* Value */}
-            <span className="flex flex-col overflow-hidden">
-              {/* Label */}
-              {label && (
-                <span className="lowercase first-letter:uppercase text-ellipsis whitespace-nowrap overflow-hidden">
-                  {label}
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <a
+                role="button"
+                onClick={() => copyToClipboard(value, toast)}
+                className="flex flex-row gap-2 text-sm items-center hover:bg-muted rounded-lg px-4 py-2"
+              >
+                {/* Checker background for transparent colors 🏁 */}
+                <span
+                  className="flex w-5 h-5 shrink-0 rounded-sm outline relative overflow-hidden text-neutral-200"
+                  style={{
+                    backgroundImage:
+                      'linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%), linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%)',
+                    backgroundSize: '10px 10px',
+                    backgroundPosition: '0 0, 5px 5px',
+                  }}
+                >
+                  {/* Preview of the color */}
+                  <span
+                    className="absolute inset-0"
+                    style={{
+                      backgroundColor: `rgba(${r}, ${g}, ${b}, ${Number(alpha)
+                        .toFixed(2)
+                        .replace(/\.?0+$/, '')})`,
+                    }}
+                  />
                 </span>
-              )}
 
-              {/* Value */}
-              {alpha === 1 ? (
-                // Hex
-                <span className="uppercase">{rgbToHex(r, g, b)}</span>
-              ) : (
-                // RGBA
-                <span>{`rgba(${Number(r)}, ${Number(g)}, ${Number(b)}, ${Number(
-                  alpha,
-                )
-                  .toFixed(2)
-                  .replace(/\.?0+$/, '')})`}</span>
-              )}
-            </span>
-          </a>
+                {/* Value */}
+                <span className="flex flex-col overflow-hidden">
+                  {/* Label */}
+                  {label && (
+                    <span className="lowercase first-letter:uppercase text-ellipsis whitespace-nowrap overflow-hidden">
+                      {label}
+                    </span>
+                  )}
+
+                  {/* Value */}
+                  {value}
+                </span>
+              </a>
+            </TooltipTrigger>
+
+            <TooltipContent side="left" sideOffset={5}>
+              Copy to clipboard
+            </TooltipContent>
+          </Tooltip>
         </li>
       );
     },
-    [],
+    [toast],
   );
 
   const renderLayer = useCallback(
@@ -254,7 +377,34 @@ function InspectRightPanel(props: InspectRightPanelProps) {
 
   return (
     <div className="flex flex-col bg-background p-0 overflow-auto h-full">
-      {selectedLayer && (
+      {!selectedLayer ? (
+        <>
+          <div className="flex flex-col gap-3 p-4 border-b">
+            {renderDocumentColors()}
+          </div>
+
+          <div className="flex flex-col gap-3 py-4 px-2 border-b">
+            <ul
+              id="position"
+              className="flex flex-col text-sm text-popover-foreground empty:hidden"
+            >
+              {data?.typefaces.map(({ typeface, weight }) =>
+                renderInfo(undefined, `${typeface} ${weight}`),
+              )}
+            </ul>
+          </div>
+
+          <div className="flex flex-col gap-3 py-4 px-2 border-b">
+            <ul
+              id="position"
+              className="flex flex-col text-sm text-popover-foreground empty:hidden"
+            >
+              {renderInfo('Width', `${data?.width}px`)}
+              {renderInfo('Height', `${data?.height}px`)}
+            </ul>
+          </div>
+        </>
+      ) : (
         <>
           {/* Layer name */}
           <div className="flex flex-col gap-3 p-4 border-b">
@@ -283,11 +433,12 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                   className="rounded-r-none border-r-0"
                 />
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger>
                     <Button
                       variant="outline"
                       size="icon"
+                      onClick={() => copyToClipboard(selectedLayer.text, toast)}
                       className="rounded-lg rounded-l-none flex-shrink-0 ml-auto"
                       aria-label="Copy to clipboard"
                     >
@@ -295,7 +446,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                     </Button>
                   </TooltipTrigger>
 
-                  <TooltipContent side="top" sideOffset={5}>
+                  <TooltipContent side="bottom" sideOffset={5}>
                     Copy to clipboard
                   </TooltipContent>
                 </Tooltip>
@@ -304,7 +455,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
           </div>
 
           {/* Layer details */}
-          <div className="flex-1 overflow-auto mb-20">
+          <div className="flex-1 overflow-auto">
             {/* Symbol details */}
             {(!!selectedLayer.symbol || !!selectedLayer.sharedStyle) && (
               <div className="flex flex-col gap-4 py-4 px-2 border-b">
@@ -319,21 +470,42 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                   </p>
                 </div>
 
-                <a
-                  role="button"
-                  className="flex flex-col gap-1 hover:bg-muted rounded-lg px-4 py-2"
-                >
-                  <span className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">
-                    {
-                      (selectedLayer.symbolMaster || selectedLayer.sharedStyle)
-                        ?.name
-                    }
-                  </span>
-                  <span className="text-sm text-neutral-500 text-ellipsis whitespace-nowrap overflow-hidden">
-                    {(selectedLayer.symbolMaster || selectedLayer.sharedStyle)
-                      ?.sourceLibraryName ?? 'Document'}
-                  </span>
-                </a>
+                <Tooltip delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <a
+                      role="button"
+                      onClick={() =>
+                        copyToClipboard(
+                          (
+                            selectedLayer.symbolMaster ||
+                            selectedLayer.sharedStyle
+                          )?.name,
+                          toast,
+                        )
+                      }
+                      className="flex flex-col gap-1 hover:bg-muted rounded-lg px-4 py-2"
+                    >
+                      <span className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">
+                        {
+                          (
+                            selectedLayer.symbolMaster ||
+                            selectedLayer.sharedStyle
+                          )?.name
+                        }
+                      </span>
+                      <span className="text-sm text-neutral-500 text-ellipsis whitespace-nowrap overflow-hidden">
+                        {(
+                          selectedLayer.symbolMaster ||
+                          selectedLayer.sharedStyle
+                        )?.sourceLibraryName ?? 'Document'}
+                      </span>
+                    </a>
+                  </TooltipTrigger>
+
+                  <TooltipContent side="left" sideOffset={5}>
+                    Copy to clipboard
+                  </TooltipContent>
+                </Tooltip>
               </div>
             )}
 

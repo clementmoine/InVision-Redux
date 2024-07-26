@@ -13,6 +13,7 @@ import {
 import InspectLeftPanel from './LeftPanel';
 import InspectRightPanel from './RightPanel';
 import InspectMiddlePanel from './MiddlePanel';
+import useLocalStorage from '@/hooks/useLocalStorage';
 
 interface InspectProps {
   screenId: Screen['id'];
@@ -24,6 +25,8 @@ interface InspectProps {
 
 function Inspect(props: InspectProps) {
   const { zoomLevel, screen } = props;
+
+  const storage = useLocalStorage('inspect_panels');
 
   const [hoveredLayer, setHoveredLayer] = useState<Layer>();
   const [selectedLayer, setSelectedLayer] = useState<Layer>();
@@ -48,9 +51,11 @@ function Inspect(props: InspectProps) {
       direction="horizontal"
       className="overflow-hidden"
       data-screen-id={screen.id.toString()}
+      storage={storage}
+      autoSaveId="inspect_panels"
     >
       {/* Layers */}
-      <ResizablePanel minSize={20} maxSize={60}>
+      <ResizablePanel id="left-panel" minSize={20} maxSize={60}>
         <InspectLeftPanel
           data={data}
           hoveredLayer={hoveredLayer}
@@ -65,7 +70,7 @@ function Inspect(props: InspectProps) {
       <ResizableHandle withHandle />
 
       {/* Screen with annotations */}
-      <ResizablePanel minSize={0} defaultSize={75}>
+      <ResizablePanel id="middle-panel" minSize={0} defaultSize={75}>
         <InspectMiddlePanel
           data={data}
           screen={screen}
@@ -82,9 +87,10 @@ function Inspect(props: InspectProps) {
       <ResizableHandle withHandle />
 
       {/* Code and values */}
-      <ResizablePanel minSize={20} maxSize={60}>
+      <ResizablePanel id="right-panel" minSize={20} maxSize={60}>
         <InspectRightPanel
           data={data}
+          screen={screen}
           selectedLayer={selectedLayer}
           setSelectedLayer={setSelectedLayer}
           expandedGroupIds={expandedGroupIds}
