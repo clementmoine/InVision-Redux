@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import React, { useCallback, useMemo } from 'react';
 
 interface Layer {
@@ -60,6 +61,108 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
   const hRight = useMemo(
     () => (hLeft || 0) + (hoveredLayer?.width || 0),
     [hLeft, hoveredLayer?.width],
+  );
+
+  const renderLine = useCallback(
+    (
+      from: { x: number; y: number },
+      to: { x: number; y: number },
+      orientation: 'horizontal' | 'vertical',
+      type: 'h' | 'solid' | 'dashed',
+      color: 'primary' | 'blue',
+      visible: boolean,
+    ) => {
+      if (!visible) return;
+
+      const x1 = from.x;
+      const y1 = from.y;
+      const x2 = to.x;
+      const y2 = to.y;
+
+      const length =
+        orientation === 'vertical' ? Math.abs(y2 - y1) : Math.abs(x2 - x1);
+
+      if (length < 3) return;
+
+      const offset = type === 'h' ? 2 : 0;
+
+      const style: React.CSSProperties = {
+        left:
+          orientation === 'vertical'
+            ? `${Math.min(x1, x2)}px`
+            : `${Math.min(x1, x2) + offset}px`,
+        top:
+          orientation === 'vertical'
+            ? `${Math.min(y1, y2) + offset}px`
+            : `${Math.min(y1, y2)}px`,
+      };
+
+      const hSize = 7;
+
+      return (
+        <div
+          key={`line-${x1}-${y1}-${x2}-${y2}`}
+          className={cn(
+            'absolute flex justify-center items-center text-primary',
+            {
+              'text-primary': color === 'primary',
+              'text-blue-500': color === 'blue',
+            },
+          )}
+          style={style}
+        >
+          <div
+            key={`line-${x1}-${y1}-${x2}-${y2}`}
+            className="border-current"
+            style={{
+              width:
+                orientation === 'horizontal' ? `${length - offset * 2}px` : 1,
+              height:
+                orientation === 'horizontal' ? 1 : `${length - offset * 2}px`,
+              backgroundColor:
+                type === 'solid' || type === 'h' ? 'currentColor' : undefined,
+              backgroundImage:
+                type === 'dashed'
+                  ? `linear-gradient(${orientation === 'horizontal' ? '90deg' : '0deg'}, currentColor, currentColor 75%, transparent 75%, transparent 100%)`
+                  : undefined,
+              backgroundSize:
+                type === 'dashed'
+                  ? orientation === 'horizontal'
+                    ? '6px 4px'
+                    : '4px 6px'
+                  : undefined,
+            }}
+          />
+
+          {type === 'h' && (
+            <div
+              key={`bar-top-${x1}-${y1}`}
+              className="flex absolute bg-current"
+              style={{
+                top: orientation === 'horizontal' ? undefined : 0,
+                left: orientation === 'horizontal' ? 0 : undefined,
+                width: orientation === 'horizontal' ? 1 : hSize,
+                height: orientation === 'horizontal' ? hSize : 1,
+              }}
+            />
+          )}
+
+          {type === 'h' && (
+            <div
+              key={`bar-bottom-${x2}-${y2}`}
+              className="flex absolute bg-current"
+              style={{
+                bottom: orientation === 'horizontal' ? undefined : 0,
+                right: orientation === 'horizontal' ? 0 : undefined,
+                width: orientation === 'horizontal' ? 1 : hSize,
+                height: orientation === 'horizontal' ? hSize : 1,
+              }}
+            />
+          )}
+        </div>
+      );
+    },
+    [],
   );
 
   const calculateDistances = useCallback(
@@ -454,9 +557,47 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
       };
       const midPoint: { x: number; y: number } = { x: 0, y: 0 };
 
+      const line: {
+        from: { x: number; y: number };
+        to: { x: number; y: number };
+        orientation: 'horizontal' | 'vertical';
+        type: 'dashed' | 'h';
+        visible: boolean;
+        color: 'primary' | 'blue';
+      } = {
+        from: { x: 0, y: 0 },
+        to: { x: 0, y: 0 },
+        orientation: 'horizontal',
+        type: 'h',
+        visible: true, // Debug
+        color: 'primary',
+      };
+
+      const hoverLine: {
+        from: { x: number; y: number };
+        to: { x: number; y: number };
+        orientation: 'horizontal' | 'vertical';
+        type: 'dashed' | 'h';
+        visible: boolean;
+        color: 'primary' | 'blue';
+      } = {
+        from: { x: 0, y: 0 },
+        to: { x: 0, y: 0 },
+        orientation: 'horizontal',
+        type: 'dashed',
+        visible: true, // Debug
+        color: 'blue',
+      };
+
+      const layerOutlineWidth = 2;
+
       switch (position) {
         case 'top':
           midPoint.x = sLeft + sWidth / 2;
+
+          line.from.x = midPoint.x * 2 * zoomLevel;
+          line.to.x = midPoint.x * 2 * zoomLevel;
+          line.orientation = 'vertical';
 
           if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
             style.transform = `translate(-50%, calc(-100% - 8px))`;
@@ -464,10 +605,23 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
 
           if (from === 'hTop' && to === 'sTop') {
             midPoint.y = hTop - Math.abs(hTop - sTop) / 2;
+
+            line.from.y = hTop * 2 * zoomLevel - 2;
+            line.to.y = sTop * 2 * zoomLevel;
           } else if (from === 'sTop' && to === 'hTop') {
             midPoint.y = sTop - Math.abs(hTop - sTop) / 2;
+
+            line.from.y = sTop * 2 * zoomLevel - layerOutlineWidth;
+            line.to.y = hTop * 2 * zoomLevel;
           } else if (from === 'sTop' && to === 'hBottom') {
             midPoint.y = sTop - Math.abs(sTop - hBottom) / 2;
+
+            line.from.y = sTop * 2 * zoomLevel - layerOutlineWidth;
+            line.to.y = hBottom * 2 * zoomLevel + layerOutlineWidth;
+
+            hoverLine.orientation = 'horizontal';
+            hoverLine.from = { x: line.from.x, y: hBottom + 1 };
+            hoverLine.to = { x: hLeft, y: hBottom + 1 };
           } else {
             console.info('unhandled top', from, to);
           }
@@ -478,16 +632,33 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
         case 'bottom':
           midPoint.x = sLeft + sWidth / 2;
 
+          line.from.x = midPoint.x * 2 * zoomLevel;
+          line.to.x = midPoint.x * 2 * zoomLevel;
+          line.orientation = 'vertical';
+
           if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
             style.transform = `translate(-50%, calc(0% + 8px))`;
           }
 
           if (from === 'hBottom' && to === 'sBottom') {
             midPoint.y = hBottom - Math.abs(hBottom - sBottom) / 2;
+
+            line.from.y = hBottom * 2 * zoomLevel;
+            line.to.y = sBottom * 2 * zoomLevel + layerOutlineWidth;
           } else if (from === 'sBottom' && to === 'hBottom') {
             midPoint.y = sBottom - Math.abs(sBottom - hBottom) / 2;
+
+            line.from.y = hBottom * 2 * zoomLevel + layerOutlineWidth;
+            line.to.y = sBottom * 2 * zoomLevel;
           } else if (from === 'hTop' && to === 'sBottom') {
             midPoint.y = hTop - Math.abs(hTop - sBottom) / 2;
+
+            line.from.y = hTop * 2 * zoomLevel - layerOutlineWidth;
+            line.to.y = sBottom * 2 * zoomLevel + layerOutlineWidth;
+
+            hoverLine.orientation = 'horizontal';
+            hoverLine.from = { x: line.from.x, y: hTop - 2 };
+            hoverLine.to = { x: hLeft, y: hTop - 2 };
           } else {
             console.info('unhandled bottom', from, to);
           }
@@ -498,16 +669,33 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
         case 'left':
           midPoint.y = sTop + sHeight / 2;
 
+          line.from.y = midPoint.y * 2 * zoomLevel;
+          line.to.y = midPoint.y * 2 * zoomLevel;
+          line.orientation = 'horizontal';
+
           if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
             style.transform = `translate(calc(-100% - 8px), -50%)`;
           }
 
           if (from === 'sLeft' && to === 'hRight') {
             midPoint.x = sLeft - Math.abs(sLeft - hRight) / 2;
+
+            line.from.x = sLeft * 2 * zoomLevel - layerOutlineWidth;
+            line.to.x = hRight * 2 * zoomLevel + layerOutlineWidth;
+
+            hoverLine.orientation = 'vertical';
+            hoverLine.from = { x: hRight, y: hTop };
+            hoverLine.to = { x: hRight, y: midPoint.y };
           } else if (from === 'sLeft' && to === 'hLeft') {
             midPoint.x = sLeft - Math.abs(sLeft - hLeft) / 2;
+
+            line.from.x = sLeft * 2 * zoomLevel - layerOutlineWidth;
+            line.to.x = hLeft * 2 * zoomLevel;
           } else if (from === 'hLeft' && to === 'sLeft') {
             midPoint.x = hLeft - Math.abs(hLeft - sLeft) / 2;
+
+            line.from.x = hLeft * 2 * zoomLevel - layerOutlineWidth;
+            line.to.x = sLeft * 2 * zoomLevel;
           } else {
             console.info('unhandled left', from, to);
           }
@@ -518,16 +706,33 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
         case 'right':
           midPoint.y = sTop + sHeight / 2;
 
+          line.from.y = midPoint.y * 2 * zoomLevel;
+          line.to.y = midPoint.y * 2 * zoomLevel;
+          line.orientation = 'horizontal';
+
           if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
             style.transform = `translate(calc(0% + 8px), -50%)`;
           }
 
           if (from === 'hLeft' && to === 'sRight') {
             midPoint.x = hLeft - Math.abs(hLeft - sRight) / 2;
+
+            line.from.x = hLeft * 2 * zoomLevel - layerOutlineWidth;
+            line.to.x = sRight * 2 * zoomLevel + layerOutlineWidth;
+
+            hoverLine.orientation = 'vertical';
+            hoverLine.from = { x: hLeft, y: hTop };
+            hoverLine.to = { x: hLeft, y: midPoint.y };
           } else if (from === 'sRight' && to === 'hRight') {
             midPoint.x = sRight - Math.abs(sRight - hRight) / 2;
+
+            line.from.x = sRight * 2 * zoomLevel;
+            line.to.x = hRight * 2 * zoomLevel + layerOutlineWidth;
           } else if (from === 'hRight' && to === 'sRight') {
             midPoint.x = hRight - Math.abs(hRight - sRight) / 2;
+
+            line.from.x = hRight * 2 * zoomLevel;
+            line.to.x = sRight * 2 * zoomLevel + layerOutlineWidth;
           } else {
             console.info('unhandled right', from, to);
           }
@@ -540,22 +745,45 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
       }
 
       return (
-        <div
-          className="absolute bg-primary text-white rounded-sm"
-          style={{
-            ...style,
-            fontSize: 10,
-            padding: 2,
-            zIndex: 5000,
-          }}
-        >
-          {absDistance.toFixed(2).replace(/\.?0+$/, '')}px
-        </div>
+        <>
+          {/* Measure */}
+          <div
+            className="absolute bg-primary text-white rounded-sm"
+            style={{
+              ...style,
+              fontSize: 10,
+              padding: 2,
+              zIndex: 5000,
+            }}
+          >
+            {absDistance.toFixed(2).replace(/\.?0+$/, '')}px
+          </div>
+
+          {/* Lines */}
+          {renderLine(
+            line.from,
+            line.to,
+            line.orientation,
+            line.type,
+            line.color,
+            line.visible,
+          )}
+          {renderLine(
+            hoverLine.from,
+            hoverLine.to,
+            hoverLine.orientation,
+            hoverLine.type,
+            hoverLine.color,
+            hoverLine.visible,
+          )}
+        </>
       );
     },
     [
+      renderLine,
       sLeft,
       sWidth,
+      zoomLevel,
       sTop,
       sHeight,
       hTop,
@@ -564,7 +792,6 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
       hRight,
       hLeft,
       sRight,
-      zoomLevel,
     ],
   );
 

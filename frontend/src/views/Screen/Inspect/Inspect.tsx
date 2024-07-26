@@ -65,7 +65,7 @@ function Inspect(props: InspectProps) {
       <ResizableHandle withHandle />
 
       {/* Screen with annotations */}
-      <ResizablePanel minSize={0} defaultSize={50}>
+      <ResizablePanel minSize={0} defaultSize={75}>
         <InspectMiddlePanel
           data={data}
           screen={screen}

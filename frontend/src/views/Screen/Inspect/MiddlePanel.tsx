@@ -232,6 +232,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
           }
         } else {
           const { x, y } = getMousePosition(e, containerRef.current);
+
           const layerUnderMouse = findLayerUnderMouse(x, y);
 
           if (layerUnderMouse) {
@@ -299,7 +300,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       {/* Annotations */}
       <div
         id="annotations"
-        className="absolute inset-16"
+        className="absolute inset-16 mx-auto"
         style={{
           width: screen.width * zoomLevel,
           height: screen.height * zoomLevel,
@@ -322,6 +323,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
           <div
             className="text-blue-500 outline outline-current absolute"
             style={{
+              outlineWidth: 2,
               top: hoveredLayer.y * 2 * zoomLevel,
               left: hoveredLayer.x * 2 * zoomLevel,
               width: hoveredLayer.width * 2 * zoomLevel,
@@ -333,8 +335,9 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
         {/* Selected layer */}
         {selectedLayer && (
           <div
-            className="text-primary  outline outline-current absolute"
+            className="text-primary outline outline-current absolute"
             style={{
+              outlineWidth: 2,
               top: selectedLayer.y * 2 * zoomLevel,
               left: selectedLayer.x * 2 * zoomLevel,
               width: selectedLayer.width * 2 * zoomLevel,
