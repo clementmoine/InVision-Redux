@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 
-// Déclaration du type pour l'événement personnalisé
 interface CustomStorageEventDetail {
   key: string;
   value: string;
 }
 
-// Création du type d'événement personnalisé
 class CustomStorageEvent extends CustomEvent<CustomStorageEventDetail> {
   constructor(key: string, value: string) {
     super('localStorageChange', { detail: { key, value } });
@@ -27,7 +25,6 @@ const useLocalStorage = (key: string): LocalStorageAPI => {
       localStorage.setItem(key, newValue);
       setValue(newValue);
 
-      // Déclenche l'événement personnalisé
       window.dispatchEvent(new CustomStorageEvent(key, newValue));
     },
     [key],
@@ -64,11 +61,10 @@ const useLocalStorage = (key: string): LocalStorageAPI => {
         );
       };
     },
-    [key], // La dépendance key est nécessaire ici
+    [key],
   );
 
   useEffect(() => {
-    // Nettoyage lors du démontage
     return () => {
       window.removeEventListener('localStorageChange', () => {});
     };

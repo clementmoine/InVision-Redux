@@ -23,7 +23,7 @@ def download_file(url, destination, session):
         return True
 
     response = session.get(url)
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # Save the file content to the destination
         with open(destination, "wb") as f:
             f.write(response.content)

@@ -360,7 +360,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       <img
         decoding="sync"
         src={`/api/static/${screen.imageUrl}`}
-        className="object-contain mx-auto bg-white select-none pointer-events-none"
+        className="object-contain mx-auto select-none pointer-events-none"
         style={{
           width: screen.width * zoomLevel,
           height: screen.height * zoomLevel,
@@ -369,6 +369,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
           maxWidth: screen.width * zoomLevel,
           maxHeight: screen.height * zoomLevel,
           aspectRatio: `${screen.width} / ${screen.height}`,
+          backgroundColor: 'rgb(var(--screen-background-color))',
         }}
       />
     </div>

@@ -36,6 +36,13 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useCollapsedGroups } from '@/hooks/useCollapsedGroups';
 
 import EmptyState from '@/assets/illustrations/empty-state.svg?react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { copyToClipboard } from '@/utils';
+import { useToast } from '@/components/ui/use-toast';
 
 const formSchema = z.object({
   search: z.string(),
@@ -43,6 +50,7 @@ const formSchema = z.object({
 
 function Project() {
   const params = useParams();
+  const { toast } = useToast();
   const { favorites, setFavorites } = useFavorites();
   const { collapsedGroups, setCollapsedGroups } = useCollapsedGroups();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -161,14 +169,23 @@ function Project() {
               </div>
             </div>
 
-            <Button
-              variant="default"
-              className="rounded-lg gap-2"
-              aria-label="Back"
-            >
-              <Share className="size-5" />
-              Share
-            </Button>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="default"
+                  className="rounded-lg gap-2"
+                  aria-label="Share"
+                  onClick={() => copyToClipboard(window.location.href, toast)}
+                >
+                  <Share className="size-5" />
+                  Share
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent side="left" sideOffset={5}>
+                Copy to clipboard
+              </TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Search Input */}

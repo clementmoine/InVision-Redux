@@ -1,42 +1,55 @@
 from bs4 import BeautifulSoup
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, RequestException
 
 from src.utils import color_print
 import time
-import time
 
 max_retries = 3
-cooldown = 60
+cooldown = 120
 
 
 def request(session, method, *args, **kwargs):
     retries = 0
     while retries < max_retries:
-        if method == "GET":
-            response = session.get(*args, **kwargs)
-        elif method == "POST":
-            response = session.post(*args, **kwargs)
-        elif method == "PUT":
-            response = session.put(*args, **kwargs)
-        else:
-            raise ValueError(f"Unsupported HTTP method: {method}")
+        try:
+            if method == "GET":
+                response = session.get(*args, **kwargs)
+            elif method == "POST":
+                response = session.post(*args, **kwargs)
+            elif method == "PUT":
+                response = session.put(*args, **kwargs)
+            else:
+                raise ValueError(f"Unsupported HTTP method: {method}")
 
-        if response.status_code == 200:
-            if response.cookies:
-                session.cookies.update(response.cookies)
-            return response
-        elif response.status_code == 429:  # Rate limit exceeded
-            # print("API rate limit exceeded. Retrying after cooldown...")
-            time.sleep(cooldown)  # Wait before restart
+            if response and response.status_code == 200:
+                if response.cookies:
+                    session.cookies.update(response.cookies)
+                return response
+            elif not response or response.status_code == 429:  # Rate limit exceeded
+                # print("API rate limit exceeded. Retrying after cooldown...")
+                time.sleep(cooldown)  # Wait before restart
+                retries += 1
+            else:
+                error_message = "Unknown error"
+                if response:
+                    error_message = response.text
+
+                color_print(f"Failed to fetch data: {error_message}", "red")
+                return None
+        except HTTPError as e:
+            color_print(f"HTTP error occurred: {str(e)}", "red")
+            time.sleep(cooldown)
             retries += 1
-        else:
-            error_message = "Unknown error"
-            if response:
-                error_message = response.text
+        except RequestException as e:
+            color_print(f"Request exception occurred: {str(e)}", "red")
+            time.sleep(cooldown)
+            retries += 1
+        except Exception as e:
+            color_print(f"An unexpected error occurred: {str(e)}", "red")
+            time.sleep(cooldown)
+            retries += 1
 
-            color_print(f"Failed to fetch data: {error_message}", "red")
-            return None
-    print("Maximum number of retries reached. Aborting.")
+    color_print("Maximum number of retries reached. Aborting.", "red")
     return None
 
 
@@ -87,7 +100,7 @@ def get_user_id(session):
     # response = session.get(url=url, headers=headers)
     response = request(session, "GET", url=url, headers=headers)
 
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # if response.cookies:
         #     session.cookies.update(response.cookies)
 
@@ -110,7 +123,7 @@ def fetch_tags(session):
     # response = session.get(url=url, headers=headers)
     response = request(session, "GET", url=url, headers=headers)
 
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # if response.cookies:
         #     session.cookies.update(response.cookies)
 
@@ -211,7 +224,7 @@ def get_project_archived_screens(project, session):
     # response = session.get(url=url, headers=headers, params=params)
     response = request(session, "GET", url=url, headers=headers, params=params)
 
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # if response.cookies:
         #     session.cookies.update(response.cookies)
 
@@ -241,7 +254,7 @@ def get_project_screens(project, session):
     # response = session.get(url=url, headers=headers, params=params)
     response = request(session, "GET", url=url, headers=headers, params=params)
 
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # if response.cookies:
         #     session.cookies.update(response.cookies)
 
@@ -275,7 +288,7 @@ def get_screen_details(screen, session):
     # response = session.get(url=url, headers=headers, params=params)
     response = request(session, "GET", url=url, headers=headers, params=params)
 
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # if response.cookies:
         #     session.cookies.update(response.cookies)
 
@@ -303,7 +316,7 @@ def get_project_assets(project, session):
     # response = session.get(url=url, headers=headers, params=params)
     response = request(session, "GET", url=url, headers=headers, params=params)
 
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # if response.cookies:
         #     session.cookies.update(response.cookies)
 
@@ -330,7 +343,7 @@ def get_screen_inspect_details(screen, session):
     # response = session.get(url=url, headers=headers, params=params)
     response = request(session, "GET", url=url, headers=headers, params=params)
 
-    if response.status_code == 200:
+    if response and response.status_code == 200:
         # if response.cookies:
         #     session.cookies.update(response.cookies)
 

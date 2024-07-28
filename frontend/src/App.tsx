@@ -13,6 +13,7 @@ import { Redirect } from '@/components/Redirect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 import InVision from '@/assets/invision.svg?react';
+import { Toaster } from './components/ui/toaster';
 
 dayjs.extend(relativeTime);
 
@@ -46,7 +47,7 @@ export default function App() {
 function Layout() {
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden">
-      <header className="z-30 top-0 left-0 w-full flex h-16 border-b bg-background px-4 flex-shrink-0">
+      <header className="dark z-30 top-0 left-0 w-full flex h-16 border-b bg-background px-4 flex-shrink-0">
         <div className="flex justify-between w-full gap-4 items-center max-w-7xl mx-auto">
           <nav>
             <Link
@@ -68,6 +69,7 @@ function Layout() {
       </header>
 
       <div className="h-full px-4 py-6 overflow-auto bg-muted/40">
+        <Toaster />
         <Outlet />
       </div>
     </div>

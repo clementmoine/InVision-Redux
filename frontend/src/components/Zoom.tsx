@@ -63,7 +63,7 @@ const Zoom: React.FC<ZoomProps> = (props: ZoomProps) => {
   return (
     <div
       className={cn(
-        'inline-flex items-center justify-center gap-2 flex-nowrap border rounded-md p-1 bg-background',
+        'inline-flex items-center justify-center flex-nowrap border rounded-md p-1 bg-background',
         className,
       )}
     >
@@ -85,12 +85,13 @@ const Zoom: React.FC<ZoomProps> = (props: ZoomProps) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            size="icon"
             variant="ghost"
-            className="disabled:opacity-100"
+            className="disabled:opacity-100 px-2 w-[50px]"
             onClick={handleReset}
             disabled={zoomLevel === initialValue}
-          >{`${Math.round(zoomLevel * 100)}%`}</Button>
+          >
+            {`${Math.round(zoomLevel * 100)}%`}
+          </Button>
         </TooltipTrigger>
         <TooltipContent>
           Reset to {Math.round(initialValue * 100)}%

@@ -12,7 +12,7 @@ export const copyToClipboard = async (text?: string, toast?: ToastFunc) => {
       toast?.({
         title: 'Copied! 🎉',
         description: 'Text copied to clipboard successfully.',
-        className: '!top-0 !left-0 !bottom-auto !right-auto',
+        duration: 1500,
       });
       return true;
     } catch (err) {
@@ -42,7 +42,7 @@ export const copyToClipboard = async (text?: string, toast?: ToastFunc) => {
         toast?.({
           title: 'Copied! 🎉',
           description: 'Text copied to clipboard successfully.',
-          className: '!top-0 !left-0 !bottom-auto !right-auto',
+          duration: 1500,
         });
       }
       return successful;

@@ -331,6 +331,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
           src={`/api/static/${screen.imageUrl}`}
           className="object-contain"
           style={{
+            backgroundColor: 'rgb(var(--screen-background-color))',
             marginTop:
               'fixedHeaderHeight' in screen
                 ? -(screen.fixedHeaderHeight * zoomLevel)

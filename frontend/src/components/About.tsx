@@ -20,7 +20,7 @@ function About() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button variant="outline" size="icon" className="text-foreground">
           <Info className="h-[1.2rem] w-[1.2rem]" />
           <span className="sr-only">About</span>
         </Button>

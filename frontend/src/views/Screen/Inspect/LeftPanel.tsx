@@ -63,8 +63,7 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
               className={cn(
                 'p-2 overflow-hidden rounded-lg transition-all !no-underline gap-3',
                 {
-                  'text-muted-foreground hover:bg-muted hover:text-neutral-500':
-                    !isSelected,
+                  'text-muted-foreground hover:bg-muted': !isSelected,
                   'bg-primary-foreground text-primary': isSelected,
                 },
               )}

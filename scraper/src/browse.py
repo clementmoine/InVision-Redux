@@ -75,8 +75,18 @@ def browse_screen(screen, project, session):
     project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
     screen_json_folder = os.path.join(project_folder, "screens", str(screen["id"]))
 
-    # Check if screen files exist
-    file_names = ["screen.json", "inspect.json", "thumbnail.png", "image.png"]
+    # Files we expect to see when the screen already exists
+    file_names = [
+        "image.png",
+        "inspect.json",  # Not existing for archived screen
+        "screen.json",
+        "thumbnail.png",
+    ]
+
+    # Remove inspect.json to expected files if the screen is archived
+    if screen.get("isArchived", False):
+        file_names.remove("inspect.json")
+
     if all(
         map(
             lambda file_name: os.path.exists(

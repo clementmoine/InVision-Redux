@@ -49,7 +49,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
     (label?: string, value?: string) => {
       return (
         !!value && (
-          <li>
+          <li key={`${label}.${value}`}>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <a
@@ -182,7 +182,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                     href="#"
                     role="button"
                     onClick={() => copyToClipboard(value, toast)}
-                    className="flex w-5 h-5 shrink-0 rounded-sm border relative overflow-hidden text-neutral-200"
+                    className="flex w-5 h-5 shrink-0 rounded-sm outline outline-1 outline-muted-foreground/50 relative overflow-hidden text-neutral-200"
                     style={{
                       backgroundImage:
                         'linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%), linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%)',
@@ -249,7 +249,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
               >
                 {/* Checker background for transparent colors 🏁 */}
                 <span
-                  className="flex w-5 h-5 shrink-0 rounded-sm outline relative overflow-hidden text-neutral-200"
+                  className="flex w-5 h-5 shrink-0 rounded-sm outline outline-1 outline-muted-foreground/50 relative overflow-hidden text-neutral-200"
                   style={{
                     backgroundImage:
                       'linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%), linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%, currentColor 100%)',
@@ -434,7 +434,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                 />
 
                 <Tooltip delayDuration={0}>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Button
                       variant="outline"
                       size="icon"

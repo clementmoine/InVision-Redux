@@ -211,7 +211,7 @@ function Screen() {
   return (
     <div
       id="screen"
-      className="flex h-screen w-full flex-col overflow-hidden"
+      className="flex h-screen w-full flex-col overflow-hidden bg-muted"
       style={{ ['--screen-background-color']: screenBackgroundColor }}
     >
       <Toaster
@@ -233,7 +233,10 @@ function Screen() {
           )}
           style={{
             marginBottom: '4rem',
-            backgroundColor: 'rgb(var(--screen-background-color))', // Defined after the fetching of the screen
+            backgroundColor:
+              params.mode === 'preview'
+                ? 'rgb(var(--screen-background-color))'
+                : undefined,
           }}
         >
           {screen && params.projectId && params.screenId ? (
@@ -352,7 +355,7 @@ function Screen() {
       </aside>
 
       {/* Footer */}
-      <footer className="flex fixed bottom-0 w-full h-16 items-center border-t p-3 z-[100] overflow-hidden bg-background flex-shrink-0">
+      <footer className="dark flex fixed bottom-0 w-full h-16 items-center border-t p-3 z-[100] overflow-hidden bg-background flex-shrink-0">
         <nav className="flex flex-1 gap-1 justify-between overflow-hidden">
           <div className="flex flex-1 overflow-hidden items-center gap-4 justify-start">
             <Tooltip>
@@ -360,7 +363,7 @@ function Screen() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="rounded-lg flex-shrink-0"
+                  className="rounded-lg flex-shrink-0 text-foreground"
                   aria-label="Back"
                   onClick={() => navigate(`/projects/${params.projectId}`)}
                 >
@@ -377,6 +380,7 @@ function Screen() {
               <BreadcrumbList className="flex-nowrap flex-1 overflow-hidden">
                 <BreadcrumbItem className="hidden overflow-hidden lg:flex">
                   <BreadcrumbLink
+                    title={data?.project.name}
                     href={`/projects/${params.projectId}`}
                     className="text-nowrap overflow-hidden text-ellipsis"
                   >
@@ -385,7 +389,10 @@ function Screen() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden flex-shrink-0 lg:flex" />
                 <BreadcrumbItem className="hidden overflow-hidden lg:overflow-visible sm:flex">
-                  <BreadcrumbPage className="text-nowrap overflow-hidden text-ellipsis ">
+                  <BreadcrumbPage
+                    title={screen?.name}
+                    className="text-nowrap overflow-hidden text-ellipsis"
+                  >
                     {screen?.name}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
@@ -396,33 +403,33 @@ function Screen() {
           <div className="flex flex-1 items-center gap-4 justify-center ">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Hotkeys
-                  keyName="p"
-                  onKeyUp={() =>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    'rounded-lg',
+                    (params.mode ?? 'preview') === 'preview'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                  aria-label="Preview Mode"
+                  onClick={() =>
                     navigate(
                       `/projects/${params.projectId}/${params.screenId}/preview`,
                     )
                   }
                 >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      'rounded-lg',
-                      (params.mode ?? 'preview') === 'preview'
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground',
-                    )}
-                    aria-label="Preview Mode"
-                    onClick={() =>
+                  <Hotkeys
+                    keyName="p"
+                    onKeyUp={() =>
                       navigate(
                         `/projects/${params.projectId}/${params.screenId}/preview`,
                       )
                     }
                   >
                     <Eye className="size-5" />
-                  </Button>
-                </Hotkeys>
+                  </Hotkeys>
+                </Button>
               </TooltipTrigger>
 
               <TooltipContent side="top" sideOffset={5}>
@@ -432,33 +439,33 @@ function Screen() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Hotkeys
-                  keyName="f"
-                  onKeyUp={() =>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Flow Mode"
+                  className={cn(
+                    'rounded-lg',
+                    (params.mode ?? 'preview') === 'flow'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                  onClick={() =>
                     navigate(
                       `/projects/${params.projectId}/${params.screenId}/flow`,
                     )
                   }
                 >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Flow Mode"
-                    className={cn(
-                      'rounded-lg',
-                      (params.mode ?? 'preview') === 'flow'
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground',
-                    )}
-                    onClick={() =>
+                  <Hotkeys
+                    keyName="f"
+                    onKeyUp={() =>
                       navigate(
                         `/projects/${params.projectId}/${params.screenId}/flow`,
                       )
                     }
                   >
                     <Workflow className="size-5" />
-                  </Button>
-                </Hotkeys>
+                  </Hotkeys>
+                </Button>
               </TooltipTrigger>
 
               <TooltipContent side="top" sideOffset={5}>
@@ -468,33 +475,33 @@ function Screen() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Hotkeys
-                  keyName="i"
-                  onKeyUp={() =>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Inspect"
+                  className={cn(
+                    'rounded-lg',
+                    (params.mode ?? 'preview') === 'inspect'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                  onClick={() =>
                     navigate(
                       `/projects/${params.projectId}/${params.screenId}/inspect`,
                     )
                   }
                 >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Inspect"
-                    className={cn(
-                      'rounded-lg',
-                      (params.mode ?? 'preview') === 'inspect'
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground',
-                    )}
-                    onClick={() =>
+                  <Hotkeys
+                    keyName="i"
+                    onKeyUp={() =>
                       navigate(
                         `/projects/${params.projectId}/${params.screenId}/inspect`,
                       )
                     }
                   >
                     <Code2 className="size-5" />
-                  </Button>
-                </Hotkeys>
+                  </Hotkeys>
+                </Button>
               </TooltipTrigger>
 
               <TooltipContent side="top" sideOffset={5}>
@@ -504,33 +511,33 @@ function Screen() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Hotkeys
-                  keyName="h"
-                  onKeyUp={() =>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="History Mode"
+                  className={cn(
+                    'rounded-lg',
+                    (params.mode ?? 'preview') === 'history'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                  onClick={() =>
                     navigate(
                       `/projects/${params.projectId}/${params.screenId}/history`,
                     )
                   }
                 >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="History Mode"
-                    className={cn(
-                      'rounded-lg',
-                      (params.mode ?? 'preview') === 'history'
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground',
-                    )}
-                    onClick={() =>
+                  <Hotkeys
+                    keyName="h"
+                    onKeyUp={() =>
                       navigate(
                         `/projects/${params.projectId}/${params.screenId}/history`,
                       )
                     }
                   >
                     <Clock className="size-5" />
-                  </Button>
-                </Hotkeys>
+                  </Hotkeys>
+                </Button>
               </TooltipTrigger>
 
               <TooltipContent side="top" sideOffset={5}>

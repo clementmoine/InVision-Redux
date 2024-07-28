@@ -20,16 +20,19 @@ interface ScreenCardProps {
 
 const ScreenCard: React.FC<ScreenCardProps> = ({ screen }) => {
   return (
-    <Card>
+    <Card className="bg-background rounded-md overflow-hidden shadow-md">
       <CardHeader className="p-0 border-b">
         <AspectRatio
           ratio={9 / 6}
-          className="relative bg-white overflow-hidden rounded-md"
+          className="relative bg-white overflow-hidden"
           style={{
             backgroundColor: screen.backgroundColor,
           }}
         >
-          <Link to={`/projects/${screen.projectID}/${screen.id}/preview`}>
+          <Link
+            to={`/projects/${screen.projectID}/${screen.id}/preview`}
+            className="flex h-full w-full items-center justify-center text-slate-500"
+          >
             {screen.thumbnailUrl ? (
               <img
                 className="absolute inset-0 h-full w-full object-cover transition-all hover:scale-105"
