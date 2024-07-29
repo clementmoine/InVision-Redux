@@ -99,11 +99,12 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
     [screen.width, zoomLevel],
   );
 
-  const expandGroupAndParents = useCallback(
+  // Expand layer (if group) and parents when grouped
+  const expandLayerAndParents = useCallback(
     (layer: Layer | undefined) => {
       if (!layer) return;
 
-      const groupsToExpand: Layer['id'][] = [];
+      const groupsToExpand = new Set<Layer['id']>();
 
       const findParentGroups = (layerId: Layer['id'] | undefined) => {
         if (!layerId) return;
@@ -114,15 +115,15 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
         );
         parentGroups.forEach(group => {
           if (!expandedGroupIds.includes(group.id)) {
-            groupsToExpand.push(group.id);
+            groupsToExpand.add(group.id);
             findParentGroups(group.id);
           }
         });
       };
 
       findParentGroups(layer.id);
-      if (!expandedGroupIds.includes(layer.id)) {
-        groupsToExpand.push(layer.id);
+      if (layer.type === 'group') {
+        groupsToExpand.add(layer.id);
       }
 
       setExpandedGroupIds(prev =>
@@ -189,9 +190,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
           if (layerUnderMouse) {
             setSelectedLayer(layerUnderMouse);
 
-            if (layerUnderMouse.type === 'group') {
-              expandGroupAndParents(selectedLayer);
-            }
+            expandLayerAndParents(layerUnderMouse);
           } else {
             // Vérifier si le clic est en dehors de l'image
             if (
@@ -211,8 +210,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       getMousePosition,
       findLayerUnderMouse,
       setSelectedLayer,
-      expandGroupAndParents,
-      selectedLayer,
+      expandLayerAndParents,
       screen.width,
       screen.height,
       zoomLevel,
