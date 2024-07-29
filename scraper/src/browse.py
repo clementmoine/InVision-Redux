@@ -1,3 +1,4 @@
+import glob
 import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -15,6 +16,12 @@ from src.api_requests import (
 # Constants for directories
 DOCS_ROOT = os.path.join("../", os.getenv("DOCS_ROOT", "./docs"))
 
+# Parallelized tasks
+PARALLELIZED_TASKS = min(5, os.cpu_count())
+
+# Ignore Archived project
+IGNORE_ARCHIVED_PROJECTS = True
+
 
 # Function to ask the user whether to overwrite, ignore, or cancel the operation
 def ask_user():
@@ -22,12 +29,12 @@ def ask_user():
     Asks the user whether to overwrite, ignore, or cancel the operation if the docs folder already exists.
 
     Returns:
-        str: 'overwrite' if the user wants to overwrite, 'ignore' if the user wants to ignore, 'cancel' to cancel the operation.
+        str: 'overwrite' if the user wants to overwrite, 'ignore' if the user wants to ignore existing files, 'continue' if the user wants to scrap missing projects, 'exit' to cancel the operation.
     """
     while True:
         response = (
             color_input(
-                "Docs folder already exists. Do you want to overwrite it, ignore and continue, or cancel the operation? (overwrite/ignore/cancel): ",
+                "Docs folder already exists. Do you want to overwrite it, ignore and continue, or cancel the operation? (overwrite/ignore/continue/exit): ",
                 "yellow",
             )
             .strip()
@@ -38,26 +45,14 @@ def ask_user():
             return "overwrite"
         elif response in ("ignore", "i"):
             return "ignore"
-        elif response in ("cancel", "c"):
-            return "cancel"
+        elif response in ("continue", "c"):
+            return "continue"
+        elif response in ("exit", "x"):
+            return "exit"
         else:
             print(
-                "Invalid input. Please enter 'overwrite' (o), 'ignore' (i), or 'cancel' (c)."
+                "Invalid input. Please enter 'overwrite' (o), 'ignore' (i), 'continue' (c) or 'exit' (x)."
             )
-
-
-# Remove the docs folder if it exists and handle user choice
-if os.path.exists(DOCS_ROOT):
-    user_choice = ask_user()
-    if user_choice == "overwrite":
-        shutil.rmtree(DOCS_ROOT, ignore_errors=True)
-    elif user_choice == "ignore":
-        color_print(
-            "Existing docs folder will be ignored. Continuing operation.", "yellow"
-        )
-    else:  # user_choice == 'cancel'
-        color_print("Operation cancelled. Exiting.", "yellow")
-        exit()
 
 
 def browse_screen(screen, project, session):
@@ -77,22 +72,28 @@ def browse_screen(screen, project, session):
 
     # Files we expect to see when the screen already exists
     file_names = [
-        "image.png",
         "inspect.json",  # Not existing for archived screen
         "screen.json",
-        "thumbnail.png",
     ]
 
     # Remove inspect.json to expected files if the screen is archived
     if screen.get("isArchived", False):
         file_names.remove("inspect.json")
 
-    if all(
-        map(
-            lambda file_name: os.path.exists(
-                os.path.join(screen_json_folder, file_name)
-            ),
-            file_names,
+    # Check if any image file exists
+    image_files = glob.glob(os.path.join(screen_json_folder, "image.*"))
+    thumbnail_files = glob.glob(os.path.join(screen_json_folder, "thumbnail.*"))
+
+    if (
+        image_files
+        and thumbnail_files
+        and all(
+            map(
+                lambda file_name: os.path.exists(
+                    os.path.join(screen_json_folder, file_name)
+                ),
+                file_names,
+            )
         )
     ):
         color_print(
@@ -195,7 +196,7 @@ def browse_project(project, session):
 
         browsed_screen_ids = set()
 
-        with ThreadPoolExecutor(max_workers=min(5, os.cpu_count())) as executor:
+        with ThreadPoolExecutor(max_workers=PARALLELIZED_TASKS) as executor:
             future_to_screen_id = {
                 executor.submit(browse_screen, screen, project, session): screen["id"]
                 for screen in (
@@ -228,10 +229,32 @@ def browse_project(project, session):
 
 
 def browse_projects(session):
+    user_choice = None
+
+    if os.path.exists(DOCS_ROOT):
+        user_choice = ask_user()
+        if user_choice == "overwrite":
+            shutil.rmtree(DOCS_ROOT, ignore_errors=True)
+
+        elif user_choice == "ignore":
+            color_print(
+                "Existing files in folders will be ignored. Replaying the scraping.",
+                "yellow",
+            )
+        elif user_choice == "continue":
+            color_print(
+                "Existing docs folder will be ignored. Continuing operation.", "yellow"
+            )
+        else:  # user_choice == 'cancel'
+            color_print("Operation cancelled. Exiting.", "yellow")
+            exit()
+
     projects = fetch_projects(isArchived=False, isCollaborator=True, session=session)
 
-    archivedProjects = fetch_projects(
-        isArchived=True, isCollaborator=True, session=session
+    archivedProjects = (
+        fetch_projects(isArchived=True, isCollaborator=True, session=session)
+        if not IGNORE_ARCHIVED_PROJECTS
+        else []
     )
 
     allProjects = (projects or []) + (archivedProjects or [])
@@ -250,6 +273,7 @@ def browse_projects(session):
             project for project in allProjects if project["type"] == "prototype"
         ]
 
+        color_print(f"\nMaximum tasks parallelized: {PARALLELIZED_TASKS}", "green")
         color_print(f"\nRetrieving {len(allProjects)} projects:", "green")
 
         tags = fetch_tags(session)
@@ -259,8 +283,26 @@ def browse_projects(session):
             return False
 
         successfully_exported_project_ids = set()
+        ignored_project_ids = set()
 
         for project in allProjects:
+            project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
+
+            # Ignore existing valid project folders
+            if user_choice == "continue" and os.path.exists(project_folder):
+                required_files = ["project.json", "screens.json"]
+                if all(
+                    os.path.exists(os.path.join(project_folder, f))
+                    for f in required_files
+                ):
+                    color_print(
+                        f"   ⮑  Project {project['id']} data already exists locally. Skipping.",
+                        "yellow",
+                    )
+                    ignored_project_ids.add(project["id"])
+
+                    continue
+
             if tags:
                 project["data"]["tags"] = [
                     tag for tag in tags if project["id"] in tag["prototypeIDs"]
@@ -269,12 +311,14 @@ def browse_projects(session):
             if browse_project(project, session):
                 successfully_exported_project_ids.add(project["id"])
 
-        #  Generate index page only for successfully exported projects
         successfully_exported_projects = [
             project
             for project in allProjects
             if project["id"] in successfully_exported_project_ids
         ]
+
+        ignored_projects_count = len(ignored_project_ids)
+
         if successfully_exported_projects:
             # Compare the success to global list to find failed ones
             failed_projects = [
@@ -284,15 +328,43 @@ def browse_projects(session):
             ]
 
             if failed_projects:
+                if len(successfully_exported_project_ids) > 0:
+                    color_print(
+                        f"\nSuccessfully exported {len(successfully_exported_project_ids)} projects.",
+                        "yellow",
+                    )
+
+                if ignored_projects_count > 0:
+                    color_print(
+                        f"Ignored {ignored_projects_count} existing projects.", "yellow"
+                    )
+
                 color_print("\nSome projects failed to export.", "red")
 
                 return False
             else:
-                color_print("\nAll projects were successfully exported.", "yellow")
+                if len(successfully_exported_project_ids) > 0:
+                    color_print(
+                        f"\nSuccessfully exported {len(successfully_exported_project_ids)} projects.",
+                        "yellow",
+                    )
+
+                if ignored_projects_count > 0:
+                    color_print(
+                        f"Ignored {ignored_projects_count} existing projects.", "yellow"
+                    )
+
+                color_print("\nAll projects were successfully exported.", "green")
 
                 return True
         else:
-            color_print("\nNo projects were successfully exported.", "red")
+            if ignored_projects_count > 0:
+                color_print(
+                    f"\nNo new projects were exported. {ignored_projects_count} projects were already present and ignored.",
+                    "yellow",
+                )
+            else:
+                color_print("\nNo projects were successfully exported.", "red")
 
             return False
     else:
