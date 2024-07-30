@@ -19,6 +19,7 @@ import {
   Screen,
   TargetType,
 } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface ScreenPreviewProps {
   isEmbedded?: boolean;
@@ -329,9 +330,10 @@ function ScreenPreview(props: ScreenPreviewProps) {
           // key={screen.id}
           decoding="sync"
           src={`/api/static/${screen.imageUrl}`}
-          className="object-contain"
+          className={cn('object-contain', {
+            'bg-[rgb(var(--screen-background-color))]': !isEmbedded,
+          })}
           style={{
-            backgroundColor: 'rgb(var(--screen-background-color))',
             marginTop:
               'fixedHeaderHeight' in screen
                 ? -(screen.fixedHeaderHeight * zoomLevel)
@@ -381,14 +383,11 @@ function ScreenPreview(props: ScreenPreviewProps) {
         {'fixedHeaderHeight' in screen && screen.fixedHeaderHeight > 0 && (
           <div
             id="screen-preview-fixed-header"
-            className="fixed header top-0 overflow-hidden"
+            className="fixed header top-0 overflow-hidden bg-no-repeat bg-top bg-cover"
             style={{
               height: `${screen.fixedHeaderHeight * zoomLevel}px`,
               width: screen.width * zoomLevel,
               backgroundImage: `url("/api/static/${screen.imageUrl}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'top center',
-              backgroundRepeat: 'no-repeat',
             }}
             onClick={onHotspotGroupClick}
           >
@@ -416,14 +415,11 @@ function ScreenPreview(props: ScreenPreviewProps) {
         {'fixedFooterHeight' in screen && screen.fixedFooterHeight > 0 && (
           <div
             id="screen-preview-fixed-footer"
-            className="fixed footer bottom-16 overflow-hidden"
+            className="fixed footer bottom-16 overflow-hidden bg-bottom bg-cover bg-no-repeat"
             style={{
               height: `${screen.fixedFooterHeight * zoomLevel}px`,
               width: screen.width * zoomLevel,
               backgroundImage: `url("/api/static/${screen.imageUrl}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'bottom center',
-              backgroundRepeat: 'no-repeat',
             }}
             onClick={onHotspotGroupClick}
           >

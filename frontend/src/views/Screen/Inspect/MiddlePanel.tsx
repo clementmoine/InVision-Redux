@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
   useRef,
+  useMemo,
 } from 'react';
 
 import { ArchivedScreenDetails, Screen, Layer, ScreenInspect } from '@/types';
@@ -142,7 +143,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       let foundLayer: Layer | null = null;
 
       for (const layer of layersToCheck) {
-        const { id, x, y, width, height, order } = layer;
+        const { x, y, width, height, order } = layer;
 
         const layerX = x * 2 * zoomLevel;
         const layerY = y * 2 * zoomLevel;
@@ -155,9 +156,10 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
           mouseY >= layerY &&
           mouseY <= layerY + layerHeight
         ) {
-          if (selectedLayer?.id && selectedLayer.id === id) {
-            continue;
-          }
+          // Ignore the layer if it is already selected
+          // if (selectedLayer?.id && selectedLayer.id === layer.id) {
+          //   continue;
+          // }
 
           if (!foundLayer || order > foundLayer.order) {
             foundLayer = layer;
@@ -167,7 +169,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
 
       return foundLayer;
     },
-    [getLayersToCheck, selectedLayer, zoomLevel],
+    [getLayersToCheck, zoomLevel],
   );
 
   // Handle mouse down event for dragging or selecting layers
@@ -192,15 +194,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
 
             expandLayerAndParents(layerUnderMouse);
           } else {
-            // Vérifier si le clic est en dehors de l'image
-            if (
-              x < 0 ||
-              x > screen.width * zoomLevel ||
-              y < 0 ||
-              y > screen.height * zoomLevel
-            ) {
-              setSelectedLayer(undefined);
-            }
+            setSelectedLayer(undefined);
           }
         }
       }
@@ -211,9 +205,6 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       findLayerUnderMouse,
       setSelectedLayer,
       expandLayerAndParents,
-      screen.width,
-      screen.height,
-      zoomLevel,
     ],
   );
 
@@ -287,6 +278,32 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
     };
   }, [handleMouseMove, handleMouseUp, handleKeyDown, handleKeyUp]);
 
+  const measures = useMemo<
+    | undefined
+    | {
+        color: 'primary' | 'blue';
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }
+  >(() => {
+    const isSelectedLayer =
+      selectedLayer != null &&
+      (hoveredLayer == null || hoveredLayer.id === selectedLayer.id);
+    const isHoveredLayer = hoveredLayer != null && selectedLayer == null;
+
+    return isHoveredLayer || isSelectedLayer
+      ? {
+          color: isSelectedLayer ? 'primary' : 'blue',
+          x: isSelectedLayer ? selectedLayer.x : hoveredLayer!.x,
+          y: isSelectedLayer ? selectedLayer.y : hoveredLayer!.y,
+          width: isSelectedLayer ? selectedLayer.width : hoveredLayer!.width,
+          height: isSelectedLayer ? selectedLayer.height : hoveredLayer!.height,
+        }
+      : undefined;
+  }, [selectedLayer, hoveredLayer]);
+
   return (
     <div
       ref={containerRef}
@@ -319,9 +336,8 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
         {/* Hovered layer */}
         {hoveredLayer && (
           <div
-            className="text-blue-500 outline outline-current absolute"
+            className="text-blue-500 outline outline-current absolute outline-[2px]"
             style={{
-              outlineWidth: 2,
               top: hoveredLayer.y * 2 * zoomLevel,
               left: hoveredLayer.x * 2 * zoomLevel,
               width: hoveredLayer.width * 2 * zoomLevel,
@@ -330,12 +346,31 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
           />
         )}
 
+        {/* Measures of hover / selected layer */}
+        {measures && (
+          <div
+            className={cn('absolute  text-white p-[2px] text-[10px]', {
+              ['bg-primary']: measures.color === 'primary',
+              ['bg-blue-500']: measures.color === 'blue',
+            })}
+            style={{
+              top: (measures.y + measures.height) * 2 * zoomLevel,
+              left: measures.x * 2 * zoomLevel - 2,
+            }}
+          >
+            {`${Number(measures.height)
+              .toFixed(2)
+              .replace(/\.?0+$/, '')}x${Number(measures.height)
+              .toFixed(2)
+              .replace(/\.?0+$/, '')}`}
+          </div>
+        )}
+
         {/* Selected layer */}
         {selectedLayer && (
           <div
-            className="text-primary outline outline-current absolute"
+            className="text-primary outline outline-current absolute outline-[2px]"
             style={{
-              outlineWidth: 2,
               top: selectedLayer.y * 2 * zoomLevel,
               left: selectedLayer.x * 2 * zoomLevel,
               width: selectedLayer.width * 2 * zoomLevel,
@@ -358,7 +393,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       <img
         decoding="sync"
         src={`/api/static/${screen.imageUrl}`}
-        className="object-contain mx-auto select-none pointer-events-none"
+        className="object-contain mx-auto select-none pointer-events-none bg-[rgb(var(--screen-background-color))]"
         style={{
           width: screen.width * zoomLevel,
           height: screen.height * zoomLevel,
@@ -367,7 +402,6 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
           maxWidth: screen.width * zoomLevel,
           maxHeight: screen.height * zoomLevel,
           aspectRatio: `${screen.width} / ${screen.height}`,
-          backgroundColor: 'rgb(var(--screen-background-color))',
         }}
       />
     </div>

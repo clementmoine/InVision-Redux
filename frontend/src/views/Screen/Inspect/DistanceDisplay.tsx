@@ -763,13 +763,8 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
         <>
           {/* Measure */}
           <div
-            className="absolute bg-primary text-white rounded-sm"
-            style={{
-              ...style,
-              fontSize: 10,
-              padding: 2,
-              zIndex: 5000,
-            }}
+            className="absolute bg-primary text-white rounded-sm text-[10px] p-[2px] z-[5000]"
+            style={style}
           >
             {absDistance.toFixed(2).replace(/\.?0+$/, '')}px
           </div>

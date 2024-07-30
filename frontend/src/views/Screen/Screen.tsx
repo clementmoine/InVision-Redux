@@ -228,11 +228,10 @@ function Screen() {
         {/* Screen */}
         <div
           className={cn(
-            'flex h-full w-full justify-center overflow-hidden p-0 select-none',
+            'flex h-full w-full justify-center overflow-hidden p-0 select-none mb-16',
             { [style['is-mobile']]: isMobile },
           )}
           style={{
-            marginBottom: '4rem',
             backgroundColor:
               params.mode === 'preview'
                 ? 'rgb(var(--screen-background-color))'
