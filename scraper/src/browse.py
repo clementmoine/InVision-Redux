@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -29,12 +30,12 @@ def ask_user():
     Asks the user whether to overwrite, ignore, or cancel the operation if the docs folder already exists.
 
     Returns:
-        str: 'overwrite' if the user wants to overwrite, 'ignore' if the user wants to ignore existing files, 'continue' if the user wants to scrap missing projects, 'exit' to cancel the operation.
+        str: 'overwrite' if the user wants to overwrite, 'update' if the user wants to update existing files, 'exit' to cancel the operation.
     """
     while True:
         response = (
             color_input(
-                "Docs folder already exists. Do you want to overwrite it, ignore and continue, or cancel the operation? (overwrite/ignore/continue/exit): ",
+                "Docs folder already exists. Do you want to overwrite it, update or cancel the operation? (overwrite/update/exit): ",
                 "yellow",
             )
             .strip()
@@ -43,15 +44,13 @@ def ask_user():
 
         if response in ("overwrite", "o"):
             return "overwrite"
-        elif response in ("ignore", "i"):
-            return "ignore"
-        elif response in ("continue", "c"):
-            return "continue"
+        elif response in ("update", "u"):
+            return "update"
         elif response in ("exit", "x"):
             return "exit"
         else:
             print(
-                "Invalid input. Please enter 'overwrite' (o), 'ignore' (i), 'continue' (c) or 'exit' (x)."
+                "Invalid input. Please enter 'overwrite' (o), 'update' (u) or 'exit' (x)."
             )
 
 
@@ -236,15 +235,12 @@ def browse_projects(session):
         if user_choice == "overwrite":
             shutil.rmtree(DOCS_ROOT, ignore_errors=True)
 
-        elif user_choice == "ignore":
+        elif user_choice == "update":
             color_print(
                 "Existing files in folders will be ignored. Replaying the scraping.",
                 "yellow",
             )
-        elif user_choice == "continue":
-            color_print(
-                "Existing docs folder will be ignored. Continuing operation.", "yellow"
-            )
+
         else:  # user_choice == 'cancel'
             color_print("Operation cancelled. Exiting.", "yellow")
             exit()
@@ -289,19 +285,34 @@ def browse_projects(session):
             project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
 
             # Ignore existing valid project folders
-            if user_choice == "continue" and os.path.exists(project_folder):
+            if user_choice == "update" and os.path.exists(project_folder):
                 required_files = ["project.json", "screens.json"]
                 if all(
                     os.path.exists(os.path.join(project_folder, f))
                     for f in required_files
                 ):
-                    color_print(
-                        f"   ⮑  Project {project['id']} data already exists locally. Skipping.",
-                        "yellow",
-                    )
-                    ignored_project_ids.add(project["id"])
+                    # Grab the project updated date from the project and project.json
+                    # If they match ignore the project, if they don't remove the project dir to scrap that again
+                    project_update_date = project["data"]["updatedAt"]
+                    project_json_path = os.path.join(project_folder, "project.json")
+                    with open(project_json_path, "r") as f:
+                        local_project_data = json.load(f)
+                        local_update_date = local_project_data["data"]["updatedAt"]
 
-                    continue
+                    if project_update_date == local_update_date:
+                        color_print(
+                            f"   ⮑  Project {project['id']} data already exists locally. Skipping.",
+                            "yellow",
+                        )
+
+                        ignored_project_ids.add(project["id"])
+                        continue
+                    else:
+                        color_print(
+                            f"   ⮑  Project {project['id']} has been updated since last scraping. Rescraping.",
+                            "yellow",
+                        )
+                        shutil.rmtree(project_folder, ignore_errors=True)
 
             if tags:
                 project["data"]["tags"] = [
@@ -311,62 +322,51 @@ def browse_projects(session):
             if browse_project(project, session):
                 successfully_exported_project_ids.add(project["id"])
 
-        successfully_exported_projects = [
-            project
+        # Compare the success and ignored to global list to find failed ones
+        failed_project_ids = [
+            project["id"]
             for project in allProjects
-            if project["id"] in successfully_exported_project_ids
+            if project["id"] not in successfully_exported_project_ids
+            and project["id"] not in ignored_project_ids
         ]
 
-        ignored_projects_count = len(ignored_project_ids)
-
-        if successfully_exported_projects:
-            # Compare the success to global list to find failed ones
-            failed_projects = [
-                project
-                for project in allProjects
-                if project not in successfully_exported_projects
-            ]
-
-            if failed_projects:
-                if len(successfully_exported_project_ids) > 0:
-                    color_print(
-                        f"\nSuccessfully exported {len(successfully_exported_project_ids)} projects.",
-                        "yellow",
-                    )
-
-                if ignored_projects_count > 0:
-                    color_print(
-                        f"Ignored {ignored_projects_count} existing projects.", "yellow"
-                    )
-
-                color_print("\nSome projects failed to export.", "red")
-
-                return False
-            else:
-                if len(successfully_exported_project_ids) > 0:
-                    color_print(
-                        f"\nSuccessfully exported {len(successfully_exported_project_ids)} projects.",
-                        "yellow",
-                    )
-
-                if ignored_projects_count > 0:
-                    color_print(
-                        f"Ignored {ignored_projects_count} existing projects.", "yellow"
-                    )
-
-                color_print("\nAll projects were successfully exported.", "green")
-
-                return True
-        else:
-            if ignored_projects_count > 0:
+        # Ignored projects
+        if len(ignored_project_ids) > 0:
+            if len(allProjects) == len(ignored_project_ids):
                 color_print(
-                    f"\nNo new projects were exported. {ignored_projects_count} projects were already present and ignored.",
-                    "yellow",
+                    f"\nAll {len(allProjects)} projects were already up to date and get ignored.",
+                    "green",
                 )
             else:
-                color_print("\nNo projects were successfully exported.", "red")
+                color_print(
+                    f"\nIgnored {len(ignored_project_ids)} existing projects.", "yellow"
+                )
+
+        # Successfully exported projects
+        if len(successfully_exported_project_ids) > 0:
+            if len(allProjects) == len(successfully_exported_project_ids):
+                color_print(
+                    f"\nAll {len(successfully_exported_project_ids)} projects were successfully exported.",
+                    "green",
+                )
+            else:
+                color_print(
+                    f"\nSuccessfully exported {len(successfully_exported_project_ids)} projects.",
+                    "green",
+                )
+
+        if len(failed_project_ids) > 0:
+            if len(allProjects) == len(failed_project_ids):
+                color_print(
+                    f"\nAll {len(failed_project_ids)} projects failed to export", "red"
+                )
+            else:
+                color_print(
+                    f"\n{len(failed_project_ids)} projects failed to export.", "red"
+                )
 
             return False
+
     else:
         color_print("\nNo projects were found.", "red")
 
