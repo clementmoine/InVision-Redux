@@ -21,7 +21,7 @@ DOCS_ROOT = os.path.join("../", os.getenv("DOCS_ROOT", "./docs"))
 PARALLELIZED_TASKS = min(5, os.cpu_count())
 
 # Ignore Archived project
-IGNORE_ARCHIVED_PROJECTS = True
+IGNORE_ARCHIVED_PROJECTS = False
 
 
 # Function to ask the user whether to overwrite, ignore, or cancel the operation
@@ -161,8 +161,6 @@ def browse_project(project, session):
     Returns:
         dict or None: Updated project data if successful, None otherwise.
     """
-    color_print(f" • {project['data']['name']} ({project['id']}):", "white")
-
     project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
     os.makedirs(project_folder, exist_ok=True)
 
@@ -192,6 +190,13 @@ def browse_project(project, session):
             color_print(f"   ✘  Failed to save screens data", "red")
 
             return False
+
+        if project["data"].get("isArchived", False):
+            color_print(
+                f"   ⮑  ⚠️ Screens details can't be gathered on archived projects",
+                "red",
+            )
+            return True
 
         browsed_screen_ids = set()
 
@@ -282,6 +287,8 @@ def browse_projects(session):
         ignored_project_ids = set()
 
         for project in allProjects:
+            color_print(f" • {project['data']['name']} ({project['id']}):", "white")
+
             project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
 
             # Ignore existing valid project folders
@@ -294,14 +301,24 @@ def browse_projects(session):
                     # Grab the project updated date from the project and project.json
                     # If they match ignore the project, if they don't remove the project dir to scrap that again
                     project_update_date = project["data"]["updatedAt"]
+
                     project_json_path = os.path.join(project_folder, "project.json")
+                    screens_json_path = os.path.join(project_folder, "screens.json")
+
                     with open(project_json_path, "r") as f:
                         local_project_data = json.load(f)
-                        local_update_date = local_project_data["data"]["updatedAt"]
 
-                    if project_update_date == local_update_date:
+                    with open(screens_json_path, "r") as f:
+                        local_screens_data = json.load(f)
+
+                    if project_update_date == local_project_data["data"]["updatedAt"]:
+                        archived_screens_count = local_screens_data[
+                            "archivedScreensCount"
+                        ]
+
+                        screens_count = len(local_screens_data["screens"])
                         color_print(
-                            f"   ⮑  Project {project['id']} data already exists locally. Skipping.",
+                            f"   ⮑  Project skipped ({screens_count} screens, {archived_screens_count} archived)",
                             "yellow",
                         )
 
@@ -309,7 +326,7 @@ def browse_projects(session):
                         continue
                     else:
                         color_print(
-                            f"   ⮑  Project {project['id']} has been updated since last scraping. Rescraping.",
+                            f"   ⮑  Project outdated, replay the scraping...",
                             "yellow",
                         )
                         shutil.rmtree(project_folder, ignore_errors=True)
@@ -334,7 +351,7 @@ def browse_projects(session):
         if len(ignored_project_ids) > 0:
             if len(allProjects) == len(ignored_project_ids):
                 color_print(
-                    f"\nAll {len(allProjects)} projects were already up to date and get ignored.",
+                    f"\nAll {len(allProjects)} projects were already up-to-date and get ignored.",
                     "green",
                 )
             else:

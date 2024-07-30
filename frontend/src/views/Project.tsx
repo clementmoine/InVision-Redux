@@ -103,6 +103,11 @@ function Project() {
     [onSubmit],
   );
 
+  const isArchivedProject = useMemo(
+    () => !!project?.data?.isArchived,
+    [project],
+  );
+
   const expandedGroups = useMemo(() => {
     return project?.screens.groups.reduce((acc, group) => {
       if (!collapsedGroups.has(group.dividerID)) {
@@ -324,7 +329,11 @@ function Project() {
                           className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
                         >
                           {screens.map(screen => (
-                            <ScreenCard key={screen.id} screen={screen} />
+                            <ScreenCard
+                              key={screen.id}
+                              screen={screen}
+                              disabled={isArchivedProject}
+                            />
                           ))}
                         </AccordionContent>
                       </AccordionItem>
