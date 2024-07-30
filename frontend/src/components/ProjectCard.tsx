@@ -1,7 +1,7 @@
 import React from 'react';
 import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
-import { ImageOffIcon, StarIcon } from 'lucide-react';
+import { Archive, ImageOffIcon, StarIcon } from 'lucide-react';
 
 import {
   Card,
@@ -66,8 +66,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
       <CardContent className="flex flex-row gap-4 justify-between py-4 px-6">
         <div className="flex flex-col gap-1 overflow-hidden">
           <Link to={`/projects/${project.id}`}>
-            <CardTitle className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">
-              {project.data.name}
+            <CardTitle className="flex items-center gap-1 text-sm">
+              {project.data.isArchived && (
+                <Archive aria-label="Archived" className="h-4 w-4" />
+              )}
+
+              <span className="text-ellipsis whitespace-nowrap overflow-hidden">
+                {project.data.name}
+              </span>
             </CardTitle>
           </Link>
 

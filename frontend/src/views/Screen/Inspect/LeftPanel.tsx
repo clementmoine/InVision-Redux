@@ -43,6 +43,7 @@ interface InspectLeftPanelProps {
 function InspectLeftPanel(props: InspectLeftPanelProps) {
   const {
     data,
+    hoveredLayer,
     selectedLayer,
     setHoveredLayer,
     setSelectedLayer,
@@ -53,6 +54,7 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
   const renderLayer = useCallback(
     (layer: Layer, level = 0) => {
       const isSelected = selectedLayer ? selectedLayer.id === layer.id : false;
+      const isHovered = hoveredLayer ? hoveredLayer.id === layer.id : false;
 
       if (layer.type === 'group' && layer.layers) {
         const isExpanded = expandedGroupIds.includes(layer.id);
@@ -64,6 +66,7 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
                 'p-2 overflow-hidden rounded-lg transition-all !no-underline gap-3',
                 {
                   'text-muted-foreground hover:bg-muted': !isSelected,
+                  'bg-muted': isHovered,
                   'bg-primary-foreground text-primary': isSelected,
                 },
               )}
@@ -115,6 +118,7 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
             {
               'text-muted-foreground hover:bg-stone-50 hover:text-neutral-500':
                 !isSelected,
+              'bg-stone-50 text-neutral-500': isHovered,
               'bg-primary-foreground text-primary': isSelected,
             },
           )}
@@ -132,7 +136,13 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
         </a>
       );
     },
-    [expandedGroupIds, selectedLayer, setHoveredLayer, setSelectedLayer],
+    [
+      expandedGroupIds,
+      selectedLayer,
+      hoveredLayer,
+      setHoveredLayer,
+      setSelectedLayer,
+    ],
   );
 
   const layers = useMemo(() => {

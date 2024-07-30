@@ -1,6 +1,6 @@
 import React from 'react';
 import dayjs from 'dayjs';
-import { ImageOffIcon } from 'lucide-react';
+import { Archive, ImageOffIcon } from 'lucide-react';
 
 import {
   Card,
@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 
 interface ScreenCardProps {
   screen: ScreenForProject;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 const ScreenCard: React.FC<ScreenCardProps> = ({ screen, disabled }) => {
@@ -67,8 +67,14 @@ const ScreenCard: React.FC<ScreenCardProps> = ({ screen, disabled }) => {
           }
           className="aria-disabled:cursor-not-allowed"
         >
-          <CardTitle className="text-sm text-ellipsis whitespace-nowrap overflow-hidden">
-            {screen.name}
+          <CardTitle className="flex items-center gap-1 text-sm">
+            {screen.isArchived && (
+              <Archive aria-label="Archived" className="h-4 w-4" />
+            )}
+
+            <span className="text-ellipsis whitespace-nowrap overflow-hidden">
+              {screen.name}
+            </span>
           </CardTitle>
         </a>
 

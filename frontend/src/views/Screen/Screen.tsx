@@ -399,7 +399,7 @@ function Screen() {
             </Breadcrumb>
           </div>
 
-          <div className="flex flex-1 items-center gap-4 justify-center ">
+          <div className="flex flex-1 items-center gap-4 justify-center">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

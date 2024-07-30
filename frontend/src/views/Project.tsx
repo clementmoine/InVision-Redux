@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import debounce from 'debounce';
 import { useCallback, useMemo } from 'react';
-import { Search, Share, StarIcon } from 'lucide-react';
+import { Archive, Search, Share, StarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -131,8 +131,20 @@ function Project() {
           <div className="flex flex-wrap justify-between gap-2">
             <div className="flex flex-col gap-1">
               <div className="flex gap-4">
-                <h2 className="text-3xl font-bold tracking-tight self-start">
-                  {project.data.name}
+                <h2 className="flex gap-2 items-center text-3xl font-bold tracking-tight self-start">
+                  {!!project.data.isArchived && (
+                    <Archive
+                      aria-label="Archived"
+                      fill={
+                        favorites.has(project.id)
+                          ? 'currentColor'
+                          : 'transparent'
+                      }
+                      className="h-7 w-7"
+                    />
+                  )}
+
+                  <span>{project.data.name}</span>
                 </h2>
 
                 <Toggle
@@ -332,7 +344,7 @@ function Project() {
                             <ScreenCard
                               key={screen.id}
                               screen={screen}
-                              disabled={isArchivedProject}
+                              disabled={screen.isArchived || isArchivedProject}
                             />
                           ))}
                         </AccordionContent>
