@@ -547,10 +547,13 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
       distance: DistanceProps | undefined,
       position: 'top' | 'bottom' | 'left' | 'right',
     ) => {
-      if (!distance || distance.value === 0) return null;
+      if (!distance) return null;
 
       const { value, from, to } = distance;
       const absDistance = Math.abs(value);
+
+      // Manage 0 and exponential numbers
+      if (absDistance.toFixed(2).replace(/\.?0+$/, '') === '0') return null;
 
       const style: React.CSSProperties = {
         transform: 'translate(-50%, -50%)',
@@ -599,21 +602,32 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
           line.to.x = midPoint.x * 2 * zoomLevel;
           line.orientation = 'vertical';
 
+          // Move the measure to the top if distance is too short for readability
           if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
             style.transform = `translate(-50%, calc(-100% - 8px))`;
           }
 
+          // Hovered layer is nested in selected layer
           if (from === 'hTop' && to === 'sTop') {
+            midPoint.x = hLeft + hWidth / 2;
+
+            line.from.x = midPoint.x * 2 * zoomLevel;
+            line.to.x = midPoint.x * 2 * zoomLevel;
+
             midPoint.y = hTop - Math.abs(hTop - sTop) / 2;
 
             line.from.y = hTop * 2 * zoomLevel - 2;
             line.to.y = sTop * 2 * zoomLevel;
-          } else if (from === 'sTop' && to === 'hTop') {
+          }
+          // Selected layer is nested in hovered layer
+          else if (from === 'sTop' && to === 'hTop') {
             midPoint.y = sTop - Math.abs(hTop - sTop) / 2;
 
             line.from.y = sTop * 2 * zoomLevel - layerOutlineWidth;
             line.to.y = hTop * 2 * zoomLevel;
-          } else if (from === 'sTop' && to === 'hBottom') {
+          }
+          // Hovered layer is at the top of the selected layer
+          else if (from === 'sTop' && to === 'hBottom') {
             midPoint.y = sTop - Math.abs(sTop - hBottom) / 2;
 
             line.from.y = sTop * 2 * zoomLevel - layerOutlineWidth;
@@ -625,8 +639,10 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
               x: hLeft * 2 * zoomLevel,
               y: hBottom * 2 * zoomLevel + 1,
             };
-          } else {
-            console.info('unhandled top', from, to);
+          }
+          // Unhandled
+          else {
+            console.info('Unhandled top', from, to);
           }
 
           style.left = midPoint.x * 2 * zoomLevel;
@@ -639,21 +655,32 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
           line.to.x = midPoint.x * 2 * zoomLevel;
           line.orientation = 'vertical';
 
+          // Move the measure to the bottom if distance is too short for readability
           if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
             style.transform = `translate(-50%, calc(0% + 8px))`;
           }
 
+          // Selected layer is nested in the hovered layer
           if (from === 'hBottom' && to === 'sBottom') {
             midPoint.y = hBottom - Math.abs(hBottom - sBottom) / 2;
 
             line.from.y = hBottom * 2 * zoomLevel;
             line.to.y = sBottom * 2 * zoomLevel + layerOutlineWidth;
-          } else if (from === 'sBottom' && to === 'hBottom') {
+          }
+          // Hovered layer is nested in selected layer
+          else if (from === 'sBottom' && to === 'hBottom') {
+            midPoint.x = hLeft + hWidth / 2;
+
+            line.from.x = midPoint.x * 2 * zoomLevel;
+            line.to.x = midPoint.x * 2 * zoomLevel;
+
             midPoint.y = sBottom - Math.abs(sBottom - hBottom) / 2;
 
             line.from.y = hBottom * 2 * zoomLevel + layerOutlineWidth;
             line.to.y = sBottom * 2 * zoomLevel;
-          } else if (from === 'hTop' && to === 'sBottom') {
+          }
+          // Hovered layer is at the bottom of the selected layer
+          else if (from === 'hTop' && to === 'sBottom') {
             midPoint.y = hTop - Math.abs(hTop - sBottom) / 2;
 
             line.from.y = hTop * 2 * zoomLevel - layerOutlineWidth;
@@ -665,8 +692,10 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
               x: hLeft * 2 * zoomLevel,
               y: hTop * 2 * zoomLevel - 2,
             };
-          } else {
-            console.info('unhandled bottom', from, to);
+          }
+          // Unhandled
+          else {
+            console.info('Unhandled bottom', from, to);
           }
 
           style.left = midPoint.x * 2 * zoomLevel;
@@ -679,10 +708,12 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
           line.to.y = midPoint.y * 2 * zoomLevel;
           line.orientation = 'horizontal';
 
+          // Move the measure to the left if distance is too short for readability
           if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
             style.transform = `translate(calc(-100% - 8px), -50%)`;
           }
 
+          // Hovered layer is at the left of the selected layer
           if (from === 'sLeft' && to === 'hRight') {
             midPoint.x = sLeft - Math.abs(sLeft - hRight) / 2;
 
@@ -698,18 +729,29 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
               x: hRight * 2 * zoomLevel + 1,
               y: line.to.y,
             };
-          } else if (from === 'sLeft' && to === 'hLeft') {
+          }
+          // Selected layer is nested in the hovered layer
+          else if (from === 'sLeft' && to === 'hLeft') {
             midPoint.x = sLeft - Math.abs(sLeft - hLeft) / 2;
 
             line.from.x = sLeft * 2 * zoomLevel - layerOutlineWidth;
             line.to.x = hLeft * 2 * zoomLevel;
-          } else if (from === 'hLeft' && to === 'sLeft') {
+          }
+          // Hovered layer is nested in the selected layer
+          else if (from === 'hLeft' && to === 'sLeft') {
+            midPoint.y = hTop + hHeight / 2;
+
+            line.from.y = midPoint.y * 2 * zoomLevel;
+            line.to.y = midPoint.y * 2 * zoomLevel;
+
             midPoint.x = hLeft - Math.abs(hLeft - sLeft) / 2;
 
             line.from.x = hLeft * 2 * zoomLevel - layerOutlineWidth;
             line.to.x = sLeft * 2 * zoomLevel;
-          } else {
-            console.info('unhandled left', from, to);
+          }
+          // Unhandled
+          else {
+            console.info('Unhandled left', from, to);
           }
 
           style.left = midPoint.x * 2 * zoomLevel;
@@ -722,10 +764,12 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
           line.to.y = midPoint.y * 2 * zoomLevel;
           line.orientation = 'horizontal';
 
+          // Move the measure to the right if distance is too short for readability
           if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
             style.transform = `translate(calc(0% + 8px), -50%)`;
           }
 
+          // Hovered layer is at left of the selected layer
           if (from === 'hLeft' && to === 'sRight') {
             midPoint.x = hLeft - Math.abs(hLeft - sRight) / 2;
 
@@ -738,18 +782,29 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
               y: hTop * 2 * zoomLevel,
             };
             hoverLine.to = { x: hLeft * 2 * zoomLevel - 2, y: line.to.y };
-          } else if (from === 'sRight' && to === 'hRight') {
+          }
+          // Hovered layer nested in selected layer
+          else if (from === 'sRight' && to === 'hRight') {
+            midPoint.y = hTop + hHeight / 2;
+
+            line.from.y = midPoint.y * 2 * zoomLevel;
+            line.to.y = midPoint.y * 2 * zoomLevel;
+
             midPoint.x = sRight - Math.abs(sRight - hRight) / 2;
 
             line.from.x = sRight * 2 * zoomLevel;
             line.to.x = hRight * 2 * zoomLevel + layerOutlineWidth;
-          } else if (from === 'hRight' && to === 'sRight') {
+          }
+          // Selected layer nested in hovered layer
+          else if (from === 'hRight' && to === 'sRight') {
             midPoint.x = hRight - Math.abs(hRight - sRight) / 2;
 
             line.from.x = hRight * 2 * zoomLevel;
             line.to.x = sRight * 2 * zoomLevel + layerOutlineWidth;
-          } else {
-            console.info('unhandled right', from, to);
+          }
+          // Unhandled
+          else {
+            console.info('Unhandled right', from, to);
           }
 
           style.left = midPoint.x * 2 * zoomLevel;
@@ -796,11 +851,13 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
       zoomLevel,
       sTop,
       sHeight,
+      hLeft,
+      hWidth,
       hTop,
       hBottom,
       sBottom,
       hRight,
-      hLeft,
+      hHeight,
       sRight,
     ],
   );
