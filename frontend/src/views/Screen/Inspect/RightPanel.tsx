@@ -62,7 +62,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                       {label}:
                     </span>
                   )}
-                  <span className="text-nowrap first-letter:uppercase">
+                  <span className="text-nowrap text-ellipsis overflow-hidden">
                     {value}
                   </span>
                 </a>
@@ -78,6 +78,19 @@ function InspectRightPanel(props: InspectRightPanelProps) {
     },
     [toast],
   );
+
+  const formatColor = useCallback((color?: Color) => {
+    if (!color) return undefined;
+    const [r, g, b, alpha = 1] = color;
+
+    return alpha === 1
+      ? // Hex
+        rgbToHex(r, g, b)?.toUpperCase()
+      : // RGBA
+        `rgba(${Number(r)}, ${Number(g)}, ${Number(b)}, ${Number(alpha)
+          .toFixed(2)
+          .replace(/\.?0+$/, '')})`;
+  }, []);
 
   const renderGradient = useCallback(
     (gradient: Gradient) => {
@@ -112,18 +125,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
           {/* Values */}
           <ol className="flex flex-col overflow-hidden gap-0">
             {gradient.stops.map((stop, index) => {
-              const [r, g, b, alpha] = stop.color;
-
-              const value =
-                alpha === 1
-                  ? // Hex
-                    rgbToHex(r, g, b)?.toUpperCase()
-                  : // RGBA
-                    `rgba(${Number(r)}, ${Number(g)}, ${Number(b)}, ${Number(
-                      alpha,
-                    )
-                      .toFixed(2)
-                      .replace(/\.?0+$/, '')})`;
+              const value = formatColor(stop.color);
 
               return (
                 <li key={index}>
@@ -156,23 +158,16 @@ function InspectRightPanel(props: InspectRightPanelProps) {
         </li>
       );
     },
-    [toast],
+    [formatColor, toast],
   );
 
   const renderDocumentColors = useCallback(() => {
     return (
       <ul className="flex flex-wrap gap-1">
         {data?.screen_colors.map((color, index) => {
-          const [r, g, b, alpha = 1, label = undefined] = color;
+          const [_r, _g, _b, _alpha = 1, label = undefined] = color;
 
-          const value =
-            alpha === 1
-              ? // Hex
-                rgbToHex(r, g, b)?.toUpperCase()
-              : // RGBA
-                `rgba(${Number(r)}, ${Number(g)}, ${Number(b)}, ${Number(alpha)
-                  .toFixed(2)
-                  .replace(/\.?0+$/, '')})`;
+          const value = formatColor(color);
 
           return (
             <li key={index}>
@@ -194,9 +189,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                     <span
                       className="absolute inset-0"
                       style={{
-                        backgroundColor: `rgba(${r}, ${g}, ${b}, ${Number(alpha)
-                          .toFixed(2)
-                          .replace(/\.?0+$/, '')})`,
+                        backgroundColor: value,
                       }}
                     />
                   </a>
@@ -221,22 +214,15 @@ function InspectRightPanel(props: InspectRightPanelProps) {
         })}
       </ul>
     );
-  }, [data?.screen_colors, toast]);
+  }, [data?.screen_colors, formatColor, toast]);
 
   const renderColor = useCallback(
     (color: Color | undefined, index?: number | string) => {
       if (!color?.length) return;
 
-      const [r, g, b, alpha = 1, label = undefined] = color;
+      const [_r, _g, _b, _alpha = 1, label = undefined] = color;
 
-      const value =
-        alpha === 1
-          ? // Hex
-            rgbToHex(r, g, b)?.toUpperCase()
-          : // RGBA
-            `rgba(${Number(r)}, ${Number(g)}, ${Number(b)}, ${Number(alpha)
-              .toFixed(2)
-              .replace(/\.?0+$/, '')})`;
+      const value = formatColor(color);
 
       return (
         <li key={index}>
@@ -261,9 +247,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                   <span
                     className="absolute inset-0"
                     style={{
-                      backgroundColor: `rgba(${r}, ${g}, ${b}, ${Number(alpha)
-                        .toFixed(2)
-                        .replace(/\.?0+$/, '')})`,
+                      backgroundColor: value,
                     }}
                   />
                 </span>
@@ -290,7 +274,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
         </li>
       );
     },
-    [toast],
+    [formatColor, toast],
   );
 
   const renderLayer = useCallback(
@@ -554,59 +538,87 @@ function InspectRightPanel(props: InspectRightPanelProps) {
               {/* Text attributes (parts) */}
               {selectedLayer.type === 'text' &&
                 (selectedLayer.textAttributes?.length ?? 0) > 1 &&
-                selectedLayer.textAttributes?.map((textAttributes, index) => (
-                  <ul
-                    key={`text_attributes_${index}`}
-                    id="text_attributes"
-                    className="flex flex-col px-2 text-sm text-popover-foreground empty:hidden"
-                  >
-                    {renderInfo(
-                      undefined,
-                      `"${selectedLayer.text?.substring(
-                        textAttributes.location,
-                        textAttributes.length,
-                      )}"`,
-                    )}
+                selectedLayer.textAttributes?.map((textAttributes, index) => {
+                  console.log(selectedLayer.text, textAttributes);
 
-                    {(textAttributes.attributes.typeface !==
+                  const text = selectedLayer.text
+                    ? `"${selectedLayer.text.substring(textAttributes.location, textAttributes.location + textAttributes.length)}"`
+                    : undefined;
+
+                  // Font family / weight is different from the main text
+                  const font =
+                    textAttributes.attributes.typeface !=
                       selectedLayer.typeface?.typeface ||
-                      textAttributes.attributes.weight !==
-                        selectedLayer.typeface?.weight) &&
-                      renderInfo(
-                        'Font',
-                        `${textAttributes.attributes.typeface} ${textAttributes.attributes.weight}`,
-                      )}
+                    textAttributes.attributes.weight !=
+                      selectedLayer.typeface?.weight
+                      ? `${textAttributes.attributes.typeface} ${textAttributes.attributes.weight}`
+                      : undefined;
 
-                    {textAttributes.attributes.fontSize !==
-                      selectedLayer.typeface?.fontSize &&
-                      renderInfo(
-                        'Size',
-                        `${textAttributes.attributes.fontSize}px`,
-                      )}
+                  // Color is different from the main text
+                  const color =
+                    formatColor(textAttributes.attributes.fontColor) !=
+                    formatColor(selectedLayer.typeface?.fontColor)
+                      ? renderColor(textAttributes.attributes.fontColor)
+                      : undefined;
 
-                    {textAttributes.attributes.lineHeight !==
-                      selectedLayer.typeface?.lineHeight &&
-                      renderInfo(
-                        'Line height',
-                        `${textAttributes.attributes.lineHeight}px`,
-                      )}
+                  // Font size is different from the main text
+                  const fontSize =
+                    textAttributes.attributes.fontSize !=
+                    selectedLayer.typeface?.fontSize
+                      ? `${textAttributes.attributes.fontSize}px`
+                      : undefined;
 
-                    {textAttributes.attributes.characterSpacing !==
-                      selectedLayer.typeface?.characterSpacing &&
-                      renderInfo(
-                        'Letter spacing',
-                        `${textAttributes.attributes.characterSpacing}px`,
-                      )}
+                  // Line height is different from the main text
+                  const lineHeight =
+                    textAttributes.attributes.lineHeight !=
+                    selectedLayer.typeface?.lineHeight
+                      ? `${textAttributes.attributes.lineHeight}px`
+                      : undefined;
 
-                    {textAttributes.attributes.alignment !==
-                      selectedLayer.typeface?.alignment &&
-                      renderInfo('Align', textAttributes.attributes.alignment)}
+                  // Letter spacing is different from the main text
+                  const letterSpacing =
+                    textAttributes.attributes.characterSpacing !==
+                    selectedLayer.typeface?.characterSpacing
+                      ? `${textAttributes.attributes.characterSpacing}px`
+                      : undefined;
 
-                    {textAttributes.attributes.fontColor !=
-                      selectedLayer.typeface?.fontColor &&
-                      renderColor(textAttributes.attributes.fontColor)}
-                  </ul>
-                ))}
+                  // Align is different from the main text
+                  const align =
+                    textAttributes.attributes.alignment !==
+                    selectedLayer.typeface?.alignment
+                      ? textAttributes.attributes.alignment
+                      : undefined;
+
+                  const isDifferent =
+                    font != null ||
+                    color != null ||
+                    fontSize != null ||
+                    lineHeight != null ||
+                    letterSpacing != null ||
+                    align != null;
+
+                  return (
+                    isDifferent && (
+                      <ul
+                        key={`text_attributes_${index}`}
+                        id="text_attributes"
+                        className="flex flex-col px-2 text-sm text-popover-foreground empty:hidden"
+                      >
+                        {renderInfo(undefined, text)}
+
+                        {renderInfo('Font', font)}
+
+                        {renderInfo('Size', fontSize)}
+
+                        {renderInfo('Line height', lineHeight)}
+
+                        {renderInfo('Letter spacing', letterSpacing)}
+
+                        {renderInfo('Align', align)}
+                      </ul>
+                    )
+                  );
+                })}
 
               {/* Border radius */}
               {!!selectedLayer.borderRadius?.length && (
