@@ -13,6 +13,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import ConfettiComponent from '@/components/Confetti';
 
 import Logo from '@/assets/logo.svg?react';
 
@@ -28,9 +29,16 @@ function About() {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex gap-4">
-            <Logo className="h-8 w-8 rounded-md align-center mb-2" />
+            <ConfettiComponent id="logo">
+              <Logo
+                id="logo"
+                className="h-8 w-8 rounded-md align-center mb-2"
+              />
+            </ConfettiComponent>
+
             <span>Invision Redux {pkg.version}</span>
           </AlertDialogTitle>
+
           <AlertDialogDescription className="flex flex-col gap-4">
             <p>
               This app is a replica of the InVision application, which is
