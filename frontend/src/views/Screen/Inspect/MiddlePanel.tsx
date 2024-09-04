@@ -69,6 +69,28 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       allLayers.push(...flattenLayers(selectedLayer.layers));
     }
 
+    // Add the canvas "layer"
+    const canvasLayer: Layer = {
+      name: 'CANVAS_LAYER',
+      id: 'CANVAS_LAYER',
+      index: '-1',
+      height: data.height,
+      width: data.width,
+      x: 0,
+      y: 0,
+      type: 'group',
+      order: -1,
+      rotation: 0,
+      opacity: 1,
+      fillColor: [],
+      flippedHorizontal: false,
+      flippedVertical: false,
+      isInitiallyVisible: true,
+      exportOptions: [],
+    };
+
+    allLayers.push(canvasLayer);
+
     return allLayers;
   }, [data, selectedLayer]);
 
@@ -290,8 +312,12 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
   >(() => {
     const isSelectedLayer =
       selectedLayer != null &&
+      selectedLayer.id !== 'CANVAS_LAYER' &&
       (hoveredLayer == null || hoveredLayer.id === selectedLayer.id);
-    const isHoveredLayer = hoveredLayer != null && selectedLayer == null;
+    const isHoveredLayer =
+      hoveredLayer != null &&
+      hoveredLayer.id !== 'CANVAS_LAYER' &&
+      (selectedLayer == null || selectedLayer.id === 'CANVAS_LAYER');
 
     return isHoveredLayer || isSelectedLayer
       ? {
@@ -327,14 +353,18 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
         }}
       >
         {/* Distance */}
-        <DistanceDisplay
-          zoomLevel={zoomLevel}
-          selectedLayer={selectedLayer}
-          hoveredLayer={hoveredLayer}
-        />
+        {selectedLayer &&
+          selectedLayer.id !== 'CANVAS_LAYER' &&
+          hoveredLayer && (
+            <DistanceDisplay
+              zoomLevel={zoomLevel}
+              selectedLayer={selectedLayer}
+              hoveredLayer={hoveredLayer}
+            />
+          )}
 
         {/* Hovered layer */}
-        {hoveredLayer && (
+        {hoveredLayer && hoveredLayer.id !== 'CANVAS_LAYER' && (
           <div
             className="text-blue-500 outline outline-current absolute outline-[2px]"
             style={{
@@ -367,7 +397,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
         )}
 
         {/* Selected layer */}
-        {selectedLayer && (
+        {selectedLayer && selectedLayer.id !== 'CANVAS_LAYER' && (
           <div
             className="text-primary outline outline-current absolute outline-[2px]"
             style={{

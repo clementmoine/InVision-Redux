@@ -361,7 +361,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
 
   return (
     <div className="flex flex-col bg-background p-0 overflow-auto h-full">
-      {!selectedLayer ? (
+      {!selectedLayer || selectedLayer.id === 'CANVAS_LAYER' ? (
         <>
           <div className="flex flex-col gap-3 p-4 border-b">
             {renderDocumentColors()}

@@ -1,12 +1,6 @@
 import { cn } from '@/lib/utils';
+import { Layer } from '@/types';
 import React, { useCallback, useMemo } from 'react';
-
-interface Layer {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
 
 type VerticalSource = 'hRight' | 'hLeft' | 'sRight' | 'sLeft';
 type HorizontalSource = 'hTop' | 'hBottom' | 'sTop' | 'sBottom';
@@ -23,7 +17,8 @@ interface DistanceDisplayProps {
   hoveredLayer?: Layer;
 }
 
-const MIN_DISTANCE = 25;
+const MIN_VERTICAL_DISTANCE = 24;
+const MIN_HORIZONTAL_DISTANCE = 30;
 
 const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
   zoomLevel,
@@ -513,7 +508,7 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
 
       // Unhandled case
       else {
-        console.log(
+        console.info(
           'not handled case',
           { hTop, hRight, hBottom, hLeft, hHeight, hWidth },
           { sTop, sRight, sBottom, sLeft, sHeight, sWidth },
@@ -554,6 +549,8 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
 
       // Manage 0 and exponential numbers
       if (absDistance.toFixed(2).replace(/\.?0+$/, '') === '0') return null;
+
+      const formattedDistance = `${absDistance.toFixed(2).replace(/\.?0+$/, '')}px`;
 
       const style: React.CSSProperties = {
         transform: 'translate(-50%, -50%)',
@@ -603,7 +600,7 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
           line.orientation = 'vertical';
 
           // Move the measure to the top if distance is too short for readability
-          if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
+          if (absDistance * 2 * zoomLevel < MIN_VERTICAL_DISTANCE) {
             style.transform = `translate(-50%, calc(-100% - 8px))`;
           }
 
@@ -656,7 +653,7 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
           line.orientation = 'vertical';
 
           // Move the measure to the bottom if distance is too short for readability
-          if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
+          if (absDistance * 2 * zoomLevel < MIN_VERTICAL_DISTANCE) {
             style.transform = `translate(-50%, calc(0% + 8px))`;
           }
 
@@ -666,6 +663,13 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
 
             line.from.y = hBottom * 2 * zoomLevel;
             line.to.y = sBottom * 2 * zoomLevel + layerOutlineWidth;
+
+            hoverLine.orientation = 'horizontal';
+            hoverLine.from = { x: line.from.x, y: hBottom * 2 * zoomLevel };
+            hoverLine.to = {
+              x: hLeft * 2 * zoomLevel,
+              y: hBottom * 2 * zoomLevel,
+            };
           }
           // Hovered layer is nested in selected layer
           else if (from === 'sBottom' && to === 'hBottom') {
@@ -709,8 +713,8 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
           line.orientation = 'horizontal';
 
           // Move the measure to the left if distance is too short for readability
-          if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
-            style.transform = `translate(calc(-100% - 8px), -50%)`;
+          if (absDistance * 2 * zoomLevel < MIN_HORIZONTAL_DISTANCE) {
+            style.transform = `translate(calc(-100% - 12px), -50%)`;
           }
 
           // Hovered layer is at the left of the selected layer
@@ -736,6 +740,16 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
 
             line.from.x = sLeft * 2 * zoomLevel - layerOutlineWidth;
             line.to.x = hLeft * 2 * zoomLevel;
+
+            hoverLine.orientation = 'vertical';
+            hoverLine.from = {
+              x: hLeft * 2 * zoomLevel - 1,
+              y: hTop * 2 * zoomLevel,
+            };
+            hoverLine.to = {
+              x: hLeft * 2 * zoomLevel - 1,
+              y: line.to.y,
+            };
           }
           // Hovered layer is nested in the selected layer
           else if (from === 'hLeft' && to === 'sLeft') {
@@ -765,8 +779,8 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
           line.orientation = 'horizontal';
 
           // Move the measure to the right if distance is too short for readability
-          if (absDistance * 2 * zoomLevel < MIN_DISTANCE) {
-            style.transform = `translate(calc(0% + 8px), -50%)`;
+          if (absDistance * 2 * zoomLevel < MIN_HORIZONTAL_DISTANCE) {
+            style.transform = `translate(calc(0% + 12px), -50%)`;
           }
 
           // Hovered layer is at left of the selected layer
@@ -821,7 +835,7 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
             className="absolute bg-primary text-white rounded-sm text-[10px] p-[2px] z-[5000]"
             style={style}
           >
-            {absDistance.toFixed(2).replace(/\.?0+$/, '')}px
+            {formattedDistance}
           </div>
 
           {/* Lines */}
@@ -833,14 +847,16 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
             line.color,
             line.visible,
           )}
-          {renderLine(
-            hoverLine.from,
-            hoverLine.to,
-            hoverLine.orientation,
-            hoverLine.type,
-            hoverLine.color,
-            hoverLine.visible,
-          )}
+          {hoveredLayer &&
+            hoveredLayer.id !== 'CANVAS_LAYER' &&
+            renderLine(
+              hoverLine.from,
+              hoverLine.to,
+              hoverLine.orientation,
+              hoverLine.type,
+              hoverLine.color,
+              hoverLine.visible,
+            )}
         </>
       );
     },
@@ -859,6 +875,7 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
       hRight,
       hHeight,
       sRight,
+      hoveredLayer,
     ],
   );
 
