@@ -170,7 +170,9 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
             key={divider.dividerID}
             className="flex flex-col shrink-0 gap-2 pb-2"
           >
-            <h3 className="text-foreground">{divider.label}</h3>
+            <h3 className="text-foreground text-sm uppercase">
+              {divider.label}
+            </h3>
 
             <ol className="flex flex-row gap-3">
               {divider.screens.map(screen => (
