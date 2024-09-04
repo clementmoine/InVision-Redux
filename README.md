@@ -15,7 +15,7 @@ Some features are not handled yet, here is the not prioritized roadmap/to-do lis
   - [x] Manage the mode in url
   - [x] Keyboard shortcuts
   - [ ] Preview mode
-    - [ ] Quick navigate to a screen with thumbnails (dropdown on the current screen)
+    - [x] Quick navigate to a screen with thumbnails (dropdown on the current screen)
     - [ ] Manage the hotspots
       - [x] Navigate to a screen (with id, previous, next or last visited)
       - [x] Display a screen as overlay
@@ -31,12 +31,12 @@ Some features are not handled yet, here is the not prioritized roadmap/to-do lis
     - [ ] Display the screen history
     - [ ] Side by side comparison
   - [ ] Inspect mode
-    - [ ] Left panel
+    - [x] Left panel
       - [x] List the layers
       - [x] Select a layer and display annotations and fonts / styles / code etc.
     - [ ] Right panel
       - [x] Display the fonts / styles / code etc.
-      - [ ] Export assets
+      - [ ] Export assets (to be tested, never used that)
       - [ ] Variables ? (to be tested, never used that)
     - [x] Screen panel
       - [x] Display the screen
