@@ -41,17 +41,32 @@ function About() {
 
           <AlertDialogDescription className="flex flex-col gap-4">
             <p>
-              This app is a replica of the InVision application, which is
-              permanently shutting down on December 31st, 2024.
+              <b>InVision Redux</b> is an open-source project created as a
+              response to the shutdown of the original InVision application on
+              December 31st, 2024. This project is <i>not affiliated</i> with
+              InVision. Note that <b>none of the source code</b> is from
+              InVision; only the projects have been extracted from the original
+              app.
             </p>
+
             <p>
-              I want to clarify that I have no affiliation with InVision; this
-              project is open source, so any contributions are welcome.
+              This tool provides a better backup solution for design teams,
+              overcoming the limitations of InVision's official export options.
+            </p>
+
+            <p>
+              <b>Disclaimer:</b> InVision Redux is for internal use only,
+              allowing teams to back up and access their own data. Users are
+              responsible for complying with InVision's terms of service. Using
+              this tool involves risks, such as potential account suspension. By
+              using InVision Redux, users accept these risks and agree that the
+              developers are not liable for any consequences.
             </p>
 
             <a
               href="https://github.com/clementmoine/InVision-Redux"
               className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
+              aria-label="Visit the Invision Redux project on GitHub"
             >
               <Github className="h-4 w-4" />
               Invision Redux on Github
@@ -59,6 +74,7 @@ function About() {
             <a
               href="https://github.com/clementmoine"
               className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
+              aria-label="Meet the developer on GitHub"
             >
               <Coffee className="h-4 w-4" />
               Meet the dev @clement.moine

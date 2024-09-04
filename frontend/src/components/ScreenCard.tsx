@@ -17,11 +17,19 @@ import { cn } from '@/lib/utils';
 interface ScreenCardProps {
   screen: ScreenForProject;
   disabled?: boolean;
+  className?: string;
 }
 
-const ScreenCard: React.FC<ScreenCardProps> = ({ screen, disabled }) => {
+const ScreenCard: React.FC<ScreenCardProps> = props => {
+  const { screen, disabled, className } = props;
+
   return (
-    <Card className="bg-background rounded-md overflow-hidden shadow-md">
+    <Card
+      className={cn(
+        'bg-background rounded-md overflow-hidden shadow-md',
+        className,
+      )}
+    >
       <CardHeader className="p-0 border-b">
         <AspectRatio
           ratio={9 / 6}

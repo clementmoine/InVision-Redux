@@ -4,7 +4,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Clock, Code2, Eye, Share, Workflow } from 'lucide-react';
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Code2,
+  Eye,
+  Share,
+  Workflow,
+} from 'lucide-react';
 
 import {
   Tooltip,
@@ -41,6 +50,7 @@ import defaultValues from '@/constants/defaultValues';
 import style from './Screen.module.scss';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/components/ui/use-toast';
+import { ThumbnailTray } from './ThumbnailTray';
 
 function Screen() {
   const params = useParams();
@@ -48,6 +58,7 @@ function Screen() {
 
   const { toast } = useToast();
 
+  const [isTrayOpen, setIsTrayOpen] = useState<boolean>(false);
   const [rightPanelWidth, setRightPanelWidth] = useState<number>(0);
 
   const { onChange } = useLocalStorage('inspect_panels');
@@ -353,6 +364,11 @@ function Screen() {
         />
       </aside>
 
+      {/* Tray */}
+      {isTrayOpen && (
+        <ThumbnailTray data={data} handleClose={() => setIsTrayOpen(false)} />
+      )}
+
       {/* Footer */}
       <footer className="dark flex fixed bottom-0 w-full h-16 items-center border-t p-3 z-[100] overflow-hidden bg-background flex-shrink-0">
         <nav className="flex flex-1 gap-1 justify-between overflow-hidden">
@@ -386,13 +402,35 @@ function Screen() {
                     {data?.project.name}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
+
                 <BreadcrumbSeparator className="hidden flex-shrink-0 lg:flex" />
+
                 <BreadcrumbItem className="hidden overflow-hidden lg:overflow-visible sm:flex">
                   <BreadcrumbPage
                     title={screen?.name}
                     className="text-nowrap overflow-hidden text-ellipsis"
                   >
-                    {screen?.name}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span
+                          role="button"
+                          className="flex gap-2 items-center"
+                          onClick={() => setIsTrayOpen(o => !o)}
+                        >
+                          {screen?.name}
+
+                          {isTrayOpen ? (
+                            <ChevronDown className="size-3.5" />
+                          ) : (
+                            <ChevronUp className="size-3.5" />
+                          )}
+                        </span>
+                      </TooltipTrigger>
+
+                      <TooltipContent side="top" sideOffset={5}>
+                        {isTrayOpen ? 'Close' : 'Open'} thumbnail tray
+                      </TooltipContent>
+                    </Tooltip>
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -569,6 +607,7 @@ function Screen() {
     </div>
   );
 }
+
 Screen.displayName = 'Screen';
 
 export { Screen };
