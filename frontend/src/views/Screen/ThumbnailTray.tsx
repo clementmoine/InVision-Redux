@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { Search, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import React, {
+  MouseEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -27,7 +28,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
@@ -43,6 +44,7 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
   const { data, handleClose } = props;
 
   const params = useParams();
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState<string | undefined>();
 
@@ -161,7 +163,7 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
 
       <ol
         ref={containerRef}
-        className="flex flex-row px-3 overflow-x-auto items-stretch gap-5"
+        className="flex flex-row px-3 overflow-x-auto items-end gap-5"
       >
         {filteredDividers.map(divider => (
           <li
@@ -180,6 +182,15 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
                 >
                   <ScreenCard
                     screen={screen}
+                    onClick={(e: MouseEvent<HTMLAnchorElement>) => {
+                      e.preventDefault();
+
+                      navigate(
+                        new URL(e.currentTarget.href).pathname ??
+                          `/projects/${screen.projectID}/${screen.id}/${params.mode}`,
+                        { replace: true },
+                      );
+                    }}
                     className={cn('w-full', {
                       'outline-primary outline outline-4':
                         screen.id === Number(params.screenId),

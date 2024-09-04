@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import dayjs from 'dayjs';
 import { Archive, ImageOffIcon } from 'lucide-react';
 
@@ -18,10 +18,11 @@ interface ScreenCardProps {
   screen: ScreenForProject;
   disabled?: boolean;
   className?: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 
 const ScreenCard: React.FC<ScreenCardProps> = props => {
-  const { screen, disabled, className } = props;
+  const { screen, disabled, className, onClick } = props;
 
   return (
     <Card
@@ -45,6 +46,7 @@ const ScreenCard: React.FC<ScreenCardProps> = props => {
                 ? undefined
                 : `/projects/${screen.projectID}/${screen.id}/preview`
             }
+            onClick={onClick}
             className="flex h-full w-full items-center justify-center text-slate-500 aria-disabled:cursor-not-allowed"
           >
             {screen.thumbnailUrl ? (
@@ -73,6 +75,7 @@ const ScreenCard: React.FC<ScreenCardProps> = props => {
               ? undefined
               : `/projects/${screen.projectID}/${screen.id}/preview`
           }
+          onClick={onClick}
           className="aria-disabled:cursor-not-allowed"
         >
           <CardTitle className="flex items-center gap-1 text-sm">
