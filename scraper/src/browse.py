@@ -260,6 +260,8 @@ def browse_projects(session):
 
     allProjects = (projects or []) + (archivedProjects or [])
 
+    print(len(archivedProjects))
+
     if allProjects:
         # In test mode we process one project of each type
         if is_test_mode():

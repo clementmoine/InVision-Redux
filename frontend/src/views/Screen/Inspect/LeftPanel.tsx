@@ -11,6 +11,7 @@ import {
   CopyPlus,
   Folder,
   FolderOpen,
+  Image,
   Spline,
   Type,
 } from 'lucide-react';
@@ -126,6 +127,8 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
         >
           {layer.type === 'text' ? (
             <Type className="h-4 w-4 shrink-0" />
+          ) : layer.type === 'bitmap' ? (
+            <Image className="h-4 w-4 shrink-0" />
           ) : (
             <Spline className="h-4 w-4 shrink-0" />
           )}

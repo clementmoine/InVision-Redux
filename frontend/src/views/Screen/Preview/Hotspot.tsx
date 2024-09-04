@@ -183,6 +183,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
       if (
         targetType &&
         eventType === 'hover' &&
+        // Pure Typescript condition for the targetType to exclude those types (No stay on screen on these)
         targetType !== 'externalUrl' &&
         targetType !== 'positionOnScreen' &&
         !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
@@ -207,6 +208,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
         targetType &&
         (targetType === 'screenOverlay' ||
           (eventType === 'hover' &&
+            // Pure Typescript condition for the targetType to exclude those types (No stay on screen on these)
             targetType !== 'externalUrl' &&
             targetType !== 'positionOnScreen' &&
             !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
@@ -303,6 +305,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
         targetType &&
         (targetType === 'screenOverlay' ||
           (eventType === 'hover' &&
+            // Pure Typescript condition for the targetType to exclude those types (No stay on screen on these)
             targetType !== 'externalUrl' &&
             targetType !== 'positionOnScreen' &&
             !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
@@ -401,13 +404,19 @@ const Hotspot: React.FC<HotspotProps> = props => {
         ref={refs.setReference}
         {...getReferenceProps({
           onMouseLeave: () => {
+            console.log('leave');
+            console.log(isEmbedded, targetType, eventType, targetType, hotspot);
+
             // Mouse leave on the hotspot when embedded
             if (
               isEmbedded &&
               targetType &&
-              eventType === 'hover' &&
-              targetType !== 'externalUrl' && // No stay on screen on these
-              targetType !== 'positionOnScreen' && // No stay on screen on these
+              // Disabled that since we want to trigger the embedded hotspot
+              // eventType === 'hover' &&
+
+              // Pure Typescript condition for the targetType to exclude those types (No stay on screen on these)
+              targetType !== 'externalUrl' &&
+              targetType !== 'positionOnScreen' &&
               !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
                 .stayOnScreen
             ) {

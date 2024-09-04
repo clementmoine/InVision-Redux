@@ -1,19 +1,19 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
     container_name: invision-backend
-    build: 'backend'
+    build: "backend"
     volumes:
       - ${ROOT:-.}/backend/src:/srv/src
       - ${DOCS_ROOT:-./docs}:/srv/src/static:ro
     ports:
-      - '8080:8080'
+      - "8080:8080"
   frontend:
     container_name: invision-frontend
-    build: 'frontend'
+    build: "frontend"
     volumes:
       - ${ROOT:-.}/frontend/src:/app/src:ro
       - ${ROOT:-.}/frontend/public:/app/public:ro
     ports:
-      - '3000:3000'
+      - "3000:3000"

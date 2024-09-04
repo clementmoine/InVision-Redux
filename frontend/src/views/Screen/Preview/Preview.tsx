@@ -7,7 +7,6 @@ import {
   useMemo,
   useRef,
   useState,
-  UIEvent,
 } from 'react';
 
 import Hotspot from '@/views/Screen/Preview/Hotspot';
@@ -273,30 +272,32 @@ function ScreenPreview(props: ScreenPreviewProps) {
   }, []);
 
   // Keep sync of the scroll on the fixed footer / header
-  const handlePreviewScroll = useCallback(
-    (e: UIEvent<HTMLDivElement>) => {
-      const scrollLeft = e.currentTarget?.scrollLeft;
+  const handlePreviewScroll = useCallback(() => {
+    const scrollLeft = ref.current?.scrollLeft;
 
-      const fixedHeader =
-        'fixedHeaderHeight' in screen &&
-        screen.fixedHeaderHeight > 0 &&
-        document.getElementById('screen-preview-fixed-header');
+    const fixedHeader =
+      'fixedHeaderHeight' in screen &&
+      screen.fixedHeaderHeight > 0 &&
+      document.getElementById('screen-preview-fixed-header');
 
-      const fixedFooter =
-        'fixedFooterHeight' in screen &&
-        screen.fixedFooterHeight > 0 &&
-        document.getElementById('screen-preview-fixed-footer');
+    const fixedFooter =
+      'fixedFooterHeight' in screen &&
+      screen.fixedFooterHeight > 0 &&
+      document.getElementById('screen-preview-fixed-footer');
 
-      if (fixedHeader) {
-        fixedHeader.style.transform = `translate(-${scrollLeft}px)`;
-      }
+    if (fixedHeader) {
+      fixedHeader.style.transform = `translate(-${scrollLeft}px)`;
+    }
 
-      if (fixedFooter) {
-        fixedFooter.style.transform = `translate(-${scrollLeft}px)`;
-      }
-    },
-    [screen],
-  );
+    if (fixedFooter) {
+      fixedFooter.style.transform = `translate(-${scrollLeft}px)`;
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    // Sync the scroll when the screen changed
+    handlePreviewScroll();
+  }, [handlePreviewScroll]);
 
   return (
     <div

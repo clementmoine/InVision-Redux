@@ -146,7 +146,7 @@ export interface Layer {
   index: string;
   id: string;
   name: string;
-  type: 'path' | 'text' | 'group';
+  type: 'path' | 'line' | 'text' | 'group' | 'bitmap';
   flippedVertical: boolean;
   rotation: number;
   opacity: number;
