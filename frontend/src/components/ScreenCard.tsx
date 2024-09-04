@@ -42,7 +42,7 @@ const ScreenCard: React.FC<ScreenCardProps> = ({ screen, disabled }) => {
             {screen.thumbnailUrl ? (
               <img
                 className={cn(
-                  'absolute inset-0 h-full w-full object-cover transition-all',
+                  'absolute inset-0 h-auto w-full object-cover transition-all',
                   {
                     'hover:scale-105': !disabled,
                   },

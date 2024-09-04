@@ -178,7 +178,16 @@ function Project() {
                     to={`/projects?tag=${tag.id}`}
                     className="flex"
                   >
-                    <Badge className="w-fit h-fit bg-muted-foreground border-popover">
+                    <Badge
+                      variant="secondary"
+                      className="w-fit gap-1 border-current"
+                    >
+                      <div
+                        className="h-2 w-2 rounded"
+                        style={{
+                          backgroundColor: tag.color,
+                        }}
+                      />
                       {tag.name}
                     </Badge>
                   </Link>

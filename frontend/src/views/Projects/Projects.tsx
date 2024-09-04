@@ -228,7 +228,16 @@ function Projects() {
 
                   {tags?.map(tag => (
                     <SelectItem key={tag.id} value={tag.id.toString()}>
-                      {tag.name}
+                      <div className="flex w-full row items-center gap-1 text-ellipsis whitespace-nowrap overflow-hidden">
+                        <div
+                          className="h-2 w-2 rounded shrink-0"
+                          style={{
+                            backgroundColor: tag.color,
+                          }}
+                        />
+
+                        {tag.name}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectGroup>

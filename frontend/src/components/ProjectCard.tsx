@@ -38,7 +38,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           >
             {project.data.thumbnailUrl ? (
               <img
-                className="absolute inset-0 h-full w-full object-cover transition-all hover:scale-105"
+                className="absolute inset-0 h-auto w-full object-cover transition-all hover:scale-105"
                 src={`/api/static/${project.data.thumbnailUrl}`}
                 alt={project.data.name}
               />
@@ -47,14 +47,23 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             )}
           </Link>
 
-          <div className="absolute flex flex-col top-2 left-2 gap-1">
+          <div className="absolute flex flex-col bottom-2 left-2 gap-1">
             {project.data.tags.map(tag => (
               <Link
                 key={tag.id}
                 to={`/projects?tag=${tag.id}`}
                 className="flex"
               >
-                <Badge className="w-fit border-popover bg-muted-foreground">
+                <Badge
+                  variant="secondary"
+                  className="w-fit gap-1 border-current"
+                >
+                  <div
+                    className="h-2 w-2 rounded"
+                    style={{
+                      backgroundColor: tag.color,
+                    }}
+                  />
                   {tag.name}
                 </Badge>
               </Link>
