@@ -1,5 +1,4 @@
 import React, { ReactElement, useEffect, useRef } from 'react';
-import { Button } from './ui/button';
 import {
   Tooltip,
   TooltipContent,
@@ -213,7 +212,18 @@ class Confetti {
     this.element = document.getElementById(id)!;
     if (this.element) {
       this.element.addEventListener('click', event => {
-        const position = new Vector(2 * event.clientX, 2 * event.clientY);
+        event.preventDefault();
+
+        let position = new Vector(2 * event.clientX, 2 * event.clientY);
+        if (event.clientY === 0 && event.clientX === 0) {
+          const elementRect = this.element.getBoundingClientRect();
+
+          position = new Vector(
+            2 * (elementRect.x + elementRect.width / 2),
+            2 * (elementRect.y + elementRect.height / 2),
+          );
+        }
+
         this.bursts.push(new Burst(position));
         if (Confetti.CONFIG.destroy_target) {
           this.element.style.visibility = 'hidden';
@@ -253,10 +263,15 @@ class Confetti {
 type ConfettiProps = {
   id: string;
   config?: Config;
+  tooltip?: boolean;
   children: ReactElement;
 };
 
-const ConfettiComponent: React.FC<ConfettiProps> = ({ id, children }) => {
+const ConfettiComponent: React.FC<ConfettiProps> = ({
+  id,
+  children,
+  tooltip = true,
+}) => {
   const confettiRef = useRef<Confetti | null>(null);
 
   useEffect(() => {
@@ -270,7 +285,11 @@ const ConfettiComponent: React.FC<ConfettiProps> = ({ id, children }) => {
     };
   }, [id]);
 
-  return (
+  return !tooltip ? (
+    <div id={id} className="flex">
+      {children}
+    </div>
+  ) : (
     <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
         <div id={id} className="flex">
