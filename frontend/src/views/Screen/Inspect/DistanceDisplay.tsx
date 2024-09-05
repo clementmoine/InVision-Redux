@@ -270,10 +270,10 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
 
       // Case : The hovered layer is contained by the selection
       else if (
-        hLeft < sLeft &&
-        hRight > sRight &&
-        hTop < sTop &&
-        hBottom > sBottom
+        hLeft <= sLeft &&
+        hRight >= sRight &&
+        hTop <= sTop &&
+        hBottom >= sBottom
       ) {
         top = {
           from: 'sTop',
@@ -622,6 +622,13 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
 
             line.from.y = sTop * 2 * zoomLevel - layerOutlineWidth;
             line.to.y = hTop * 2 * zoomLevel;
+
+            hoverLine.orientation = 'horizontal';
+            hoverLine.from = { x: line.from.x, y: hTop * 2 * zoomLevel - 1 };
+            hoverLine.to = {
+              x: hLeft * 2 * zoomLevel,
+              y: hTop * 2 * zoomLevel - 1,
+            };
           }
           // Hovered layer is at the top of the selected layer
           else if (from === 'sTop' && to === 'hBottom') {

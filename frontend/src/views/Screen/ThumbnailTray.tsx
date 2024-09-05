@@ -184,6 +184,7 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
                 >
                   <ScreenCard
                     screen={screen}
+                    mode="inspect"
                     onClick={(e: MouseEvent<HTMLAnchorElement>) => {
                       e.preventDefault();
 

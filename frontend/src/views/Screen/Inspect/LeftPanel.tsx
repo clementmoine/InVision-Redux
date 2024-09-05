@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { Layer, ScreenInspect } from '@/types';
+import { ArchivedScreenDetails, Layer, ScreenInspect } from '@/types';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -30,12 +30,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import ToDo from '@/assets/illustrations/to-do.svg?react';
 
 interface InspectLeftPanelProps {
-  data?: ScreenInspect;
+  data?: ScreenInspect | null;
   hoveredLayer?: Layer;
   selectedLayer?: Layer;
   expandedGroupIds: Layer['id'][];
+  screen: Screen | ArchivedScreenDetails['screen'];
   setHoveredLayer: Dispatch<SetStateAction<Layer | undefined>>;
   setSelectedLayer: Dispatch<SetStateAction<Layer | undefined>>;
   setExpandedGroupIds: Dispatch<SetStateAction<Layer['id'][]>>;
@@ -44,6 +46,7 @@ interface InspectLeftPanelProps {
 function InspectLeftPanel(props: InspectLeftPanelProps) {
   const {
     data,
+    screen,
     hoveredLayer,
     selectedLayer,
     setHoveredLayer,
@@ -181,44 +184,60 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
   return (
     <div className="bg-background p-4 overflow-auto h-full">
       <div className="flex items-center gap-2 justify-between pb-2">
-        <h2 className="text-sm">{data?.name}</h2>
+        <h2 className="text-sm">
+          {data?.name ?? ('name' in screen && screen.name)}
+        </h2>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-lg flex-shrink-0"
-              aria-label={
-                expandedGroupIds.length > 0
-                  ? 'Collapse all groups'
-                  : 'Expand all groups'
-              }
-              onClick={toggleGroups}
-            >
-              {expandedGroupIds.length > 0 ? (
-                <CopyMinus className="size-4" />
-              ) : (
-                <CopyPlus className="size-4" />
-              )}
-            </Button>
-          </TooltipTrigger>
+        {data != null && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-lg flex-shrink-0"
+                aria-label={
+                  expandedGroupIds.length > 0
+                    ? 'Collapse all groups'
+                    : 'Expand all groups'
+                }
+                onClick={toggleGroups}
+              >
+                {expandedGroupIds.length > 0 ? (
+                  <CopyMinus className="size-4" />
+                ) : (
+                  <CopyPlus className="size-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
 
-          <TooltipContent side="bottom" sideOffset={5}>
-            {expandedGroupIds.length > 0
-              ? 'Collapse all groups'
-              : 'Expand all groups'}
-          </TooltipContent>
-        </Tooltip>
+            <TooltipContent side="bottom" sideOffset={5}>
+              {expandedGroupIds.length > 0
+                ? 'Collapse all groups'
+                : 'Expand all groups'}
+            </TooltipContent>
+          </Tooltip>
+        )}
       </div>
 
-      <Accordion
-        type="multiple"
-        value={expandedGroupIds}
-        onValueChange={setExpandedGroupIds}
-      >
-        {layers}
-      </Accordion>
+      {data != null ? (
+        <Accordion
+          type="multiple"
+          value={expandedGroupIds}
+          onValueChange={setExpandedGroupIds}
+        >
+          {layers}
+        </Accordion>
+      ) : (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+          <ToDo />
+          <h2 className="text-2xl font-semibold tracking-tight">
+            No layers found
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            No layers data were found.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

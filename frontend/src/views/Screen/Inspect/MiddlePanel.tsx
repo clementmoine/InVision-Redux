@@ -13,7 +13,7 @@ import DistanceDisplay from './DistanceDisplay';
 import { cn } from '@/lib/utils';
 
 interface InspectMiddlePanelProps {
-  data?: ScreenInspect;
+  data?: ScreenInspect | null;
   zoomLevel: number;
   selectedLayer?: Layer;
   hoveredLayer?: Layer;
@@ -48,7 +48,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
 
   // Flatten nested layers and add the same group layers if selected
   const getLayersToCheck = useCallback(() => {
-    if (!data?.layers) return [];
+    if (data == null || !data.layers) return [];
 
     const flattenLayers = (layers: Layer[], level: number = 0): Layer[] => {
       let result: Layer[] = [];

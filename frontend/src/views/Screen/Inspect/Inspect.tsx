@@ -58,6 +58,7 @@ function Inspect(props: InspectProps) {
       <ResizablePanel id="left-panel" minSize={20} maxSize={60}>
         <InspectLeftPanel
           data={data}
+          screen={screen}
           hoveredLayer={hoveredLayer}
           setHoveredLayer={setHoveredLayer}
           selectedLayer={selectedLayer}

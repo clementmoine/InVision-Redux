@@ -18,11 +18,12 @@ interface ScreenCardProps {
   screen: ScreenForProject;
   disabled?: boolean;
   className?: string;
+  mode?: 'inspect' | 'preview';
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 
 const ScreenCard: React.FC<ScreenCardProps> = props => {
-  const { screen, disabled, className, onClick } = props;
+  const { mode = 'preview', screen, disabled, className, onClick } = props;
 
   return (
     <Card
@@ -44,7 +45,7 @@ const ScreenCard: React.FC<ScreenCardProps> = props => {
             href={
               disabled
                 ? undefined
-                : `/projects/${screen.projectID}/${screen.id}/preview`
+                : `/projects/${screen.projectID}/${screen.id}/${mode}`
             }
             onClick={onClick}
             className="flex h-full w-full items-center justify-center text-slate-500 aria-disabled:cursor-not-allowed"

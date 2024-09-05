@@ -404,9 +404,6 @@ const Hotspot: React.FC<HotspotProps> = props => {
         ref={refs.setReference}
         {...getReferenceProps({
           onMouseLeave: () => {
-            console.log('leave');
-            console.log(isEmbedded, targetType, eventType, targetType, hotspot);
-
             // Mouse leave on the hotspot when embedded
             if (
               isEmbedded &&

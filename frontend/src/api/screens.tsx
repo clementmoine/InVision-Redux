@@ -36,7 +36,7 @@ export const getScreen: QueryFunction<
 };
 
 export const getScreenInspect: QueryFunction<
-  ScreenInspect,
+  ScreenInspect | null,
   [string, Project['id'], Screen['id'], 'inspect']
 > = ({ queryKey }) => {
   const [_key, project_id, screen_id] = queryKey;
@@ -55,8 +55,13 @@ export const getScreenInspect: QueryFunction<
 
       return response.json();
     })
-    .then(screen => {
-      return screen;
+    .then(response => {
+      // Not valid Sketch file
+      if (response.code === 417) {
+        return null;
+      }
+
+      return response;
     })
     .catch(error => {
       throw error;

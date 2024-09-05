@@ -32,8 +32,10 @@ import {
 } from '@/components/ui/accordion';
 import { useToast } from '@/components/ui/use-toast';
 
+import EmptyState from '@/assets/illustrations/empty-state.svg?react';
+
 interface InspectRightPanelProps {
-  data?: ScreenInspect;
+  data?: ScreenInspect | null;
   selectedLayer?: Layer;
   expandedGroupIds: Layer['id'][];
   screen: Screen | ArchivedScreenDetails['screen'];
@@ -164,7 +166,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
   const renderDocumentColors = useCallback(() => {
     return (
       <ul className="flex flex-wrap gap-1">
-        {data?.screen_colors.map((color, index) => {
+        {data?.screen_colors?.map((color, index) => {
           const [_r, _g, _b, _alpha = 1, label = undefined] = color;
 
           const value = formatColor(color);
@@ -361,7 +363,17 @@ function InspectRightPanel(props: InspectRightPanelProps) {
 
   return (
     <div className="flex flex-col bg-background p-0 overflow-auto h-full">
-      {!selectedLayer || selectedLayer.id === 'CANVAS_LAYER' ? (
+      {data == null ? (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+          <EmptyState />
+          <h2 className="text-2xl font-semibold tracking-tight">
+            Can't inspect that!
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            No inspect data were found.
+          </p>
+        </div>
+      ) : !selectedLayer || selectedLayer.id === 'CANVAS_LAYER' ? (
         <>
           <div className="flex flex-col gap-3 p-4 border-b">
             {renderDocumentColors()}
@@ -372,7 +384,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
               id="position"
               className="flex flex-col text-sm text-popover-foreground empty:hidden"
             >
-              {data?.typefaces.map(({ typeface, weight }) =>
+              {data?.typefaces?.map(({ typeface, weight }) =>
                 renderInfo(undefined, `${typeface} ${weight}`),
               )}
             </ul>
@@ -539,8 +551,6 @@ function InspectRightPanel(props: InspectRightPanelProps) {
               {selectedLayer.type === 'text' &&
                 (selectedLayer.textAttributes?.length ?? 0) > 1 &&
                 selectedLayer.textAttributes?.map((textAttributes, index) => {
-                  console.log(selectedLayer.text, textAttributes);
-
                   const text = selectedLayer.text
                     ? `"${selectedLayer.text.substring(textAttributes.location, textAttributes.location + textAttributes.length)}"`
                     : undefined;
