@@ -1,4 +1,4 @@
-import { Coffee, Github, Info } from 'lucide-react';
+import { Coffee, Github, Info, PenToolIcon } from 'lucide-react';
 
 import pkg from '../../package.json';
 
@@ -72,12 +72,20 @@ function About() {
               Invision Redux on Github
             </a>
             <a
-              href="https://github.com/clementmoine"
+              href="https://www.linkedin.com/in/clemmoine/"
               className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-              aria-label="Meet the developer on GitHub"
+              aria-label="Developed by Clément Moine"
             >
               <Coffee className="h-4 w-4" />
-              Meet the dev @clement.moine
+              Developed by Clément Moine
+            </a>
+            <a
+              href="https://www.linkedin.com/in/yasmin-sagaya-rekha-957181173"
+              className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
+              aria-label="Illustrations from Yasmin Sagaya Rekha"
+            >
+              <PenToolIcon className="h-4 w-4" />
+              Illustrations from Yasmin Sagaya Rekha
             </a>
           </AlertDialogDescription>
         </AlertDialogHeader>
