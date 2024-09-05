@@ -17,6 +17,7 @@ interface InspectMiddlePanelProps {
   zoomLevel: number;
   selectedLayer?: Layer;
   hoveredLayer?: Layer;
+  isFetching?: boolean;
   expandedGroupIds: Layer['id'][];
   screen: Screen | ArchivedScreenDetails['screen'];
   setHoveredLayer: Dispatch<SetStateAction<Layer | undefined>>;

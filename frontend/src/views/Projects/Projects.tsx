@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useCallback, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowDownAZ, Search, Tag } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import {
   Form,
@@ -34,6 +34,7 @@ import defaultValues from '@/constants/defaultValues';
 import { fetchTags } from '@/api/tags';
 
 import { useFavorites } from '@/hooks/useFavorites';
+import { Spinner } from '@/components/Spinner';
 
 const formSchema = z.object({
   search: z.string(),
@@ -43,6 +44,8 @@ function Projects() {
   const { favorites } = useFavorites();
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: tags } = useQuery({ queryKey: ['tags'], queryFn: fetchTags });
+
+  const isFetching = useIsFetching();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -112,7 +115,12 @@ function Projects() {
               <FormItem>
                 <FormControl>
                   <div className="flex relative ml-auto flex-1 md:grow-0 items-center">
-                    <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    {field.value !== '' && isFetching ? (
+                      <Spinner className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    ) : (
+                      <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    )}
+
                     <Input
                       type="search"
                       placeholder="Search projects..."

@@ -33,10 +33,12 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 
 import EmptyState from '@/assets/illustrations/empty-state.svg?react';
+import { Spinner } from '@/components/Spinner';
 
 interface InspectRightPanelProps {
   data?: ScreenInspect | null;
   selectedLayer?: Layer;
+  isFetching?: boolean;
   expandedGroupIds: Layer['id'][];
   screen: Screen | ArchivedScreenDetails['screen'];
   setSelectedLayer: Dispatch<SetStateAction<Layer | undefined>>;
@@ -44,7 +46,13 @@ interface InspectRightPanelProps {
 }
 
 function InspectRightPanel(props: InspectRightPanelProps) {
-  const { data, selectedLayer, setSelectedLayer, expandedGroupIds } = props;
+  const {
+    data,
+    isFetching = false,
+    selectedLayer,
+    setSelectedLayer,
+    expandedGroupIds,
+  } = props;
   const { toast } = useToast();
 
   const renderInfo = useCallback(
@@ -362,8 +370,14 @@ function InspectRightPanel(props: InspectRightPanelProps) {
   );
 
   return (
-    <div className="flex flex-col bg-background p-0 overflow-auto h-full">
-      {data == null ? (
+    <div className="flex flex-col bg-background p-0 overflow-auto h-full relative">
+      {isFetching && (
+        <div className="absolute bg-background/50 flex inset-0 h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+          <Spinner />
+        </div>
+      )}
+
+      {data == null && !isFetching ? (
         <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
           <EmptyState />
           <h2 className="text-2xl font-semibold tracking-tight">

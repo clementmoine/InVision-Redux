@@ -34,7 +34,7 @@ function Inspect(props: InspectProps) {
 
   const params = useParams();
 
-  const { data } = useQuery({
+  const { data, isFetching } = useQuery({
     queryKey: [
       'projects',
       Number(params.projectId),
@@ -59,6 +59,7 @@ function Inspect(props: InspectProps) {
         <InspectLeftPanel
           data={data}
           screen={screen}
+          isFetching={isFetching}
           hoveredLayer={hoveredLayer}
           setHoveredLayer={setHoveredLayer}
           selectedLayer={selectedLayer}
@@ -76,6 +77,7 @@ function Inspect(props: InspectProps) {
           data={data}
           screen={screen}
           zoomLevel={zoomLevel}
+          isFetching={isFetching}
           hoveredLayer={hoveredLayer}
           setHoveredLayer={setHoveredLayer}
           selectedLayer={selectedLayer}
@@ -92,6 +94,7 @@ function Inspect(props: InspectProps) {
         <InspectRightPanel
           data={data}
           screen={screen}
+          isFetching={isFetching}
           selectedLayer={selectedLayer}
           setSelectedLayer={setSelectedLayer}
           expandedGroupIds={expandedGroupIds}

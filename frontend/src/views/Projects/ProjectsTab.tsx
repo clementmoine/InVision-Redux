@@ -71,7 +71,6 @@ function ProjectsTab() {
     data: projects,
     refetch,
     isFetching,
-    isPending,
   } = useQuery({
     queryKey: ['projects', params],
     queryFn: fetchProjects,
@@ -134,7 +133,7 @@ function ProjectsTab() {
   }, [projects]);
 
   return (
-    <div className="flex h-full w-full flex-col gap-6">
+    <div className="flex h-full w-full flex-col gap-6 relative">
       {/* Projects */}
       {projects && projects.data.length > 0 ? (
         <div
@@ -147,8 +146,7 @@ function ProjectsTab() {
           ))}
         </div>
       ) : (
-        !isFetching &&
-        !isPending && (
+        !isFetching && (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
             <EmptyState />
             <h2 className="text-2xl font-semibold tracking-tight">

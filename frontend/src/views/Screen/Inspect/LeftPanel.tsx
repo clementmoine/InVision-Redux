@@ -31,10 +31,12 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import ToDo from '@/assets/illustrations/to-do.svg?react';
+import { Spinner } from '@/components/Spinner';
 
 interface InspectLeftPanelProps {
   data?: ScreenInspect | null;
   hoveredLayer?: Layer;
+  isFetching?: boolean;
   selectedLayer?: Layer;
   expandedGroupIds: Layer['id'][];
   screen: Screen | ArchivedScreenDetails['screen'];
@@ -47,6 +49,7 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
   const {
     data,
     screen,
+    isFetching = false,
     hoveredLayer,
     selectedLayer,
     setHoveredLayer,
@@ -182,7 +185,7 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
   }, [groupIds, setExpandedGroupIds]);
 
   return (
-    <div className="bg-background p-4 overflow-auto h-full">
+    <div className="bg-background p-4 overflow-auto h-full relative">
       <div className="flex items-center gap-2 justify-between pb-2">
         <h2 className="text-sm">
           {data?.name ?? ('name' in screen && screen.name)}
@@ -219,6 +222,12 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
         )}
       </div>
 
+      {isFetching && (
+        <div className="absolute bg-background/50 flex inset-0 h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+          <Spinner />
+        </div>
+      )}
+
       {data != null ? (
         <Accordion
           type="multiple"
@@ -228,15 +237,17 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
           {layers}
         </Accordion>
       ) : (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
-          <ToDo />
-          <h2 className="text-2xl font-semibold tracking-tight">
-            No layers found
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            No layers data were found.
-          </p>
-        </div>
+        !isFetching && (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+            <ToDo />
+            <h2 className="text-2xl font-semibold tracking-tight">
+              No layers found
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              No layers data were found.
+            </p>
+          </div>
+        )
       )}
     </div>
   );

@@ -189,8 +189,7 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
                       e.preventDefault();
 
                       navigate(
-                        new URL(e.currentTarget.href).pathname ??
-                          `/projects/${screen.projectID}/${screen.id}/${params.mode}`,
+                        `/projects/${screen.projectID}/${screen.id}/${params.mode}`,
                         { replace: true },
                       );
                     }}
