@@ -15,6 +15,7 @@ Some features are not handled yet, here is the not prioritized roadmap/to-do lis
   - [x] Manage the mode in url
   - [x] Keyboard shortcuts
   - [ ] Preview mode
+    - [ ] Comments in read only
     - [x] Quick navigate to a screen with thumbnails (dropdown on the current screen)
     - [ ] Manage the hotspots
       - [x] Navigate to a screen (with id, previous, next or last visited)
