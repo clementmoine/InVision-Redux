@@ -1,6 +1,11 @@
 import React, { MouseEventHandler } from 'react';
 import dayjs from 'dayjs';
-import { Archive, ImageOffIcon } from 'lucide-react';
+import {
+  Archive,
+  ImageOffIcon,
+  MessageCircle,
+  MessageCircleDashed,
+} from 'lucide-react';
 
 import {
   Card,
@@ -91,6 +96,14 @@ const ScreenCard: React.FC<ScreenCardProps> = props => {
         </a>
 
         <CardDescription>{dayjs(screen.updatedAt).fromNow()}</CardDescription>
+        <CardDescription className="flex items-center gap-1">
+          {screen.conversationCount > 0 ? (
+            <MessageCircle className="size-4" />
+          ) : (
+            <MessageCircleDashed className="size-4" />
+          )}
+          {screen.conversationCount} conversations
+        </CardDescription>
       </CardContent>
     </Card>
   );

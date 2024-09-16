@@ -1,0 +1,37 @@
+.ripple-effect {
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background-color: currentColor;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: -1;
+  }
+
+  /* First ripple */
+  &::before {
+    animation: ripple 2s infinite ease-in-out;
+  }
+
+  /* Second ripple */
+  &::after {
+    animation: ripple 2s infinite ease-in-out;
+    animation-delay: 500ms;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}

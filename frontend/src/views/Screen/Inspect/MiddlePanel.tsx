@@ -8,9 +8,16 @@ import {
   useMemo,
 } from 'react';
 
-import { ArchivedScreenDetails, Screen, Layer, ScreenInspect } from '@/types';
+import {
+  ArchivedScreenDetails,
+  Screen,
+  Layer,
+  ScreenInspect,
+  Conversation as ConversationType,
+} from '@/types';
 import DistanceDisplay from './DistanceDisplay';
 import { cn } from '@/lib/utils';
+import Conversation from '../Conversation';
 
 interface InspectMiddlePanelProps {
   data?: ScreenInspect | null;
@@ -19,6 +26,8 @@ interface InspectMiddlePanelProps {
   hoveredLayer?: Layer;
   isFetching?: boolean;
   expandedGroupIds: Layer['id'][];
+  conversations?: ConversationType[];
+  showConversations: boolean | 'all';
   screen: Screen | ArchivedScreenDetails['screen'];
   setHoveredLayer: Dispatch<SetStateAction<Layer | undefined>>;
   setExpandedGroupIds: Dispatch<SetStateAction<Layer['id'][]>>;
@@ -36,6 +45,8 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
     screen,
     zoomLevel,
     data,
+    conversations,
+    showConversations,
   } = props;
 
   const [isDragging, setIsDragging] = useState(false);
@@ -394,6 +405,21 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
               .replace(/\.?0+$/, '')}x${Number(measures.height)
               .toFixed(2)
               .replace(/\.?0+$/, '')}`}
+          </div>
+        )}
+
+        {/* Conversations */}
+        {conversations && (
+          <div className="absolute left-0 inset-0 bg-transparent overflow-hidden">
+            {conversations.map(conversation => (
+              <Conversation
+                key={`${data?.id}/${screen.id}/${conversation.id}`}
+                screen={screen}
+                conversation={conversation}
+                zoomLevel={zoomLevel}
+                visible={showConversations}
+              />
+            ))}
           </div>
         )}
 

@@ -51,6 +51,7 @@ import style from './Screen.module.scss';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { useToast } from '@/components/ui/use-toast';
 import { ThumbnailTray } from './ThumbnailTray';
+import ConversationToggle from '@/components/ConversationToggle';
 
 function Screen() {
   const params = useParams();
@@ -58,6 +59,9 @@ function Screen() {
 
   const { toast } = useToast();
 
+  const [showConversations, setShowConversations] = useState<boolean | 'all'>(
+    true,
+  );
   const [isTrayOpen, setIsTrayOpen] = useState<boolean>(false);
   const [rightPanelWidth, setRightPanelWidth] = useState<number>(0);
 
@@ -85,6 +89,12 @@ function Screen() {
       data != null && 'activeScreens' in data
         ? data.activeScreens.sort((a, b) => a.sort - b.sort)
         : undefined,
+    [data],
+  );
+
+  const conversations = useMemo(
+    () =>
+      data != null && 'activeScreens' in data ? data.conversations : undefined,
     [data],
   );
 
@@ -219,6 +229,13 @@ function Screen() {
     [allScreens, navigate, params],
   );
 
+  const handleEnableConversations = useCallback(
+    (checked: boolean, showAll: boolean) => {
+      setShowConversations(() => (checked && showAll ? 'all' : checked));
+    },
+    [],
+  );
+
   return (
     <div
       id="screen"
@@ -273,8 +290,10 @@ function Screen() {
                   hotspots={hotspots}
                   allScreens={allScreens}
                   allHotspots={allHotspots}
+                  conversations={conversations}
                   screenId={Number(params.screenId)}
                   projectId={Number(params.projectId)}
+                  showConversations={showConversations}
                 />
               )}
 
@@ -283,8 +302,10 @@ function Screen() {
                   zoomLevel={zoomLevel}
                   screen={screen}
                   allScreens={allScreens}
+                  conversations={conversations}
                   screenId={Number(params.screenId)}
                   projectId={Number(params.projectId)}
+                  showConversations={showConversations}
                 />
               )}
 
@@ -584,6 +605,17 @@ function Screen() {
           </div>
 
           <div className="flex flex-1 items-center gap-4 justify-end">
+            <ConversationToggle
+              totalCount={conversations?.length ?? 0}
+              count={
+                showConversations === 'all'
+                  ? conversations?.length ?? 0
+                  : conversations?.filter(c => !c.isComplete).length ?? 0
+              }
+              checked={!!showConversations}
+              onCheckedChange={handleEnableConversations}
+            />
+
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <Button

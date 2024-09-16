@@ -3,7 +3,13 @@ import { useParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { getScreenInspect } from '@/api/screens';
-import { ArchivedScreenDetails, Project, Screen, Layer } from '@/types';
+import {
+  ArchivedScreenDetails,
+  Project,
+  Screen,
+  Layer,
+  Conversation as ConversationType,
+} from '@/types';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -21,10 +27,12 @@ interface InspectProps {
   zoomLevel: number;
   screen: Screen | ArchivedScreenDetails['screen'];
   allScreens?: Screen[];
+  conversations?: ConversationType[];
+  showConversations: boolean | 'all';
 }
 
 function Inspect(props: InspectProps) {
-  const { zoomLevel, screen } = props;
+  const { zoomLevel, screen, conversations, showConversations } = props;
 
   const storage = useLocalStorage('inspect_panels');
 
@@ -79,6 +87,8 @@ function Inspect(props: InspectProps) {
           zoomLevel={zoomLevel}
           isFetching={isFetching}
           hoveredLayer={hoveredLayer}
+          conversations={conversations}
+          showConversations={showConversations}
           setHoveredLayer={setHoveredLayer}
           selectedLayer={selectedLayer}
           setSelectedLayer={setSelectedLayer}

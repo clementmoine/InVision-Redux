@@ -14,11 +14,13 @@ import Hotspot from '@/views/Screen/Preview/Hotspot';
 import {
   ArchivedScreenDetails,
   HotspotWithMetadata,
+  Conversation as ConversationType,
   Project,
   Screen,
   TargetType,
 } from '@/types';
 import { cn } from '@/lib/utils';
+import Conversation from '../Conversation';
 
 interface ScreenPreviewProps {
   isEmbedded?: boolean;
@@ -28,8 +30,10 @@ interface ScreenPreviewProps {
   zoomLevel: number;
   screen: Screen | ArchivedScreenDetails['screen'];
   allScreens?: Screen[];
+  conversations?: ConversationType[];
   hotspots?: HotspotWithMetadata[];
   allHotspots?: HotspotWithMetadata[];
+  showConversations: boolean | 'all';
 }
 
 function ScreenPreview(props: ScreenPreviewProps) {
@@ -41,8 +45,10 @@ function ScreenPreview(props: ScreenPreviewProps) {
     zoomLevel,
     screen,
     hotspots,
+    conversations,
     allScreens,
     allHotspots,
+    showConversations,
   } = props;
 
   const ref = useRef<HTMLDivElement>(null);
@@ -349,6 +355,21 @@ function ScreenPreview(props: ScreenPreviewProps) {
           }}
         />
 
+        {/* Conversations */}
+        {conversations && !isEmbedded && (
+          <div className="absolute left-0 inset-0 bg-transparent overflow-hidden">
+            {conversations.map(conversation => (
+              <Conversation
+                key={`${projectId}/${screenId}/${conversation.id}`}
+                screen={screen}
+                conversation={conversation}
+                zoomLevel={zoomLevel}
+                visible={showConversations}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Hotspots */}
         {restHotspots && (
           <div
@@ -373,7 +394,6 @@ function ScreenPreview(props: ScreenPreviewProps) {
                 allScreens={allScreens}
                 allHotspots={allHotspots}
                 onTrigger={onHotspotTrigger}
-                screenID={0}
                 closeParent={closeParent}
               />
             ))}
@@ -405,7 +425,6 @@ function ScreenPreview(props: ScreenPreviewProps) {
                   allScreens={allScreens}
                   allHotspots={allHotspots}
                   onTrigger={onHotspotTrigger}
-                  screenID={0}
                   closeParent={closeParent}
                 />
               ))}
@@ -437,7 +456,6 @@ function ScreenPreview(props: ScreenPreviewProps) {
                   allScreens={allScreens}
                   allHotspots={allHotspots}
                   onTrigger={onHotspotTrigger}
-                  screenID={0}
                   closeParent={closeParent}
                 />
               ))}

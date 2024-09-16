@@ -46,7 +46,6 @@ interface HotspotProps {
   zoomLevel: number;
   screen: Screen | ArchivedScreenDetails['screen'];
   isEmbedded?: boolean;
-  screenID: Screen['id'];
   projectId: Project['id'];
   allScreens?: Screen[];
   allHotspots?: HotspotWithMetadata[];
@@ -462,6 +461,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
                 hotspots={targetScreenHotspots}
                 allHotspots={allHotspots}
                 closeParent={closeOverlay}
+                showConversations={false}
                 screenId={targetScreen.id}
               />
             </div>
