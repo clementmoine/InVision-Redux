@@ -15,7 +15,7 @@ Some features are not handled yet, here is the not prioritized roadmap/to-do lis
   - [x] Manage the mode in url
   - [x] Keyboard shortcuts
   - [ ] Preview mode
-    - [ ] Comments in read only
+    - [x] Comments in read only
     - [x] Quick navigate to a screen with thumbnails (dropdown on the current screen)
     - [ ] Manage the hotspots
       - [x] Navigate to a screen (with id, previous, next or last visited)
@@ -28,9 +28,6 @@ Some features are not handled yet, here is the not prioritized roadmap/to-do lis
       - [x] Display these
       - [x] Manage hotspots in fixed footer and header
       - [x] Fix to follow the horizontal scroll
-  - [ ] History mode
-    - [ ] Display the screen history
-    - [ ] Side by side comparison
   - [ ] Inspect mode
     - [x] Left panel
       - [x] List the layers
@@ -43,11 +40,11 @@ Some features are not handled yet, here is the not prioritized roadmap/to-do lis
       - [x] Display the screen
       - [x] Display the annotations on hover
       - [x] Visual select of a layer
-    - [ ] Flow mode
-      - [ ] Display the screens in a flow chart
 
 Some features are intentionally not meant to be done (at least for the ongoing version) :
 
+- Flow mode
+- History mode
 - Build mode
 - Comments
 - Notifications
