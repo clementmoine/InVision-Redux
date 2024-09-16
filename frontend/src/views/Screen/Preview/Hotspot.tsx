@@ -39,6 +39,7 @@ import { useLongPress } from '@/hooks/useLongPress';
 import { useSwipe } from '@/hooks/useSwipe';
 
 import Preview from '@/views/Screen/Preview/Preview';
+import { cn } from '@/lib/utils';
 
 interface HotspotProps {
   hotspot: HotspotWithMetadata;
@@ -68,7 +69,6 @@ const Hotspot: React.FC<HotspotProps> = props => {
     projectId,
     zoomLevel,
     allScreens,
-    closeParent,
   } = props;
 
   const timeoutRef = useRef<number>();
@@ -179,21 +179,9 @@ const Hotspot: React.FC<HotspotProps> = props => {
         h => h.screenID === targetScreen.id,
       );
 
-      if (
-        targetType &&
-        eventType === 'hover' &&
-        // Pure Typescript condition for the targetType to exclude those types (No stay on screen on these)
-        targetType !== 'externalUrl' &&
-        targetType !== 'positionOnScreen' &&
-        !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
-          .stayOnScreen
-      ) {
-        targetHotspots?.unshift(hotspot);
-      }
-
       return targetHotspots;
     }
-  }, [allHotspots, eventType, hotspot, targetScreen, targetType]);
+  }, [allHotspots, targetScreen]);
 
   // Handle open (for floating and trigger hotspot actions)
   const handleOpen = useCallback(
@@ -366,6 +354,39 @@ const Hotspot: React.FC<HotspotProps> = props => {
     return style;
   }, [hotspot, position, targetType]);
 
+  // Listen the mouse move to close the overlay opened by hovering a hotspot
+  const handleMouseMove = useCallback(
+    (event: MouseEvent) => {
+      if (isOverlayOpen && eventType === 'hover') {
+        const { clientX, clientY } = event;
+
+        const rect = refs.reference.current?.getBoundingClientRect();
+
+        if (rect) {
+          if (
+            clientX < rect.left ||
+            clientX > rect.right ||
+            clientY < rect.top ||
+            clientY > rect.bottom
+          ) {
+            closeOverlay();
+          }
+        }
+      }
+    },
+    [closeOverlay, eventType, isOverlayOpen, refs.reference],
+  );
+
+  // Mouse move listener
+  useEffect(() => {
+    if (!isEmbedded) {
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+      };
+    }
+  }, [handleMouseMove, isEmbedded]);
+
   // Timer hotspot
   useEffect(() => {
     if (
@@ -401,31 +422,15 @@ const Hotspot: React.FC<HotspotProps> = props => {
     <>
       <button
         ref={refs.setReference}
-        {...getReferenceProps({
-          onMouseLeave: () => {
-            // Mouse leave on the hotspot when embedded
-            if (
-              isEmbedded &&
-              targetType &&
-              // Disabled that since we want to trigger the embedded hotspot
-              // eventType === 'hover' &&
-
-              // Pure Typescript condition for the targetType to exclude those types (No stay on screen on these)
-              targetType !== 'externalUrl' &&
-              targetType !== 'positionOnScreen' &&
-              !(hotspot as HotspotWithMetadata<typeof targetType>).metaData
-                .stayOnScreen
-            ) {
-              closeParent?.();
-            }
-          },
-        })}
+        {...getReferenceProps()}
         style={style}
         data-event={eventType}
         data-target={targetType}
         data-hotspotid={hotspot.id.toString()}
         data-screenid={hotspot.screenID.toString()}
-        className="absolute border border-blue-400 bg-blue-400/50 transition-opacity duration-500"
+        className={cn(
+          'absolute border border-blue-400 bg-blue-400/50 transition-opacity duration-500',
+        )}
       />
 
       {isOverlayOpen && !isEmbedded && targetScreen && (
