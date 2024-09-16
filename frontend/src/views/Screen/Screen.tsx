@@ -500,42 +500,6 @@ function Screen() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label="Flow Mode"
-                  className={cn(
-                    'rounded-lg',
-                    (params.mode ?? 'preview') === 'flow'
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground',
-                  )}
-                  onClick={() =>
-                    navigate(
-                      `/projects/${params.projectId}/${params.screenId}/flow`,
-                    )
-                  }
-                >
-                  <Hotkeys
-                    keyName="f"
-                    onKeyUp={() =>
-                      navigate(
-                        `/projects/${params.projectId}/${params.screenId}/flow`,
-                      )
-                    }
-                  >
-                    <Workflow className="size-5" />
-                  </Hotkeys>
-                </Button>
-              </TooltipTrigger>
-
-              <TooltipContent side="top" sideOffset={5}>
-                Flow Mode <kbd>(F)</kbd>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
                   aria-label="Inspect"
                   className={cn(
                     'rounded-lg',
@@ -564,42 +528,6 @@ function Screen() {
 
               <TooltipContent side="top" sideOffset={5}>
                 Inspect <kbd>(I)</kbd>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="History Mode"
-                  className={cn(
-                    'rounded-lg',
-                    (params.mode ?? 'preview') === 'history'
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground',
-                  )}
-                  onClick={() =>
-                    navigate(
-                      `/projects/${params.projectId}/${params.screenId}/history`,
-                    )
-                  }
-                >
-                  <Hotkeys
-                    keyName="h"
-                    onKeyUp={() =>
-                      navigate(
-                        `/projects/${params.projectId}/${params.screenId}/history`,
-                      )
-                    }
-                  >
-                    <Clock className="size-5" />
-                  </Hotkeys>
-                </Button>
-              </TooltipTrigger>
-
-              <TooltipContent side="top" sideOffset={5}>
-                History Mode <kbd>(H)</kbd>
               </TooltipContent>
             </Tooltip>
           </div>
