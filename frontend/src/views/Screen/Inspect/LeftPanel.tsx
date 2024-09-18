@@ -4,6 +4,8 @@ import {
   MouseEvent,
   Dispatch,
   SetStateAction,
+  useRef,
+  useEffect,
 } from 'react';
 import {
   Component,
@@ -58,6 +60,10 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
     setExpandedGroupIds,
   } = props;
 
+  const layerRefs = useRef<{
+    [key: string]: HTMLDivElement | HTMLAnchorElement | null;
+  }>({});
+
   const renderLayer = useCallback(
     (layer: Layer, level = 0) => {
       const isSelected = selectedLayer ? selectedLayer.id === layer.id : false;
@@ -67,7 +73,12 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
         const isExpanded = expandedGroupIds.includes(layer.id);
 
         return (
-          <AccordionItem key={layer.id} value={layer.id} className="border-b-0">
+          <AccordionItem
+            key={layer.id}
+            value={layer.id}
+            className="border-b-0"
+            ref={el => (layerRefs.current[layer.id] = el)}
+          >
             <AccordionTrigger
               className={cn(
                 'p-2 overflow-hidden rounded-lg transition-all !no-underline gap-3',
@@ -120,6 +131,7 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
           onClick={() => setSelectedLayer(layer)}
           onMouseOver={() => setHoveredLayer(layer)}
           onMouseOut={() => setHoveredLayer(undefined)}
+          ref={el => (layerRefs.current[layer.id] = el)}
           className={cn(
             'flex items-center gap-3 rounded-lg p-2 transition-all',
             {
@@ -157,6 +169,25 @@ function InspectLeftPanel(props: InspectLeftPanelProps) {
   const layers = useMemo(() => {
     if (data?.layers) return data.layers.map(layer => renderLayer(layer));
   }, [data?.layers, renderLayer]);
+
+  useEffect(() => {
+    if (selectedLayer && layerRefs.current[selectedLayer.id]) {
+      const element = layerRefs.current[selectedLayer.id];
+
+      const scrollToElement = () => {
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            element?.scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+            });
+          });
+        }, 250); // Wait a bit before transition to prevent missing the element real position when accordion open
+      };
+
+      scrollToElement();
+    }
+  }, [selectedLayer, expandedGroupIds]);
 
   const groupIds = useMemo(() => {
     const getGroupIds = (layers: Layer[]): string[] => {

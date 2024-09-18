@@ -120,7 +120,7 @@ const Conversation: React.FC<ConversationProps> = props => {
             {/* Avatar */}
             <img
               src={`/api/static/${firstComment?.avatarUrl}`}
-              className="absolute rounded-full inset-0 border-4 border-current"
+              className="absolute rounded-full inset-0 border-4 border-current m-auto"
             />
           </button>
         </TooltipTrigger>
