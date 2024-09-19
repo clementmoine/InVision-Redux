@@ -22,6 +22,7 @@ import {
   ArchivedScreenDetails,
   Conversation as ConversationType,
   Screen,
+  Comment,
 } from '@/types';
 
 import dayjs from 'dayjs';
@@ -29,6 +30,9 @@ import { Card } from '@/components/ui/card';
 import { IntermediateRepresentation } from 'linkifyjs';
 import style from './Conversation.module.scss';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+import 'linkify-plugin-mention';
 
 interface ConversationProps {
   conversation: ConversationType;
@@ -69,6 +73,22 @@ const Conversation: React.FC<ConversationProps> = props => {
     role,
   ]);
 
+  function isSystemAvatar(avatarID: string | undefined): boolean {
+    return avatarID !== undefined && avatarID.startsWith('00000000');
+  }
+
+  function getInitials(name: string | undefined): string {
+    if (!name) return '';
+
+    const nameParts = name.trim().split(/\s+/);
+    const firstName = nameParts.shift() || '';
+    const lastName = nameParts.pop() || '';
+
+    return (
+      firstName.slice(0, 1).toUpperCase() + lastName.slice(0, 1).toUpperCase()
+    );
+  }
+
   const referenceStyle = useMemo(() => {
     return {
       top: conversation.y * zoomLevel,
@@ -76,22 +96,57 @@ const Conversation: React.FC<ConversationProps> = props => {
     };
   }, [conversation, zoomLevel]);
 
-  const firstComment = useMemo(
-    () => [...conversation.comments].shift(),
-    [conversation],
-  );
+  const commenters = useMemo(() => {
+    if (!conversation || !conversation.comments) return [];
+
+    return conversation.comments.reduce(
+      (users, comment) => {
+        const userExists = users.some(user => user.userID === comment.userID);
+
+        if (!userExists) {
+          users.push({
+            avatarID: comment.avatarID,
+            avatarUrl: comment.avatarUrl,
+            userName: comment.userName,
+            userID: comment.userID,
+          });
+        }
+
+        return users;
+      },
+      [] as Pick<Comment, 'avatarID' | 'userName' | 'avatarUrl' | 'userID'>[],
+    );
+  }, [conversation]);
+
+  const isValidUrl = (url: string | undefined): boolean => {
+    try {
+      return !!url && !!new URL(url); // Tente de créer un objet URL pour valider
+    } catch {
+      return false;
+    }
+  };
 
   const renderLink = useCallback((options: IntermediateRepresentation) => {
     const { content, attributes } = options;
+    const href = attributes?.href;
+
+    if (isValidUrl(href)) {
+      return (
+        <a
+          className="text-primary hover:text-primary"
+          target="_blank"
+          rel="noopener noreferrer"
+          {...attributes}
+        >
+          {content}
+        </a>
+      );
+    }
+
     return (
-      <a
-        className="text-primary hover:text-primary"
-        target="_blank"
-        rel="noopener noreferrer"
-        {...attributes}
-      >
+      <span className="text-blue-400" {...attributes}>
         {content}
-      </a>
+      </span>
     );
   }, []);
 
@@ -104,7 +159,7 @@ const Conversation: React.FC<ConversationProps> = props => {
             {...getReferenceProps()}
             style={referenceStyle}
             className={cn(
-              'absolute size-8 z-[9999] -translate-y-full opacity-70 hover:opacity-100 transition-opacity',
+              'absolute h-8 min-w-8 z-[9999] -translate-y-full opacity-70 hover:opacity-100 transition-opacity',
               {
                 'text-white': !conversation.isTourPoint,
                 'text-blue-400': conversation.isTourPoint,
@@ -118,10 +173,32 @@ const Conversation: React.FC<ConversationProps> = props => {
             <div className="absolute inset-0 size-full shadow-md shadow-gray-500/50 rounded-e-full rounded-ss-full bg-current" />
 
             {/* Avatar */}
-            <img
-              src={`/api/static/${firstComment?.avatarUrl}`}
-              className="absolute rounded-full inset-0 border-4 border-current m-auto"
-            />
+            <div className="-space-x-4 h-full flex m-auto">
+              {commenters.map((commenter, index) => (
+                <Avatar
+                  key={commenter.avatarID}
+                  className={cn(
+                    'h-full aspect-square w-auto shrink-0 border-4 border-transparent',
+                    {
+                      grayscale: conversation.isComplete,
+                    },
+                  )}
+                  style={{ zIndex: commenters.length - index }}
+                >
+                  <AvatarImage
+                    src={
+                      isSystemAvatar(commenter.avatarID)
+                        ? undefined
+                        : `/api/static/${commenter.avatarUrl}`
+                    }
+                    alt={commenter.userName}
+                  />
+                  <AvatarFallback className="text-muted-foreground text-[12px] align-middle text-center h-full aspect-square w-auto p-0">
+                    {getInitials(commenter.userName)}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
           </button>
         </TooltipTrigger>
 
@@ -141,29 +218,53 @@ const Conversation: React.FC<ConversationProps> = props => {
             >
               <ol className="flex flex-col gap-4 p-0 m-0 overflow-hidden w-full justify-between py-4 px-6 select-text text-sm text-muted-foreground">
                 {conversation.comments.map(comment => (
-                  <li key={comment.id} className="flex gap-4 w-full">
-                    <img
-                      src={`/api/static/${comment.avatarUrl}`}
-                      className={cn('size-6 rounded-full shrink-0', {
+                  <li key={comment.id} className="flex gap-2 w-full">
+                    {/* Avatar */}
+                    <Avatar
+                      className={cn('size-6 shrink-0', {
                         grayscale: conversation.isComplete,
                       })}
-                    />
+                    >
+                      <AvatarImage
+                        src={
+                          isSystemAvatar(comment.avatarID)
+                            ? undefined
+                            : `/api/static/${comment.avatarUrl}`
+                        }
+                        alt={comment.userName}
+                      />
 
-                    <div className="flex gap-1 flex-col w-full ">
-                      <div className="flex justify-between  text-foreground">
-                        <p className="text-md">{comment.userName}</p>
-                        <p>{dayjs(comment.createdAt).fromNow()}</p>
+                      <AvatarFallback className="text-muted-foreground text-[12px] align-middle text-center h-full aspect-square w-auto p-0">
+                        {getInitials(comment.userName)}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex gap-2 flex-col w-full ">
+                      <div className="flex gap-2 text-foreground">
+                        <p>{comment.userName}</p>
+
+                        {/* Comment date */}
+                        <p
+                          className="text-muted-foreground"
+                          title={dayjs(comment.createdAt).format('L LT')}
+                        >
+                          {dayjs(comment.createdAt).fromNow()}
+                        </p>
                       </div>
 
                       <p
-                        className="text-sm  w-full"
+                        className="text-sm w-full"
                         style={{
                           whiteSpace: 'pre-line',
                           wordBreak: 'break-word',
                           overflowWrap: 'break-word',
                         }}
                       >
-                        <Linkify options={{ render: renderLink }}>
+                        <Linkify
+                          options={{
+                            render: renderLink,
+                          }}
+                        >
                           {comment.comment}
                         </Linkify>
                       </p>

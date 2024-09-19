@@ -87,7 +87,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           </Link>
 
           <CardDescription>{project.data.itemCount} screens</CardDescription>
-          <CardDescription>
+
+          <CardDescription title={dayjs(project.data.updatedAt).format('L LT')}>
             {dayjs(project.data.updatedAt).fromNow()}
           </CardDescription>
         </div>

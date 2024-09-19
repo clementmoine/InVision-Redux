@@ -95,7 +95,10 @@ const ScreenCard: React.FC<ScreenCardProps> = props => {
           </CardTitle>
         </a>
 
-        <CardDescription>{dayjs(screen.updatedAt).fromNow()}</CardDescription>
+        <CardDescription title={dayjs(screen.updatedAt).format('L LT')}>
+          {dayjs(screen.updatedAt).fromNow()}
+        </CardDescription>
+
         <CardDescription className="flex items-center gap-1">
           {screen.conversationCount > 0 ? (
             <MessageCircle className="size-4" />

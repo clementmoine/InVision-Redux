@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { TypeAnimation } from 'react-type-animation';
 import { Routes, Route, Outlet, Link } from 'react-router-dom';
 
@@ -18,6 +19,7 @@ import { Toaster } from './components/ui/toaster';
 import { useRef, useState } from 'react';
 import ConfettiComponent from './components/Confetti';
 
+dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
 
 export default function App() {
