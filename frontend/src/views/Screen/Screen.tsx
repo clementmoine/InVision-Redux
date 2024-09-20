@@ -253,6 +253,7 @@ function Screen() {
       <div className="relative flex h-screen w-full flex-col overflow-hidden">
         {/* Screen */}
         <div
+          id="screen-container"
           className={cn(
             'flex h-full w-full justify-center overflow-hidden p-0 select-none mb-16',
             { [style['is-mobile']]: isMobile },

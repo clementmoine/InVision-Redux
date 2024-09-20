@@ -9,6 +9,7 @@ import {
   shift,
   autoUpdate,
   FloatingPortal,
+  flip,
 } from '@floating-ui/react';
 import {
   Tooltip,
@@ -57,8 +58,13 @@ const Conversation: React.FC<ConversationProps> = props => {
     onOpenChange: handleOpen,
     middleware: [
       offset(10),
-      //   flip({ fallbackAxisSideDirection: 'end' }),
-      shift(),
+      shift({
+        boundary: document.querySelector('#screen-container') || undefined,
+      }),
+      flip({
+        fallbackPlacements: ['left-start'],
+        boundary: document.querySelector('#screen-container') || undefined,
+      }),
     ],
     whileElementsMounted: autoUpdate,
   });
