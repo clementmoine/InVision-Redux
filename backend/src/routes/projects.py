@@ -13,7 +13,7 @@ STATIC_FOLDER = "src/static/"
 @blueprint.route("/projects")
 def fetch_projects():
     # Get pagination parameters
-    limit = int(request.args.get("limit", 20))
+    limit = int(request.args.get("limit", 40))
     page = int(request.args.get("page", 1))
 
     # Get type, tag and search query if provided

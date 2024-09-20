@@ -5,7 +5,7 @@ const projects: Partial<Record<keyof FetchProjectsParams, string>> = {
   type: 'all',
   tag: 'all',
   page: '1',
-  limit: '20',
+  limit: '40',
   sort: 'updatedAt',
 };
 
