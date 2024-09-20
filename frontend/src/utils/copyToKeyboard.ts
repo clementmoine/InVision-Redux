@@ -1,16 +1,13 @@
-import { Toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
-type ToastFunc = (options: Toast) => void;
-
-export const copyToClipboard = async (text?: string, toast?: ToastFunc) => {
-  if (!text) return false; // Retourner false si aucun texte n'est fourni
+export const copyToClipboard = async (text?: string) => {
+  if (!text) return false;
 
   if (navigator.clipboard) {
-    // Utilisation de l'API Clipboard si disponible
+    // Use Clipboard API if available
     try {
       await navigator.clipboard.writeText(text);
-      toast?.({
-        title: 'Copied! 🎉',
+      toast('Copied! 🎉', {
         description: 'Text copied to clipboard successfully.',
         duration: 1500,
       });
@@ -20,11 +17,10 @@ export const copyToClipboard = async (text?: string, toast?: ToastFunc) => {
       return false;
     }
   } else {
-    // Fallback pour les navigateurs plus anciens
+    // Fallback for old browsers
     const textArea = document.createElement('textarea');
     textArea.value = text;
 
-    // Assurer que l'élément n'est pas visible à l'écran
     textArea.style.position = 'fixed';
     textArea.style.left = '-9999px';
     textArea.style.top = '-9999px';
@@ -36,11 +32,10 @@ export const copyToClipboard = async (text?: string, toast?: ToastFunc) => {
 
     try {
       const successful = document.execCommand('copy');
-      document.body.removeChild(textArea); // Nettoyer l'élément du DOM
+      document.body.removeChild(textArea);
 
       if (successful) {
-        toast?.({
-          title: 'Copied! 🎉',
+        toast('Copied! 🎉', {
           description: 'Text copied to clipboard successfully.',
           duration: 1500,
         });
@@ -48,7 +43,7 @@ export const copyToClipboard = async (text?: string, toast?: ToastFunc) => {
       return successful;
     } catch (err) {
       console.error('Failed to copy text using execCommand:', err);
-      document.body.removeChild(textArea); // Nettoyer l'élément du DOM
+      document.body.removeChild(textArea);
       return false;
     }
   }

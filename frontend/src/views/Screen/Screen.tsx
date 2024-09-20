@@ -29,7 +29,6 @@ import {
 } from '@/components/ui/breadcrumb';
 import Zoom from '@/components/Zoom';
 import MiniPagination from '@/components/MiniPagination';
-import { Toaster } from '@/components/ui/toaster';
 
 import EmptyState from '@/assets/illustrations/empty-state.svg?react';
 import ToDo from '@/assets/illustrations/to-do.svg?react';
@@ -47,15 +46,13 @@ import defaultValues from '@/constants/defaultValues';
 
 import style from './Screen.module.scss';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { useToast } from '@/components/ui/use-toast';
 import { ThumbnailTray } from './ThumbnailTray';
 import ConversationToggle from '@/components/ConversationToggle';
+import { Toaster } from '@/components/ui/sonner';
 
 function Screen() {
   const params = useParams();
   const navigate = useNavigate();
-
-  const { toast } = useToast();
 
   const [showConversations, setShowConversations] = useState<boolean | 'all'>(
     true,
@@ -241,7 +238,8 @@ function Screen() {
       style={{ ['--screen-background-color']: screenBackgroundColor }}
     >
       <Toaster
-        className="empty:overflow-visible !bottom-32 overflow-hidden"
+        className="!bottom-20"
+        position="top-right"
         style={{
           transform:
             params.mode === 'inspect'
@@ -360,7 +358,7 @@ function Screen() {
 
       {/* Tools */}
       <aside
-        className="fixed flex bottom-20 right-4 z-[100] gap-4"
+        className="fixed flex bottom-20 right-4 gap-4"
         style={{
           transform:
             params.mode === 'inspect'
@@ -549,7 +547,7 @@ function Screen() {
                   variant="default"
                   className="rounded-lg gap-2"
                   aria-label="Back"
-                  onClick={() => copyToClipboard(window.location.href, toast)}
+                  onClick={() => copyToClipboard(window.location.href)}
                 >
                   <Share className="size-5" />
                   Share

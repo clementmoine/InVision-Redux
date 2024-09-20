@@ -15,7 +15,7 @@ import { Redirect } from '@/components/Redirect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 import InVision from '@/assets/invision.svg?react';
-import { Toaster } from './components/ui/toaster';
+import { Toaster } from './components/ui/sonner';
 import { useRef, useState } from 'react';
 import ConfettiComponent from './components/Confetti';
 

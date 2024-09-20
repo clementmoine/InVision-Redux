@@ -42,7 +42,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { copyToClipboard } from '@/utils';
-import { useToast } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/Spinner';
 
 const formSchema = z.object({
@@ -51,7 +50,6 @@ const formSchema = z.object({
 
 function Project() {
   const params = useParams();
-  const { toast } = useToast();
   const { favorites, setFavorites } = useFavorites();
   const { collapsedGroups, setCollapsedGroups } = useCollapsedGroups();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -202,7 +200,7 @@ function Project() {
                   variant="default"
                   className="rounded-lg gap-2"
                   aria-label="Share"
-                  onClick={() => copyToClipboard(window.location.href, toast)}
+                  onClick={() => copyToClipboard(window.location.href)}
                 >
                   <Share className="size-5" />
                   Share

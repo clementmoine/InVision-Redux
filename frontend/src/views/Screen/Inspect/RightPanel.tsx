@@ -30,7 +30,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { useToast } from '@/components/ui/use-toast';
 
 import EmptyState from '@/assets/illustrations/empty-state.svg?react';
 import { Spinner } from '@/components/Spinner';
@@ -53,41 +52,37 @@ function InspectRightPanel(props: InspectRightPanelProps) {
     setSelectedLayer,
     expandedGroupIds,
   } = props;
-  const { toast } = useToast();
 
-  const renderInfo = useCallback(
-    (label?: string, value?: string) => {
-      return (
-        !!value && (
-          <li key={`${label}.${value}`}>
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <a
-                  role="button"
-                  onClick={() => copyToClipboard(value, toast)}
-                  className="flex gap-2 hover:bg-muted rounded-lg px-4 py-2"
-                >
-                  {!!label && (
-                    <span className="text-muted-foreground text-nowrap">
-                      {label}:
-                    </span>
-                  )}
-                  <span className="text-nowrap text-ellipsis overflow-hidden">
-                    {value}
+  const renderInfo = useCallback((label?: string, value?: string) => {
+    return (
+      !!value && (
+        <li key={`${label}.${value}`}>
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <a
+                role="button"
+                onClick={() => copyToClipboard(value)}
+                className="flex gap-2 hover:bg-muted rounded-lg px-4 py-2"
+              >
+                {!!label && (
+                  <span className="text-muted-foreground text-nowrap">
+                    {label}:
                   </span>
-                </a>
-              </TooltipTrigger>
+                )}
+                <span className="text-nowrap text-ellipsis overflow-hidden">
+                  {value}
+                </span>
+              </a>
+            </TooltipTrigger>
 
-              <TooltipContent side="left" sideOffset={5}>
-                Copy to clipboard
-              </TooltipContent>
-            </Tooltip>
-          </li>
-        )
-      );
-    },
-    [toast],
-  );
+            <TooltipContent side="left" sideOffset={5}>
+              Copy to clipboard
+            </TooltipContent>
+          </Tooltip>
+        </li>
+      )
+    );
+  }, []);
 
   const formatColor = useCallback((color?: Color) => {
     if (!color) return undefined;
@@ -143,7 +138,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                     <TooltipTrigger asChild>
                       <a
                         role="button"
-                        onClick={() => copyToClipboard(value, toast)}
+                        onClick={() => copyToClipboard(value)}
                         className="uppercase text-nowrap flex flex-row gap-2 text-sm items-stretch hover:bg-muted rounded-lg p-2"
                       >
                         <span className="text-nowrap">{value}</span>
@@ -168,7 +163,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
         </li>
       );
     },
-    [formatColor, toast],
+    [formatColor],
   );
 
   const renderDocumentColors = useCallback(() => {
@@ -186,7 +181,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                   <a
                     href="#"
                     role="button"
-                    onClick={() => copyToClipboard(value, toast)}
+                    onClick={() => copyToClipboard(value)}
                     className="flex w-5 h-5 shrink-0 rounded-sm outline outline-1 outline-muted-foreground/50 relative overflow-hidden text-neutral-200"
                     style={{
                       backgroundImage:
@@ -224,7 +219,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
         })}
       </ul>
     );
-  }, [data?.screen_colors, formatColor, toast]);
+  }, [data?.screen_colors, formatColor]);
 
   const renderColor = useCallback(
     (color: Color | undefined, index?: number | string) => {
@@ -240,7 +235,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
             <TooltipTrigger asChild>
               <a
                 role="button"
-                onClick={() => copyToClipboard(value, toast)}
+                onClick={() => copyToClipboard(value)}
                 className="flex flex-row gap-2 text-sm items-center hover:bg-muted rounded-lg px-4 py-2"
               >
                 {/* Checker background for transparent colors 🏁 */}
@@ -284,7 +279,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
         </li>
       );
     },
-    [formatColor, toast],
+    [formatColor],
   );
 
   const renderLayer = useCallback(
@@ -448,7 +443,7 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => copyToClipboard(selectedLayer.text, toast)}
+                      onClick={() => copyToClipboard(selectedLayer.text)}
                       className="rounded-lg rounded-l-none flex-shrink-0 ml-auto"
                       aria-label="Copy to clipboard"
                     >
@@ -490,7 +485,6 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                             selectedLayer.symbolMaster ||
                             selectedLayer.sharedStyle
                           )?.name,
-                          toast,
                         )
                       }
                       className="flex flex-col gap-1 hover:bg-muted rounded-lg px-4 py-2"
