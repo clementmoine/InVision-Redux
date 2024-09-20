@@ -54,6 +54,12 @@ def ask_user():
             )
 
 
+def is_valid_response(response, expected_keys):
+    if not response or not isinstance(response, dict):
+        return False
+    return all(key in response for key in expected_keys)
+
+
 def browse_screen(screen, project, session):
     """
     Browse a screen, download its assets, and save JSON data locally.
@@ -260,8 +266,6 @@ def browse_projects(session):
 
     allProjects = (projects or []) + (archivedProjects or [])
 
-    print(len(archivedProjects))
-
     if allProjects:
         # In test mode we process one project of each type
         if is_test_mode():
@@ -301,8 +305,10 @@ def browse_projects(session):
                     for f in required_files
                 ):
                     # Grab the project updated date from the project and project.json
+                    # Grab the projet item count from the project and project.json
                     # If they match ignore the project, if they don't remove the project dir to scrap that again
-                    project_update_date = project["data"]["updatedAt"]
+                    project_update_date = project["data"].get("updatedAt")
+                    project_item_count = project["data"].get("itemCount")
 
                     project_json_path = os.path.join(project_folder, "project.json")
                     screens_json_path = os.path.join(project_folder, "screens.json")
@@ -313,7 +319,33 @@ def browse_projects(session):
                     with open(screens_json_path, "r") as f:
                         local_screens_data = json.load(f)
 
-                    if project_update_date == local_project_data["data"]["updatedAt"]:
+                    # Protect the local data if the response is invalid
+                    if not is_valid_response(
+                        local_project_data,
+                        [
+                            "id",
+                            "data",
+                            "type",
+                        ],
+                    ):
+                        color_print(
+                            f"   ⮑  Project skipped due to invalid response",
+                            "yellow",
+                        )
+
+                        ignored_project_ids.add(project["id"])
+                        continue
+
+                    local_project_update_date = local_project_data["data"].get(
+                        "updatedAt"
+                    )
+                    local_project_item_count = local_project_data["data"].get(
+                        "itemCount"
+                    )
+                    if (
+                        project_update_date == local_project_update_date
+                        and project_item_count == local_project_item_count
+                    ):
                         archived_screens_count = local_screens_data[
                             "archivedScreensCount"
                         ]
