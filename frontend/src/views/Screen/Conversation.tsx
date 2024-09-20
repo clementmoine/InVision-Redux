@@ -159,7 +159,7 @@ const Conversation: React.FC<ConversationProps> = props => {
             {...getReferenceProps()}
             style={referenceStyle}
             className={cn(
-              'absolute h-8 min-w-8 z-[9999] -translate-y-full opacity-70 hover:opacity-100 transition-opacity',
+              'absolute h-8 min-w-8 z-[9998] -translate-y-full opacity-70 hover:opacity-100 transition-opacity',
               {
                 'text-white': !conversation.isTourPoint,
                 'text-blue-400': conversation.isTourPoint,
@@ -213,7 +213,7 @@ const Conversation: React.FC<ConversationProps> = props => {
             <Card
               ref={refs.setFloating}
               style={floatingStyles}
-              className="w-96 max-h-96 z-[9999] overflow-hidden overflow-y-scroll"
+              className="w-96 max-h-96 z-[9998] overflow-hidden overflow-y-scroll"
               {...getFloatingProps()}
             >
               <ol className="flex flex-col gap-4 p-0 m-0 overflow-hidden w-full justify-between py-4 px-6 select-text text-sm text-muted-foreground">
