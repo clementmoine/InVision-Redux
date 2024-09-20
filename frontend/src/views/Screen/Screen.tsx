@@ -238,7 +238,6 @@ function Screen() {
       style={{ ['--screen-background-color']: screenBackgroundColor }}
     >
       <Toaster
-        className="!bottom-20"
         position="top-right"
         style={{
           transform:

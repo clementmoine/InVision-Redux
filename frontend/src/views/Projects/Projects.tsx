@@ -164,7 +164,6 @@ function Projects() {
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="prototypes">Prototypes</TabsTrigger>
-              <TabsTrigger value="boards">Boards</TabsTrigger>
               {favorites.size > 0 && (
                 <TabsTrigger value="favorites">Favorites</TabsTrigger>
               )}

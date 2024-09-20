@@ -77,7 +77,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           <Link to={`/projects/${project.id}`}>
             <CardTitle className="flex items-center gap-1 text-sm">
               {project.data.isArchived && (
-                <Archive aria-label="Archived" className="h-4 w-4" />
+                <Archive aria-label="Archived" className="shrink-0 size-4" />
               )}
 
               <span className="text-ellipsis whitespace-nowrap overflow-hidden">

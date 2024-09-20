@@ -24,7 +24,9 @@ def fetch_projects():
 
     # Ignore type and tag if they equal 'all'
     if project_type == "all":
-        project_type = None
+        project_type = (
+            None  # We want to include both archived and non-archived projects
+        )
     if project_tag == "all":
         project_tag = None
 
@@ -50,23 +52,27 @@ def fetch_projects():
                         # Check if project should be included based on type and tag parameters
                         project_data = project.get("data")
 
+                        # Determine if we should include the project
+                        include_project = False
+
+                        if project_type is None:
+                            # If project_type is "all", include both archived and non-archived
+                            include_project = True
+                        elif project_type == "archived" and project_data.get(
+                            "isArchived"
+                        ):
+                            # If filtering by "archived", include only archived projects
+                            include_project = True
+                        elif project_data.get(
+                            "type"
+                        ) == project_type and not project_data.get("isArchived"):
+                            # If filtering by a specific type, include only non-archived projects
+                            include_project = True
+
+                        # Check if the project matches the tag and search query
                         if (
-                            (
-                                # Archived type is requested
-                                (
-                                    project_type == "archived"
-                                    and project_data.get("isArchived")
-                                )
-                                # Any type requested excluding archived
-                                or (
-                                    (
-                                        not project_type
-                                        or (project_data.get("type") == project_type)
-                                    )
-                                    and not project_data.get("isArchived")
-                                )
-                            )
-                            and (  # Project tags includes the requested tag
+                            include_project
+                            and (
                                 not project_tag
                                 or str(project_tag)
                                 in [
@@ -74,7 +80,7 @@ def fetch_projects():
                                     for tag in project_data.get("tags", [])
                                 ]
                             )
-                            and (  # Project name matches the search query
+                            and (
                                 not search_query
                                 or unidecode(search_query.lower())
                                 in unidecode(project_data.get("name", "").lower())
@@ -122,19 +128,15 @@ def fetch_projects():
 def get_project(project_id):
     # Get search query if provided
     search_query = request.args.get("search", "")
-
     project_dir = os.path.join(current_app.static_folder, "projects", str(project_id))
     project_json_path = os.path.join(project_dir, "project.json")
     screens_json_path = os.path.join(project_dir, "screens.json")
-
     try:
         with open(project_json_path, "r") as project_file:
             project_data = json.load(project_file)
-
         if os.path.exists(screens_json_path):
             with open(screens_json_path, "r") as screens_file:
                 screens_data = json.load(screens_file)
-
                 # Filter the screens
                 filtered_screens = [
                     screen
@@ -143,7 +145,6 @@ def get_project(project_id):
                     in unidecode(screen.get("name", "").lower())
                 ]
                 screens_data["screens"] = filtered_screens
-
                 # Filter the archived screens
                 filtered_archived_screens = [
                     screen
@@ -152,10 +153,8 @@ def get_project(project_id):
                     in unidecode(screen.get("name", "").lower())
                 ]
                 screens_data["archivedscreens"] = filtered_archived_screens
-
                 # Add the screens_data to the project_data
                 project_data["screens"] = screens_data
-
         return jsonify(project_data)
     except FileNotFoundError:
         return "Project not found", 404
