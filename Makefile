@@ -6,35 +6,36 @@ install:
 	@echo "INVISION_EMAIL=your_email@example.com" > .env
 	@echo "INVISION_PASSWORD=your_password" >> .env
 	@echo "TEST_MODE=0" >> .env
-	@echo "DOCS_ROOT=\$${ROOT:-.}/docs" >> .env
+	@echo "DOCS_ROOT=/app/backend/src/static/docs" >> .env
 	@echo ".env file created successfully."
 
-# Install dependencies and run scraper
-scrape:
-	cd scraper && poetry install && poetry run python main.py
-
-# Build backend and frontend services
-build:
-	docker compose build
-
-# Start backend and frontend services
-up:
-	docker compose up -d
-
-# Stop backend and frontend services
-down:
-	docker compose down
 
 # Open browser at localhost:3000
 open-browser:
 	@echo "Opening browser on http://localhost:3000"
 	open http://localhost:3000
 
-# Start both backend and frontend services and open browser
-start: build up open-browser
+# Run in dev mode
+dev:
+	docker compose -f docker-compose.yml up --build -d
+	$(MAKE) open-browser
 
-# Stop both backend and frontend services
-stop: down
+# Run in production mode
+prod:
+	docker compose -f docker-compose.prod.yml up --build -d
 
-# Restart (stop then start) 
-restart: stop start
+# Stop all
+stop:
+	docker compose down
+
+# Scrape from CLI
+scrape:
+	docker exec invision-backend poetry run python -m src.scraper.main
+	
+# Scrape with 'update' option
+scrape-update:
+	docker exec invision-backend poetry run python -m src.scraper.main update
+
+# Scrape with 'overwrite' option
+scrape-overwrite:
+	docker exec invision-backend poetry run python -m src.scraper.main overwrite

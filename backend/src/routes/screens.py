@@ -7,8 +7,6 @@ from flask import Blueprint, jsonify, current_app, request
 
 blueprint = Blueprint("screens", __name__)
 
-STATIC_FOLDER = "src/static/"
-
 
 @blueprint.route("/projects/<int:project_id>/screens/<int:screen_id>")
 def get_screen(project_id, screen_id):

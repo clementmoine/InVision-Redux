@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from requests.exceptions import HTTPError, RequestException
 
-from src.utils import color_print
+from .utils import color_print
 import time
 
 max_retries = 3

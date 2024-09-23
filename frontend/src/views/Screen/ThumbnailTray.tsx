@@ -165,44 +165,48 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
         ref={containerRef}
         className="flex flex-row px-3 overflow-x-auto items-end gap-5"
       >
-        {filteredDividers.map(divider => (
-          <li
-            key={divider.dividerID}
-            className="flex flex-col shrink-0 gap-2 pb-2"
-          >
-            <h3 className="text-foreground text-sm uppercase">
-              {divider.label}
-            </h3>
+        {filteredDividers.map(divider => {
+          if (divider != null) {
+            return (
+              <li
+                key={divider.dividerID}
+                className="flex flex-col shrink-0 gap-2 pb-2"
+              >
+                <h3 className="text-foreground text-sm uppercase">
+                  {divider.label}
+                </h3>
 
-            <ol className="flex flex-row gap-3">
-              {divider.screens.map(screen => (
-                <li
-                  key={screen.id}
-                  className={cn('flex shrink-0 w-48', {
-                    'screen-active': screen.id === Number(params.screenId),
-                  })}
-                >
-                  <ScreenCard
-                    screen={screen}
-                    mode="inspect"
-                    onClick={(e: MouseEvent<HTMLAnchorElement>) => {
-                      e.preventDefault();
+                <ol className="flex flex-row gap-3">
+                  {divider.screens.map(screen => (
+                    <li
+                      key={screen.id}
+                      className={cn('flex shrink-0 w-48', {
+                        'screen-active': screen.id === Number(params.screenId),
+                      })}
+                    >
+                      <ScreenCard
+                        screen={screen}
+                        mode="inspect"
+                        onClick={(e: MouseEvent<HTMLAnchorElement>) => {
+                          e.preventDefault();
 
-                      navigate(
-                        `/projects/${screen.projectID}/${screen.id}/${params.mode}`,
-                        { replace: true },
-                      );
-                    }}
-                    className={cn('w-full', {
-                      'outline-primary outline outline-4':
-                        screen.id === Number(params.screenId),
-                    })}
-                  />
-                </li>
-              ))}
-            </ol>
-          </li>
-        ))}
+                          navigate(
+                            `/projects/${screen.projectID}/${screen.id}/${params.mode}`,
+                            { replace: true },
+                          );
+                        }}
+                        className={cn('w-full', {
+                          'outline-primary outline outline-4':
+                            screen.id === Number(params.screenId),
+                        })}
+                      />
+                    </li>
+                  ))}
+                </ol>
+              </li>
+            );
+          }
+        })}
       </ol>
     </div>
   );

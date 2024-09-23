@@ -95,7 +95,13 @@ To begin using InVision Redux, follow these steps:
    Once the scraper has finished running, you can find the exported projects in the `docs` directory. To start the frontend and backend containers serving the documentation:
 
    ```
-   make start
+   make dev
+   ```
+
+   or for production
+
+   ```
+   make prod
    ```
 
 7. **Stop the Project**:

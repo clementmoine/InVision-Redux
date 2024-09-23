@@ -3,9 +3,9 @@ import json
 import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from src.download import json_patch_to_local_assets, save_json_data
-from src.utils import color_print, color_input, is_test_mode
-from src.api_requests import (
+from .download import json_patch_to_local_assets, save_json_data
+from .utils import color_print, is_test_mode
+from .api_requests import (
     fetch_tags,
     fetch_projects,
     get_screen_details,
@@ -15,43 +15,14 @@ from src.api_requests import (
 )
 
 # Constants for directories
-DOCS_ROOT = os.path.join("../", os.getenv("DOCS_ROOT", "./docs"))
+DOCS_ROOT = os.getenv("DOCS_ROOT", "./docs")
+
 
 # Parallelized tasks
 PARALLELIZED_TASKS = min(5, os.cpu_count())
 
 # Ignore Archived project
 IGNORE_ARCHIVED_PROJECTS = False
-
-
-# Function to ask the user whether to overwrite, ignore, or cancel the operation
-def ask_user():
-    """
-    Asks the user whether to overwrite, ignore, or cancel the operation if the docs folder already exists.
-
-    Returns:
-        str: 'overwrite' if the user wants to overwrite, 'update' if the user wants to update existing files, 'exit' to cancel the operation.
-    """
-    while True:
-        response = (
-            color_input(
-                "Docs folder already exists. Do you want to overwrite it, update or cancel the operation? (overwrite/update/exit): ",
-                "yellow",
-            )
-            .strip()
-            .lower()
-        )
-
-        if response in ("overwrite", "o"):
-            return "overwrite"
-        elif response in ("update", "u"):
-            return "update"
-        elif response in ("exit", "x"):
-            return "exit"
-        else:
-            print(
-                "Invalid input. Please enter 'overwrite' (o), 'update' (u) or 'exit' (x)."
-            )
 
 
 def is_valid_response(response, expected_keys):
@@ -238,24 +209,7 @@ def browse_project(project, session):
         return False
 
 
-def browse_projects(session):
-    user_choice = None
-
-    if os.path.exists(DOCS_ROOT):
-        user_choice = ask_user()
-        if user_choice == "overwrite":
-            shutil.rmtree(DOCS_ROOT, ignore_errors=True)
-
-        elif user_choice == "update":
-            color_print(
-                "Existing files in folders will be ignored. Replaying the scraping.",
-                "yellow",
-            )
-
-        else:  # user_choice == 'cancel'
-            color_print("Operation cancelled. Exiting.", "yellow")
-            exit()
-
+def browse_projects(session, option=None):
     projects = fetch_projects(isArchived=False, isCollaborator=True, session=session)
 
     archivedProjects = (
@@ -298,7 +252,7 @@ def browse_projects(session):
             project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
 
             # Ignore existing valid project folders
-            if user_choice == "update" and os.path.exists(project_folder):
+            if option == "update" and os.path.exists(project_folder):
                 required_files = ["project.json", "screens.json"]
                 if all(
                     os.path.exists(os.path.join(project_folder, f))

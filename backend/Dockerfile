@@ -1,25 +1,24 @@
+# ---- Base Python Image ----
 ARG PYTHON_VERSION=3.12
+FROM python:${PYTHON_VERSION}-slim as base
 
-FROM python:${PYTHON_VERSION}
-
-WORKDIR /srv
-
-# Install poetry
-RUN pip install --upgrade pip
+# Install Poetry
 RUN pip install poetry
 
-# Install Python dependencies
-ADD pyproject.toml poetry.lock ./
-RUN poetry install
+# Change working directory
+WORKDIR /backend
 
-# Add the project
-# NOTE Run the install again to install the project
-ADD src ./src
-RUN poetry install
+# Copy source code
+COPY . .
 
-# Expose the port that the application listens on.
+# Install dependencies (without dev dependencies)
+RUN poetry install --no-dev --no-interaction --no-ansi
+
+# Flask app target
+ENV FLASK_APP=/backend/src/app
+
+# Expose the Flask port
 EXPOSE 8080
 
-# Set the default command
-ENV FLASK_APP src/app:app
-CMD poetry run flask run --host 0.0.0.0 --port 8080 --debug
+# Run Flask backend
+CMD ["poetry", "run", "flask", "run", "--host=0.0.0.0", "--port=8080"]

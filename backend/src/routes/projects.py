@@ -7,8 +7,6 @@ from flask import Blueprint, jsonify, current_app, request
 
 blueprint = Blueprint("projects", __name__)
 
-STATIC_FOLDER = "src/static/"
-
 
 @blueprint.route("/projects")
 def fetch_projects():

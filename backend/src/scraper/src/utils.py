@@ -16,7 +16,7 @@ def color_print(text, color="RESET"):
         "white": Fore.WHITE,
     }
     color_code = color_mapping.get(color.lower(), Style.RESET_ALL)
-    return print(color_code + text + Style.RESET_ALL)
+    return print(color_code + text + Style.RESET_ALL, flush=True)
 
 
 def color_input(text, color="RESET"):

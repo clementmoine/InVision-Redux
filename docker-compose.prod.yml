@@ -9,7 +9,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      FLASK_ENV: development
+      FLASK_ENV: production
       INVISION_EMAIL: ${INVISION_EMAIL}
       INVISION_PASSWORD: ${INVISION_PASSWORD}
       DOCS_ROOT: ${DOCS_ROOT}
@@ -20,11 +20,6 @@ services:
     container_name: invision-frontend
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - ${ROOT:-.}/frontend/src:/frontend/src # Hot reloading
-    command: yarn dev
+      - "80:80"
