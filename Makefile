@@ -1,14 +1,23 @@
-# Install Poetry and create .env file
+# Create .env file
 install:
-	curl -sSL https://install.python-poetry.org | python3 -
-	poetry --version || (echo "Poetry installation failed"; exit 1)
 	@echo "Creating .env file..."
 	@echo "INVISION_EMAIL=your_email@example.com" > .env
 	@echo "INVISION_PASSWORD=your_password" >> .env
 	@echo "TEST_MODE=0" >> .env
-	@echo "DOCS_ROOT=/app/backend/src/static/docs" >> .env
+	@echo "ROOT=." >> .env
+	@echo "DOCS_ROOT=/backend/src/static/docs" >> .env
+	@echo "" >> .env
+	@echo "#CURL_CA_BUNDLE=/ca.crt" >> .env
+	@echo "" >> .env
+	@echo "#PIP_CERT=/ca.crt" >> .env
+	@echo "#PIP_INDEX_URL=http://example.fr" >> .env
+	@echo "" >> .env
+	@echo "#POETRY_CERTIFICATES_CUSTOM_CERT=/ca.crt" >> .env
+	@echo "#POETRY_CUSTOM_SOURCE_URL=http://example.fr" >> .env
+	@echo "" >> .env
+	@echo "#YARN_CAFILE=/ca.crt" >> .env
+	@echo "#YARN_REGISTRY=http://example.fr" >> .env
 	@echo ".env file created successfully."
-
 
 # Open browser at localhost:3000
 open-browser:

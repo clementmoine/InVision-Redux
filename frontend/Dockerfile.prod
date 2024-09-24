@@ -6,8 +6,21 @@ WORKDIR /frontend
 # Copy the source files into the image
 COPY . .
 
+# Set custom Yarn registry if YARN_REGISTRY is defined
+ARG YARN_REGISTRY
+RUN if [ -n "$YARN_REGISTRY" ]; then \
+        yarn config set registry "$YARN_REGISTRY"; \
+    fi
+
+# Set custom CA file if YARN_CAFILE is defined
+ARG YARN_CAFILE
+RUN if [ -n "$YARN_CAFILE" ]; then \
+        yarn config set cafile "$YARN_CAFILE"; \
+    fi
+
 # Install dependencies and build
-RUN yarn install && yarn build
+RUN yarn install --non-interactive
+RUN yarn build
 
 # Production stage
 FROM nginx:alpine
