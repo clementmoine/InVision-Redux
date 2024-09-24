@@ -15,8 +15,8 @@ install:
 	@echo "#POETRY_CERTIFICATES_CUSTOM_CERT=/ca.crt" >> .env
 	@echo "#POETRY_CUSTOM_SOURCE_URL=http://example.fr" >> .env
 	@echo "" >> .env
-	@echo "#YARN_CAFILE=/ca.crt" >> .env
-	@echo "#YARN_REGISTRY=http://example.fr" >> .env
+	@echo "#NPM_CA_FILE=/ca.crt" >> .env
+	@echo "#NPM_REGISTRY_SERVER=http://example.fr" >> .env
 	@echo ".env file created successfully."
 
 # Open browser at localhost:3000
@@ -26,12 +26,14 @@ open-browser:
 
 # Run in dev mode
 dev:
-	docker compose -f docker-compose.yml up --build -d
+	docker compose build --no-cache --pull
+	docker compose up -d
 	$(MAKE) open-browser
 
 # Run in production mode
 prod:
-	docker compose -f docker-compose.prod.yml up --build -d
+	docker compose -f docker-compose.prod.yml build --no-cache --pull
+	docker compose -f docker-compose.prod.yml up -d
 
 # Stop all
 stop:

@@ -2,20 +2,9 @@
 ARG PYTHON_VERSION=3.12
 FROM python:${PYTHON_VERSION}-slim as base
 
-# Set custom PyPI index if PIP_INDEX_URL is defined
-ARG PIP_INDEX_URL
-RUN if [ -n "$PIP_INDEX_URL" ]; then \
-        pip config set global.index-url "$PIP_INDEX_URL"; \
-    fi
-
-# Install Poetry
-RUN pip install poetry
-
-# Add custom source to poetry if env POETRY_CUSTOM_SOURCE_URL is defined
-ARG POETRY_CUSTOM_SOURCE_URL
-RUN if [ -n "$POETRY_CUSTOM_SOURCE_URL" ]; then \
-        poetry source add custom "$POETRY_CUSTOM_SOURCE_URL"; \
-    fi
+# Define build-time arguments
+ARG PYTHON_REGISTY_URL
+ARG CUSTOM_CA_FILE
 
 # Change working directory
 WORKDIR /backend
@@ -23,7 +12,35 @@ WORKDIR /backend
 # Copy source code
 COPY . .
 
+# Copy the CA certificate into the image and set configurations if CUSTOM_CA_FILE is defined
+RUN if [ -n "$CUSTOM_CA_FILE" ]; then \
+        # Import cert file
+        cp ${CUSTOM_CA_FILE} "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
+        update-ca-certificates; \
+
+        # Apply the cert file
+        export PIP_CERT="/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
+        export REQUESTS_CA_BUNDLE="/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
+        export CURL_CA_BUNDLE="/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
+
+        pip config set global.cert "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
+    fi
+
+# Set custom PyPI index url if PIP_INDEX_URL is defined
+RUN if [ -n "$PYTHON_REGISTY_URL" ]; then \
+        pip config set global.index-url "$PYTHON_REGISTY_URL"; \
+    fi
+
+# Install Poetry
+RUN pip install poetry
+
+# Add custom source to poetry if env PYTHON_REGISTY_URL is defined
+RUN if [ -n "$PYTHON_REGISTY_URL" ]; then \
+        poetry source add custom "$PYTHON_REGISTY_URL"; \
+    fi
+
 # Install dependencies (without dev dependencies)
+RUN poetry lock
 RUN poetry install --no-dev --no-interaction --no-ansi
 
 # Flask app target

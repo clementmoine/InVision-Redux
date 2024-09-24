@@ -4,6 +4,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL}
+        POETRY_CUSTOM_SOURCE_URL: ${POETRY_CUSTOM_SOURCE_URL}
     ports:
       - "8080:8080"
     environment:
@@ -11,6 +14,9 @@ services:
       INVISION_EMAIL: ${INVISION_EMAIL}
       INVISION_PASSWORD: ${INVISION_PASSWORD}
       DOCS_ROOT: ${DOCS_ROOT}
+
+      PIP_INDEX_URL: ${PIP_INDEX_URL}
+      POETRY_CUSTOM_SOURCE_URL: ${POETRY_CUSTOM_SOURCE_URL}
     volumes:
       - ${ROOT:-.}/docs:${DOCS_ROOT}
 
@@ -19,10 +25,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NPM_CAFILE: ${NPM_CAFILE}
+        NPM_REGISTRY_SERVER: ${NPM_REGISTRY_SERVER}
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
+      NODE_ENV: development
+      NPM_CAFILE: ${NPM_CAFILE}
+      NPM_REGISTRY_SERVER: ${NPM_REGISTRY_SERVER}
     volumes:
       - ${ROOT:-.}/frontend/src:/frontend/src # Hot reloading
     command: yarn dev
