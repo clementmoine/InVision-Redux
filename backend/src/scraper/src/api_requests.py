@@ -1,3 +1,4 @@
+import os
 from bs4 import BeautifulSoup
 from requests.exceptions import HTTPError, RequestException
 
@@ -10,6 +11,7 @@ cooldown = 120
 
 def request(session, method, *args, **kwargs):
     retries = 0
+
     while retries < max_retries:
         try:
             if method == "GET":

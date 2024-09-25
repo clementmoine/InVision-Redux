@@ -7,16 +7,11 @@ install:
 	@echo "ROOT=." >> .env
 	@echo "DOCS_ROOT=/backend/src/static/docs" >> .env
 	@echo "" >> .env
-	@echo "#CURL_CA_BUNDLE=/ca.crt" >> .env
+	@echo "#CUSTOM_CA_FILE=custom.ca-bundle.crt" >> .env
 	@echo "" >> .env
-	@echo "#PIP_CERT=/ca.crt" >> .env
-	@echo "#PIP_INDEX_URL=http://example.fr" >> .env
+	@echo "#PYTHON_REGISTY_URL=http://nexus/repository/pypi/simple" >> .env
 	@echo "" >> .env
-	@echo "#POETRY_CERTIFICATES_CUSTOM_CERT=/ca.crt" >> .env
-	@echo "#POETRY_CUSTOM_SOURCE_URL=http://example.fr" >> .env
-	@echo "" >> .env
-	@echo "#NPM_CA_FILE=/ca.crt" >> .env
-	@echo "#NPM_REGISTRY_SERVER=http://example.fr" >> .env
+	@echo "#NPM_REGISTRY_SERVER=http://nexus/repository/npm-group" >> .env
 	@echo ".env file created successfully."
 
 # Open browser at localhost:3000
@@ -26,13 +21,13 @@ open-browser:
 
 # Run in dev mode
 dev:
-	docker compose build --no-cache --pull
+	docker compose build
 	docker compose up -d
 	$(MAKE) open-browser
 
 # Run in production mode
 prod:
-	docker compose -f docker-compose.prod.yml build --no-cache --pull
+	docker compose -f docker-compose.prod.yml build
 	docker compose -f docker-compose.prod.yml up -d
 
 # Stop all

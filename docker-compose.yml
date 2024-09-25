@@ -1,12 +1,12 @@
 services:
   backend:
-    container_name: invision-backend
+    container_name: backend
     build:
       context: ./backend
       dockerfile: Dockerfile
       args:
-        PIP_INDEX_URL: ${PIP_INDEX_URL}
-        POETRY_CUSTOM_SOURCE_URL: ${POETRY_CUSTOM_SOURCE_URL}
+        CUSTOM_CA_FILE: ${CUSTOM_CA_FILE}
+        PYTHON_REGISTY_URL: ${PYTHON_REGISTY_URL}
     ports:
       - "8080:8080"
     environment:
@@ -14,26 +14,24 @@ services:
       INVISION_EMAIL: ${INVISION_EMAIL}
       INVISION_PASSWORD: ${INVISION_PASSWORD}
       DOCS_ROOT: ${DOCS_ROOT}
-
-      PIP_INDEX_URL: ${PIP_INDEX_URL}
-      POETRY_CUSTOM_SOURCE_URL: ${POETRY_CUSTOM_SOURCE_URL}
+      CUSTOM_CA_FILE: ${CUSTOM_CA_FILE}
     volumes:
+      - ${ROOT:-.}/backend/src:/backend/src # Hot reloading
       - ${ROOT:-.}/docs:${DOCS_ROOT}
 
   frontend:
-    container_name: invision-frontend
+    container_name: frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NPM_CAFILE: ${NPM_CAFILE}
+        CUSTOM_CA_FILE: ${CUSTOM_CA_FILE}
         NPM_REGISTRY_SERVER: ${NPM_REGISTRY_SERVER}
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: development
-      NPM_CAFILE: ${NPM_CAFILE}
-      NPM_REGISTRY_SERVER: ${NPM_REGISTRY_SERVER}
+      CUSTOM_CA_FILE: ${CUSTOM_CA_FILE}
     volumes:
       - ${ROOT:-.}/frontend/src:/frontend/src # Hot reloading
     command: yarn dev

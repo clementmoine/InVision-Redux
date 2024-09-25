@@ -1,4 +1,3 @@
-# ---- Base Python Image ----
 ARG PYTHON_VERSION=3.12.0
 FROM python:${PYTHON_VERSION}-slim as base
 
@@ -14,15 +13,8 @@ COPY . .
 
 # Copy the CA certificate into the image and set configurations if CUSTOM_CA_FILE is defined
 RUN if [ -n "$CUSTOM_CA_FILE" ]; then \
-        # Import cert file
         cp ${CUSTOM_CA_FILE} "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
         update-ca-certificates; \
-
-        # Apply the cert file
-        export PIP_CERT="/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
-        export REQUESTS_CA_BUNDLE="/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
-        export CURL_CA_BUNDLE="/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
-
         pip config set global.cert "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
     fi
 
@@ -36,7 +28,7 @@ RUN pip install poetry
 
 # Configure the certificate
 RUN if [ -n "$CUSTOM_CA_FILE" ]; then \
-    poetry config certificates.custom.cert "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
+        poetry config certificates.custom.cert "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
     fi
 
 # Add custom source to poetry if env PYTHON_REGISTY_URL is defined
@@ -45,8 +37,7 @@ RUN if [ -n "$PYTHON_REGISTY_URL" ]; then \
     fi
 
 # Install dependencies (without dev dependencies)
-RUN poetry lock
-RUN poetry install --no-dev --no-interaction --no-ansi
+RUN poetry install --only main --no-interaction --no-ansi
 
 # Flask app target
 ENV FLASK_APP=/backend/src/app

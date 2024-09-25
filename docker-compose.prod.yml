@@ -1,6 +1,6 @@
 services:
   backend:
-    container_name: invision-backend
+    container_name: backend
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -12,14 +12,12 @@ services:
       INVISION_EMAIL: ${INVISION_EMAIL}
       INVISION_PASSWORD: ${INVISION_PASSWORD}
       DOCS_ROOT: ${DOCS_ROOT}
-
       CUSTOM_CA_FILE: ${CUSTOM_CA_FILE}
-      PYTHON_REGISTY_URL: ${PYTHON_REGISTY_URL}
     volumes:
       - ${ROOT:-.}/docs:${DOCS_ROOT}
 
   frontend:
-    container_name: invision-frontend
+    container_name: frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
@@ -27,7 +25,7 @@ services:
         CUSTOM_CA_FILE: ${CUSTOM_CA_FILE}
         NPM_REGISTRY_SERVER: ${NPM_REGISTRY_SERVER}
     environment:
+      NODE_ENV: production
       CUSTOM_CA_FILE: ${CUSTOM_CA_FILE}
-      NPM_REGISTRY_SERVER: ${NPM_REGISTRY_SERVER}
     ports:
       - "80:80"
