@@ -1,5 +1,5 @@
 # ---- Base Python Image ----
-ARG PYTHON_VERSION=3.12
+ARG PYTHON_VERSION=3.12.0
 FROM python:${PYTHON_VERSION}-slim as base
 
 # Define build-time arguments
@@ -33,6 +33,11 @@ RUN if [ -n "$PYTHON_REGISTY_URL" ]; then \
 
 # Install Poetry
 RUN pip install poetry
+
+# Configure the certificate
+RUN if [ -n "$CUSTOM_CA_FILE" ]; then \
+    poetry config certificates.custom.cert "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
+    fi
 
 # Add custom source to poetry if env PYTHON_REGISTY_URL is defined
 RUN if [ -n "$PYTHON_REGISTY_URL" ]; then \

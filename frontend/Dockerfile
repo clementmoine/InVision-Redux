@@ -1,5 +1,4 @@
 ARG NODE_VERSION=21.7.2
-
 FROM node:${NODE_VERSION}
 
 # Use production node environment by default.
@@ -28,7 +27,7 @@ RUN if [ -n "$NPM_REGISTRY_SERVER" ]; then \
 RUN if [ -n "$CUSTOM_CA_FILE" ]; then \
         # Import cert file
         cp ${CUSTOM_CA_FILE} "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
-        update-ca-certificates: \
+        update-ca-certificates; \
 
         # Apply the cert file
         yarn config set cafile "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \

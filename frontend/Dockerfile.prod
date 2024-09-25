@@ -1,5 +1,6 @@
-# Build stage
-FROM node:21.7.2 AS build
+# Build Stage
+ARG NODE_VERSION=21.7.2
+FROM node:${NODE_VERSION} AS build
 
 WORKDIR /frontend
 
@@ -31,9 +32,6 @@ RUN if [ -n "$CUSTOM_CA_FILE" ]; then \
         npm config set cafile "/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
         export NODE_EXTRA_CA_CERTS="/usr/local/share/ca-certificates/${CUSTOM_CA_FILE}"; \
     fi
-
-# Display Yarn configuration for debugging
-RUN yarn config list
 
 # Install dependencies and build
 RUN yarn install --non-interactive
