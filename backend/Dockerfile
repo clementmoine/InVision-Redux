@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.12.0
+ARG PYTHON_VERSION=3.12.6
 FROM python:${PYTHON_VERSION}-slim as base
 
 # Define build-time arguments
