@@ -2,9 +2,7 @@
 
 InVision Redux is a complete app designed to help users backup their projects from InVision before its closure in December 2024. With this tool, users can retrieve all their projects and preserve the prototypes along with their hotspots in complete web application.
 
-![Description de l'image](./screenshot.png)
-
-> Important note: Nicolas Cage could not be included in the final product (sorry).
+![Migration from InVision to InVision Redux](./screenshot.png)
 
 ## Work in Progress
 
