@@ -1,8 +1,9 @@
 import dayjs from 'dayjs';
+import { useEffect, useRef, useState } from 'react';
+import { TypeAnimation } from 'react-type-animation';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
-import { TypeAnimation } from 'react-type-animation';
-import { Routes, Route, Outlet, Link } from 'react-router-dom';
+import { Routes, Route, Outlet, Link, useNavigate } from 'react-router-dom';
 
 import Test from '@/views/Test';
 import { Screen } from '@/views/Screen';
@@ -11,23 +12,63 @@ import { Projects } from '@/views/Projects';
 import { NotFound } from '@/views/NotFound';
 
 import { About } from '@/components/About';
-import { Redirect } from '@/components/Redirect';
+import { Toaster } from '@/components/ui/sonner';
+// import { Redirect } from '@/components/Redirect';
+import ConfettiComponent from '@/components/Confetti';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 import InVision from '@/assets/invision.svg?react';
-import { Toaster } from './components/ui/sonner';
-import { useRef, useState } from 'react';
-import ConfettiComponent from './components/Confetti';
 
 dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
 
 export default function App() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+
+    // Check if the current path is the root path
+    const isRootPath = window.location.pathname === '/';
+
+    if (hash) {
+      // Regex matching /projects/prototypes/<ProjectID>
+      const projectMatch = hash.match(
+        /^#\/projects\/prototypes\/(?<projectId>\d+)/,
+      );
+
+      // Regex matching /console/<ProjectID>/<ScreenID>/<mode>
+      const consoleMatch = hash.match(
+        /^#\/console\/(?<projectId>\d+)\/(?<screenId>\d+)\/?(?<mode>preview|inspect)?/,
+      );
+
+      if (hash === '#/projects') {
+        navigate('/projects');
+      } else if (projectMatch?.groups?.projectId) {
+        const { projectId } = projectMatch.groups;
+        navigate(`/projects/${projectId}`);
+      } else if (
+        consoleMatch?.groups?.projectId &&
+        consoleMatch?.groups?.screenId
+      ) {
+        const { projectId, screenId, mode } = consoleMatch.groups;
+
+        if (mode != null) {
+          navigate(`/projects/${projectId}/${screenId}/${mode}`);
+        } else {
+          navigate(`/projects/${projectId}/${screenId}`);
+        }
+      }
+    } else if (isRootPath) {
+      // Redirect to /projects if on the root path
+      navigate('/projects');
+    }
+  }, [navigate]);
+
   return (
     <Routes>
       {/* Screens without layout */}
       <Route path="/test" element={<Test />} />
-      {/* Screens without layout */}
       <Route
         path="/projects/:projectId/:screenId/:mode?"
         element={<Screen />}
@@ -36,7 +77,7 @@ export default function App() {
       {/* Screens with layout */}
       <Route path="/" element={<Layout />}>
         {/* Home => Redirect to projects */}
-        <Route path="/" element={<Redirect to="/projects" />} />
+        {/* <Route path="/" element={<Redirect to="/projects" />} /> */}
 
         {/* Screens */}
         <Route path="/projects" element={<Projects />} />
