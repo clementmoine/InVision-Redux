@@ -13,7 +13,6 @@ import { NotFound } from '@/views/NotFound';
 
 import { About } from '@/components/About';
 import { Toaster } from '@/components/ui/sonner';
-// import { Redirect } from '@/components/Redirect';
 import ConfettiComponent from '@/components/Confetti';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -26,18 +25,19 @@ export default function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const hash = window.location.hash;
+    const { hash, pathname } = window.location;
 
-    // Check if the current path is the root path
-    const isRootPath = window.location.pathname === '/';
+    // Redirect /share and / to projects
+    if (pathname.startsWith('/share') || (pathname === '/' && !hash)) {
+      navigate('/projects');
+      return;
+    }
 
+    // Manage hash routing redirection
     if (hash) {
-      // Regex matching /projects/prototypes/<ProjectID>
       const projectMatch = hash.match(
         /^#\/projects\/prototypes\/(?<projectId>\d+)/,
       );
-
-      // Regex matching /console/<ProjectID>/<ScreenID>/<mode>
       const consoleMatch = hash.match(
         /^#\/console\/(?<projectId>\d+)\/(?<screenId>\d+)\/?(?<mode>preview|inspect)?/,
       );
@@ -45,23 +45,11 @@ export default function App() {
       if (hash === '#/projects') {
         navigate('/projects');
       } else if (projectMatch?.groups?.projectId) {
-        const { projectId } = projectMatch.groups;
-        navigate(`/projects/${projectId}`);
-      } else if (
-        consoleMatch?.groups?.projectId &&
-        consoleMatch?.groups?.screenId
-      ) {
+        navigate(`/projects/${projectMatch.groups.projectId}`);
+      } else if (consoleMatch?.groups) {
         const { projectId, screenId, mode } = consoleMatch.groups;
-
-        if (mode != null) {
-          navigate(`/projects/${projectId}/${screenId}/${mode}`);
-        } else {
-          navigate(`/projects/${projectId}/${screenId}`);
-        }
+        navigate(`/projects/${projectId}/${screenId}${mode ? `/${mode}` : ''}`);
       }
-    } else if (isRootPath) {
-      // Redirect to /projects if on the root path
-      navigate('/projects');
     }
   }, [navigate]);
 
@@ -76,14 +64,8 @@ export default function App() {
 
       {/* Screens with layout */}
       <Route path="/" element={<Layout />}>
-        {/* Home => Redirect to projects */}
-        {/* <Route path="/" element={<Redirect to="/projects" />} /> */}
-
-        {/* Screens */}
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:id" element={<Project />} />
-
-        {/* Not found route */}
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
