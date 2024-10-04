@@ -74,6 +74,16 @@ def run_scraper(option=None):
 
 
 if __name__ == "__main__":
+    # Setup the CA if needed
+    if os.getenv("CUSTOM_CA_FILE"):
+        ca_file = os.path.join(
+            "/usr/local/share/ca-certificates", os.getenv("CUSTOM_CA_FILE")
+        )
+
+        if os.path.isfile(ca_file):
+            os.environ["CURL_CA_BUNDLE"] = ca_file
+            os.environ["REQUESTS_CA_BUNDLE"] = ca_file
+
     # Get the option from CLI arguments or None if not provided
     option = sys.argv[1] if len(sys.argv) > 1 else None
     run_scraper(option)

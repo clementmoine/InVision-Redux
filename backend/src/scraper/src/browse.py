@@ -127,7 +127,7 @@ def browse_screen(screen, project, session):
     return False
 
 
-def browse_project(project, session):
+def browse_project(project, ignored_project_ids, option, session):
     """
     Browse a project, download its assets, and save JSON data locally.
 
@@ -139,6 +139,7 @@ def browse_project(project, session):
         dict or None: Updated project data if successful, None otherwise.
     """
     project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
+
     os.makedirs(project_folder, exist_ok=True)
 
     patched_project = json_patch_to_local_assets(project, project["id"], session)
@@ -149,7 +150,7 @@ def browse_project(project, session):
 
     screens = get_project_screens(project, session)
     if screens:
-        archived_screens_count = screens["archivedScreensCount"]
+        archived_screens_count = screens.get("archivedScreensCount")
 
         if archived_screens_count != 0:
             screens["archivedscreens"] = get_project_archived_screens(
@@ -161,6 +162,72 @@ def browse_project(project, session):
             f"   ⮑  Project browsed ({screens_count} screens, {archived_screens_count} archived)",
             "green",
         )
+
+        screens_json_path = os.path.join(project_folder, "screens.json")
+
+        # Check if the screens are up to date
+        if option == "update" and os.path.exists(screens_json_path):
+            with open(screens_json_path, "r") as f:
+                local_screens_data = json.load(f)
+
+            screens_to_delete = []
+
+            # Check each "updatedAt" and "conversationCount" and "unreadConversationCount" from screens.json
+            for screen, local_screen in zip(
+                screens.get("screens", []), local_screens_data.get("screens", [])
+            ):
+                if (
+                    screen["updatedAt"] != local_screen.get("updatedAt")
+                    or screen.get("conversationCount", 0)
+                    != local_screen.get("conversationCount", 0)
+                    or screen.get("unreadConversationCount", 0)
+                    != local_screen.get("unreadConversationCount", 0)
+                ):
+                    # Add to list of screens to delete if data is not up to date
+                    screens_to_delete.append(screen)
+
+            for archived_screen, local_archived_screen in zip(
+                screens.get("archivedscreens", []),
+                local_screens_data.get("archivedscreens", []),
+            ):
+                if archived_screen.get("updatedAt") != local_archived_screen.get(
+                    "updatedAt"
+                ):
+                    screens_to_delete.append(archived_screen)
+
+            # Remove outdated screens folders
+            for screen in screens_to_delete:
+                screen_folder = os.path.join(
+                    project_folder, "screens", str(screen["id"])
+                )
+                if os.path.exists(screen_folder):
+                    shutil.rmtree(screen_folder, ignore_errors=True)
+                    color_print(
+                        f"   ⮑  Screen {screen['name']} folder deleted for update",
+                        "yellow",
+                    )
+
+            # After deleting, check if all screens are up-to-date
+            if (
+                not screens_to_delete
+                and archived_screens_count
+                == len(local_screens_data.get("archivedscreens", []))
+                and all(
+                    archived_screen.get("updatedAt")
+                    == local_archived_screen.get("updatedAt")
+                    for archived_screen, local_archived_screen in zip(
+                        screens.get("archivedscreens", []),
+                        local_screens_data.get("archivedscreens", []),
+                    )
+                )
+            ):
+                # Ignore the project if everything is up to date
+                color_print(
+                    f"   ⮑  Up-to-date project skipped ({screens_count} screens, {archived_screens_count} archived)",
+                    "yellow",
+                )
+                ignored_project_ids.add(project["id"])
+                return False
 
         screens_patched = json_patch_to_local_assets(screens, project["id"], session)
         if not save_json_data(screens_patched, project_folder, "screens.json"):
@@ -265,13 +332,9 @@ def browse_projects(session, option=None):
                     project_item_count = project["data"].get("itemCount")
 
                     project_json_path = os.path.join(project_folder, "project.json")
-                    screens_json_path = os.path.join(project_folder, "screens.json")
 
                     with open(project_json_path, "r") as f:
                         local_project_data = json.load(f)
-
-                    with open(screens_json_path, "r") as f:
-                        local_screens_data = json.load(f)
 
                     # Protect the local data if the response is invalid
                     if not is_valid_response(
@@ -296,23 +359,12 @@ def browse_projects(session, option=None):
                     local_project_item_count = local_project_data["data"].get(
                         "itemCount"
                     )
+
+                    # Project outdated
                     if (
-                        project_update_date == local_project_update_date
-                        and project_item_count == local_project_item_count
+                        project_update_date != local_project_update_date
+                        or project_item_count != local_project_item_count
                     ):
-                        archived_screens_count = local_screens_data[
-                            "archivedScreensCount"
-                        ]
-
-                        screens_count = len(local_screens_data["screens"])
-                        color_print(
-                            f"   ⮑  Project skipped ({screens_count} screens, {archived_screens_count} archived)",
-                            "yellow",
-                        )
-
-                        ignored_project_ids.add(project["id"])
-                        continue
-                    else:
                         color_print(
                             f"   ⮑  Project outdated, replay the scraping...",
                             "yellow",
@@ -324,7 +376,7 @@ def browse_projects(session, option=None):
                     tag for tag in tags if project["id"] in tag["prototypeIDs"]
                 ]
 
-            if browse_project(project, session):
+            if browse_project(project, ignored_project_ids, option, session):
                 successfully_exported_project_ids.add(project["id"])
 
         # Compare the success and ignored to global list to find failed ones

@@ -38,12 +38,12 @@ stop:
 
 # Scrape from CLI
 scrape:
-	docker exec invision-backend poetry run python -m src.scraper.main
+	docker exec backend poetry run python -m src.scraper.main
 	
 # Scrape with 'update' option
 scrape-update:
-	docker exec invision-backend poetry run python -m src.scraper.main update
+	docker exec backend poetry run python -m src.scraper.main update
 
 # Scrape with 'overwrite' option
 scrape-overwrite:
-	docker exec invision-backend poetry run python -m src.scraper.main overwrite
+	docker exec backend poetry run python -m src.scraper.main overwrite
