@@ -25,7 +25,8 @@ services:
         CUSTOM_CA_FILE: ${CUSTOM_CA_FILE}
         NPM_REGISTRY_SERVER: ${NPM_REGISTRY_SERVER}
     ports:
-      - "${PROD_PORT:-80}:80"
+      - "${PROD_HTTP_PORT:-80}:80"
+      - "${PROD_HTTPS_PORT:-443}:443"
     environment:
       NODE_ENV: production
       CUSTOM_CA_FILE: ${CUSTOM_CA_FILE}

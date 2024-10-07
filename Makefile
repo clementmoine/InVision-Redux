@@ -7,7 +7,8 @@ install:
 	@echo "ROOT=." >> .env
 	@echo "DOCS_ROOT=/backend/src/static/docs" >> .env
 	@echo "" >> .env
-	@echo "#PROD_PORT=80" >> .env
+	@echo "#PROD_HTTP_PORT=80" >> .env
+	@echo "#PROD_HTTPS_PORT=443" >> .env
 	@echo "" >> .env
 	@echo "#CUSTOM_CA_FILE=custom.ca-bundle.crt" >> .env
 	@echo "" >> .env
