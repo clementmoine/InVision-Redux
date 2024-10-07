@@ -41,7 +41,7 @@ RUN apk add --no-cache openssl
 # Create a directory for SSL certificates
 RUN mkdir -p /etc/nginx/ssl
 
-# Generate a self-signed SSL certificate
+# Generate a self-signed SSL certificate (temporary until I figure how to manage the key and crt)
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/nginx/ssl/nginx-selfsigned.key \
     -out /etc/nginx/ssl/nginx-selfsigned.crt \

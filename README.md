@@ -9,6 +9,7 @@ InVision Redux is a complete app designed to help users backup their projects fr
 Some features are not handled yet, here is the not prioritized roadmap/to-do list :
 
 - [x] Share button (QR Code and url copy to keyboard)
+- [x] Redirections from old url scheme (including shares links)
 - [ ] Manage all modes (excluding build and comments) :
   - [x] Manage the mode in url
   - [x] Keyboard shortcuts
