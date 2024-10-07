@@ -43,8 +43,11 @@ export default function App() {
       const consoleMatch = hash.match(
         /^#\/console\/(?<projectId>\d+)\/(?<screenId>\d+)\/?(?<mode>preview|inspect)?/,
       );
+      const shareMatch = hash.match(/^#\/(screens\/)?(?<screenId>\d+)/);
 
-      if (hash === '#/projects') {
+      if (pathname.startsWith('/share') && shareMatch?.groups?.screenId) {
+        navigate(`${pathname}/${shareMatch.groups.screenId}`);
+      } else if (hash === '#/projects') {
         navigate('/projects');
       } else if (projectMatch?.groups?.projectId) {
         navigate(`/projects/${projectMatch.groups.projectId}`);
@@ -66,7 +69,7 @@ export default function App() {
 
       {/* Screens with layout */}
       <Route path="/" element={<Layout />}>
-        <Route path="/share/:shareId" element={<Share />} />
+        <Route path="/share/:shareId/:screenId?" element={<Share />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:id" element={<Project />} />
         <Route path="*" element={<NotFound />} />

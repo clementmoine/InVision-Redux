@@ -30,7 +30,7 @@ import {
 import Zoom from '@/components/Zoom';
 import MiniPagination from '@/components/MiniPagination';
 
-import EmptyState from '@/assets/illustrations/empty-state.svg?react';
+import NotFound from '@/assets/illustrations/not-found.svg?react';
 import ToDo from '@/assets/illustrations/to-do.svg?react';
 
 import Preview from '@/views/Screen/Preview/Preview';
@@ -73,7 +73,7 @@ function Screen() {
     });
   }, [onChange]);
 
-  const { data, isFetching, isPending, refetch } = useQuery({
+  const { data, isFetching, isPending } = useQuery({
     queryKey: ['projects', Number(params.projectId), Number(params.screenId)],
     queryFn: getScreen,
     placeholderData: keepPreviousData,
@@ -336,18 +336,20 @@ function Screen() {
             !isFetching &&
             !isPending && (
               <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
-                <EmptyState />
+                <NotFound />
 
                 <h2 className="text-2xl font-semibold tracking-tight">
-                  There is nothing here?
+                  Nothing to see here!
                 </h2>
 
                 <p className="text-sm text-muted-foreground">
-                  Huh? I thought I left that here... strange.
+                  Lost your way, hooman? Time to paws and rethink! 🐾
                 </p>
 
-                <Button className="mt-4" onClick={() => refetch()}>
-                  Give it another shot
+                <Button
+                  onClick={() => navigate(`/projects/${params.projectId}`)}
+                >
+                  Go to the project page
                 </Button>
               </div>
             )
@@ -410,46 +412,52 @@ function Screen() {
 
             <Breadcrumb className="flex flex-1 overflow-hidden">
               <BreadcrumbList className="flex-nowrap flex-1 overflow-hidden">
-                <BreadcrumbItem className="hidden overflow-hidden lg:flex">
-                  <BreadcrumbLink
-                    title={data?.project.name}
-                    href={`/projects/${params.projectId}`}
-                    className="text-nowrap overflow-hidden text-ellipsis"
-                  >
-                    {data?.project.name}
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
+                {data?.project.name && (
+                  <BreadcrumbItem className="hidden overflow-hidden lg:flex">
+                    <BreadcrumbLink
+                      title={data?.project.name}
+                      href={`/projects/${params.projectId}`}
+                      className="text-nowrap overflow-hidden text-ellipsis"
+                    >
+                      {data?.project.name}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                )}
 
-                <BreadcrumbSeparator className="hidden flex-shrink-0 lg:flex" />
+                {data?.project.name && screen?.name && (
+                  <BreadcrumbSeparator className="hidden flex-shrink-0 lg:flex" />
+                )}
 
-                <BreadcrumbItem className="hidden overflow-hidden lg:overflow-visible sm:flex">
-                  <BreadcrumbPage
-                    title={screen?.name}
-                    className="text-nowrap overflow-hidden text-ellipsis"
-                  >
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span
-                          role="button"
-                          className="flex gap-2 items-center"
-                          onClick={() => setIsTrayOpen(o => !o)}
-                        >
-                          {screen?.name}
+                {screen?.name && (
+                  <BreadcrumbItem className="hidden overflow-hidden lg:overflow-visible sm:flex">
+                    <BreadcrumbPage
+                      title={screen?.name}
+                      className="text-nowrap overflow-hidden text-ellipsis"
+                    >
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span
+                            role="button"
+                            className="flex gap-2 items-center"
+                            onClick={() => setIsTrayOpen(o => !o)}
+                          >
+                            {screen?.name}
 
-                          {isTrayOpen ? (
-                            <ChevronDown className="size-3.5" />
-                          ) : (
-                            <ChevronUp className="size-3.5" />
-                          )}
-                        </span>
-                      </TooltipTrigger>
+                            {isTrayOpen ? (
+                              <ChevronDown className="size-3.5" />
+                            ) : (
+                              <ChevronUp className="size-3.5" />
+                            )}
+                          </span>
+                        </TooltipTrigger>
 
-                      <TooltipContent side="top" sideOffset={5}>
-                        {isTrayOpen ? 'Close' : 'Open'} thumbnail tray
-                      </TooltipContent>
-                    </Tooltip>
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
+                        <TooltipContent side="top" sideOffset={5}>
+                          {isTrayOpen ? 'Close' : 'Open'} thumbnail tray
+                        </TooltipContent>
+                      </Tooltip>
+                    </BreadcrumbPage>
+                  </BreadcrumbItem>
+                )}
               </BreadcrumbList>
             </Breadcrumb>
           </div>
@@ -533,8 +541,8 @@ function Screen() {
               totalCount={conversations?.length ?? 0}
               count={
                 showConversations === 'all'
-                  ? conversations?.length ?? 0
-                  : conversations?.filter(c => !c.isComplete).length ?? 0
+                  ? (conversations?.length ?? 0)
+                  : (conversations?.filter(c => !c.isComplete).length ?? 0)
               }
               checked={!!showConversations}
               onCheckedChange={handleEnableConversations}

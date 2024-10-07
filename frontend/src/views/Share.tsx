@@ -10,7 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/Spinner';
 
 const Share: React.FC = () => {
-  const { shareId } = useParams<{ shareId: string }>();
+  const { shareId, screenId } = useParams<{
+    shareId: string;
+    screenId: string;
+  }>();
   const navigate = useNavigate();
 
   // Use react-query to fetch the project by share ID
@@ -51,6 +54,11 @@ const Share: React.FC = () => {
 
   // Navigate to the project page when the project ID is fetched
   if (data?.project_id) {
+    if (screenId) {
+      navigate(`/projects/${data.project_id}/${screenId}`);
+      return;
+    }
+
     navigate(`/projects/${data.project_id}`);
   }
 
