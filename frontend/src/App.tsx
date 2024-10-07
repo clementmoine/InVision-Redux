@@ -6,6 +6,7 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import { Routes, Route, Outlet, Link, useNavigate } from 'react-router-dom';
 
 import Test from '@/views/Test';
+import Share from '@/views/Share';
 import { Screen } from '@/views/Screen';
 import { Project } from '@/views/Project';
 import { Projects } from '@/views/Projects';
@@ -27,9 +28,10 @@ export default function App() {
   useEffect(() => {
     const { hash, pathname } = window.location;
 
-    // Redirect /share and / to projects
-    if (pathname.startsWith('/share') || (pathname === '/' && !hash)) {
+    // Redirect / to projects
+    if (pathname === '/' && !hash) {
       navigate('/projects');
+
       return;
     }
 
@@ -64,6 +66,7 @@ export default function App() {
 
       {/* Screens with layout */}
       <Route path="/" element={<Layout />}>
+        <Route path="/share/:shareId" element={<Share />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/projects/:id" element={<Project />} />
         <Route path="*" element={<NotFound />} />

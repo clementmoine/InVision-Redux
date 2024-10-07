@@ -8,6 +8,7 @@ from .utils import color_print, is_test_mode
 from .api_requests import (
     fetch_tags,
     fetch_projects,
+    fetch_project_shares,
     get_screen_details,
     get_project_screens,
     get_screen_inspect_details,
@@ -147,6 +148,38 @@ def browse_project(project, ignored_project_ids, option, session):
         color_print(f"   ✘  Failed to save project data", "red")
 
         return False
+
+    shares = fetch_project_shares(project, session)
+    if shares:
+        shares_json_path = os.path.join(project_folder, "shares.json")
+
+        # Load local shares.json if it exists
+        if os.path.exists(shares_json_path):
+            with open(shares_json_path, "r") as f:
+                local_shares_data = json.load(f)
+        else:
+            local_shares_data = {}
+
+        # Check if shares have changed
+        shares_changed = len(shares.get("shares", [])) != len(
+            local_shares_data.get("shares", [])
+        ) or any(
+            share["id"] != local_share.get("id")
+            for share, local_share in zip(
+                shares.get("shares", []), local_shares_data.get("shares", [])
+            )
+        )
+
+        if shares_changed:
+            # Save the new shares to shares.json
+            if not save_json_data(shares, project_folder, "shares.json"):
+                color_print(f"   ✘  Failed to save shares data", "red")
+            else:
+                color_print(f"   ⮑  Shares data updated", "green")
+    else:
+        color_print(
+            f"   ✘  Failed to fetch shares for {project['data']['name']}", "red"
+        )
 
     screens = get_project_screens(project, session)
     if screens:

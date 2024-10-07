@@ -213,6 +213,31 @@ def export_project(project, user_id, session):
         return None
 
 
+def fetch_project_shares(project, session):
+    url = "https://projects.invisionapp.com/api:project_shares_tab_partials.getView"
+    params = {
+        "prototypeID": project["id"],
+    }
+
+    headers = {"x-xsrf-token": session.cookies.get("XSRF-TOKEN")}
+
+    # response = session.get(url=url, headers=headers, params=params)
+    response = request(session, "GET", url=url, headers=headers, params=params)
+
+    if response and response.status_code == 200:
+        # Shares including key and password to be used with https://invis.io/${key}
+        project_shares = response.json()
+
+        return project_shares
+    else:
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Failed to fetch projects shares: {error_message}", "red")
+        return None
+
+
 def get_project_archived_screens(project, session):
     url = (
         "https://projects.invisionapp.com/api:desktop_partials.projectScreens2Archived"
