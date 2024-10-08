@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
@@ -52,6 +52,12 @@ function Inspect(props: InspectProps) {
     queryFn: getScreenInspect,
     placeholderData: keepPreviousData,
   });
+
+  useEffect(() => {
+    setSelectedLayer(undefined);
+    setHoveredLayer(undefined);
+    setExpandedGroupIds([]);
+  }, [params.screenId]);
 
   return (
     <ResizablePanelGroup
