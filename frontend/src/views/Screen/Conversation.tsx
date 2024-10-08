@@ -96,9 +96,12 @@ const Conversation: React.FC<ConversationProps> = props => {
   }
 
   const referenceStyle = useMemo(() => {
+    // Fix the position due to the different UI of original comments
+    const gap = 48;
+
     return {
-      top: conversation.y * zoomLevel,
-      left: conversation.x * zoomLevel,
+      top: (conversation.y + gap) * zoomLevel,
+      left: (conversation.x + gap) * zoomLevel,
     };
   }, [conversation, zoomLevel]);
 
