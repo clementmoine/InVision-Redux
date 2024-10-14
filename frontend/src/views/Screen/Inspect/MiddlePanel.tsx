@@ -400,9 +400,9 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
               left: measures.x * 2 * zoomLevel - 2,
             }}
           >
-            {`${Number(measures.height)
+            {`${Number(measures.width)
               .toFixed(2)
-              .replace(/\.?0+$/, '')}x${Number(measures.height)
+              .replace(/\.?0+$/, '')} x ${Number(measures.height)
               .toFixed(2)
               .replace(/\.?0+$/, '')}`}
           </div>
