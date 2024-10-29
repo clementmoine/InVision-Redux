@@ -176,8 +176,14 @@ def browse_project(project, ignored_project_ids, option, session):
 
         # Load local shares.json if it exists
         if os.path.exists(shares_json_path):
-            with open(shares_json_path, "r") as f:
-                local_shares_data = json.load(f)
+            if os.path.getsize(shares_json_path) > 0:
+                try:
+                    with open(shares_json_path, "r") as f:
+                        local_shares_data = json.load(f)
+                except json.JSONDecodeError:
+                    local_shares_data = {}
+            else:
+                local_shares_data = {}
         else:
             local_shares_data = {}
 
