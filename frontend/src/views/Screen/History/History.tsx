@@ -89,11 +89,13 @@ function History(props: HistoryProps) {
         id="left-panel"
         minSize={20}
         maxSize={60}
-        className="flex flex-col py-4 px-2 gap-4 bg-background"
+        className="flex flex-col gap-4 bg-background"
       >
-        <h2 className="text-sm">Versions ({data?.versions?.length ?? 0})</h2>
+        <div className="flex mt-4 mx-4 h-10 items-center shrink-0">
+          <h2 className="text-sm ">Versions ({data?.versions?.length ?? 0})</h2>
+        </div>
 
-        <ol className="flex flex-col gap-4">
+        <ol className="flex flex-col gap-2 overflow-auto px-4 pb-4">
           {data?.versions.map(version => {
             const isSelected = version.version === selectedVersion?.version;
 
