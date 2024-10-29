@@ -10,3 +10,4 @@ export * from './Hotspot';
 export * from './Mention';
 export * from './Divider';
 export * from './ScreenInspect';
+export * from './ScreenHistory';

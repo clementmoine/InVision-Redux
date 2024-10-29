@@ -26,6 +26,8 @@ import {
   Comment,
 } from '@/types';
 
+import { isSystemAvatar, getInitials } from '@/utils';
+
 import dayjs from 'dayjs';
 import { Card } from '@/components/ui/card';
 import { IntermediateRepresentation } from 'linkifyjs';
@@ -78,22 +80,6 @@ const Conversation: React.FC<ConversationProps> = props => {
     dismiss,
     role,
   ]);
-
-  function isSystemAvatar(avatarID: string | undefined): boolean {
-    return avatarID !== undefined && avatarID.startsWith('00000000');
-  }
-
-  function getInitials(name: string | undefined): string {
-    if (!name) return '';
-
-    const nameParts = name.trim().split(/\s+/);
-    const firstName = nameParts.shift() || '';
-    const lastName = nameParts.pop() || '';
-
-    return (
-      firstName.slice(0, 1).toUpperCase() + lastName.slice(0, 1).toUpperCase()
-    );
-  }
 
   const referenceStyle = useMemo(() => {
     // Fix the position due to the different UI of original comments

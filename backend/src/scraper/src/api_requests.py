@@ -385,3 +385,30 @@ def get_screen_inspect_details(screen, session):
 
         color_print(f"Failed to fetch screen inspect details: {error_message}", "red")
         return None
+
+
+def get_screen_history(screen, session):
+    url = "https://projects.invisionapp.com/api:desktop_partials/screenHistory"
+    params = {
+        "screenID": screen["id"],
+    }
+
+    headers = {"x-xsrf-token": session.cookies.get("XSRF-TOKEN")}
+
+    # response = session.get(url=url, headers=headers, params=params)
+    response = request(session, "GET", url=url, headers=headers, params=params)
+
+    if response and response.status_code == 200:
+        # if response.cookies:
+        #     session.cookies.update(response.cookies)
+
+        screen_history = response.json()
+
+        return screen_history
+    else:
+        error_message = "Unknown error"
+        if response:
+            error_message = response.text
+
+        color_print(f"Failed to fetch screen history: {error_message}", "red")
+        return None

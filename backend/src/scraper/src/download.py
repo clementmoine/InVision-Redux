@@ -33,7 +33,7 @@ def download_file(url, destination, session):
         return False
 
 
-def json_patch_to_local_assets(json_data, project_id, session):
+def json_patch_to_local_assets(json_data, project_id, screen_id, session):
     """
     Downloads files from URLs in the JSON data and updates the JSON with local file paths.
 
@@ -50,6 +50,12 @@ def json_patch_to_local_assets(json_data, project_id, session):
 
     avatars_dir = os.path.join(DOCS_ROOT, "common/avatars")
     os.makedirs(avatars_dir, exist_ok=True)
+
+    if screen_id:
+        screen_dir = os.path.join(
+            DOCS_ROOT, "projects", str(project_id), "screens", str(screen_id)
+        )
+        os.makedirs(screen_dir, exist_ok=True)
 
     def download_and_patch(data):
         """
@@ -75,6 +81,10 @@ def json_patch_to_local_assets(json_data, project_id, session):
                     # Custom case for common assets
                     if "avatars" in dir_name:
                         file_path = os.path.join(avatars_dir, file_name)
+
+                    # Screen versions (we save them in the screen dir under a versions dir)
+                    if "versions/files" in dir_name:
+                        file_path = os.path.join(screen_dir, "versions", file_name)
 
                     # Screens and thumbnails
                     elif (

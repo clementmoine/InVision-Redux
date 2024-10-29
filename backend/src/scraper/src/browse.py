@@ -9,6 +9,7 @@ from .api_requests import (
     fetch_tags,
     fetch_projects,
     fetch_project_shares,
+    get_screen_history,
     get_screen_details,
     get_project_screens,
     get_screen_inspect_details,
@@ -50,14 +51,16 @@ def browse_screen(screen, project, session):
     # Files we expect to see when the screen already exists
     file_names = [
         "inspect.json",  # Not existing for archived screen
+        "history.json",  # Not existing either on archived screen
         "screen.json",
     ]
 
     # Remove inspect.json to expected files if the screen is archived
     if screen.get("isArchived", False):
+        file_names.remove("history.json")
         file_names.remove("inspect.json")
 
-    # Check if any image file exists
+    # Check if any image file exists (versions images doesn't exists everytime so we don't check here)
     image_files = glob.glob(os.path.join(screen_json_folder, "image.*"))
     thumbnail_files = glob.glob(os.path.join(screen_json_folder, "thumbnail.*"))
 
@@ -84,7 +87,7 @@ def browse_screen(screen, project, session):
 
     if screen_details:
         screen_details_patched = json_patch_to_local_assets(
-            screen_details, project["id"], session
+            screen_details, project["id"], screen["id"], session
         )
 
         if not save_json_data(
@@ -96,17 +99,17 @@ def browse_screen(screen, project, session):
 
             return False
 
-        screen_inspect_details = get_screen_inspect_details(screen, session)
-
         if screen["isArchived"]:
             color_print(
                 f"   ⮑  Archived screen {screen['name']} (details) gathered", "green"
             )
             return True
 
+        screen_inspect_details = get_screen_inspect_details(screen, session)
+
         if screen_inspect_details:
             screen_inspect_details_patched = json_patch_to_local_assets(
-                screen_inspect_details, project["id"], session
+                screen_inspect_details, project["id"], screen["id"], session
             )
 
             if not save_json_data(
@@ -118,8 +121,25 @@ def browse_screen(screen, project, session):
 
                 return False
 
+        screen_history = get_screen_history(screen, session)
+
+        if screen_history:
+            screen_history_patched = json_patch_to_local_assets(
+                screen_history, project["id"], screen["id"], session
+            )
+
+            if not save_json_data(
+                screen_history_patched, screen_json_folder, "history.json"
+            ):
+                color_print(
+                    f"   ✘  Failed to save history data for {screen['name']}", "red"
+                )
+
+                return False
+
             color_print(
-                f"   ⮑  Screen {screen['name']} (details, inspect) gathered", "green"
+                f"   ⮑  Screen {screen['name']} (details, inspect, history) gathered",
+                "green",
             )
             return True
 
@@ -143,7 +163,7 @@ def browse_project(project, ignored_project_ids, option, session):
 
     os.makedirs(project_folder, exist_ok=True)
 
-    patched_project = json_patch_to_local_assets(project, project["id"], session)
+    patched_project = json_patch_to_local_assets(project, project["id"], None, session)
     if not save_json_data(patched_project, project_folder, "project.json"):
         color_print(f"   ✘  Failed to save project data", "red")
 
@@ -205,12 +225,13 @@ def browse_project(project, ignored_project_ids, option, session):
 
             screens_to_delete = []
 
-            # Check each "updatedAt" and "conversationCount" and "unreadConversationCount" from screens.json
+            # Check each "updatedAt", "conversationCount", "imageVersion" and "unreadConversationCount" from screens.json
             for screen, local_screen in zip(
                 screens.get("screens", []), local_screens_data.get("screens", [])
             ):
                 if (
                     screen["updatedAt"] != local_screen.get("updatedAt")
+                    or screen["imageVersion"] != local_screen.get("imageVersion")
                     or screen.get("conversationCount", 0)
                     != local_screen.get("conversationCount", 0)
                     or screen.get("unreadConversationCount", 0)
@@ -262,7 +283,9 @@ def browse_project(project, ignored_project_ids, option, session):
                 ignored_project_ids.add(project["id"])
                 return False
 
-        screens_patched = json_patch_to_local_assets(screens, project["id"], session)
+        screens_patched = json_patch_to_local_assets(
+            screens, project["id"], None, session
+        )
         if not save_json_data(screens_patched, project_folder, "screens.json"):
             color_print(f"   ✘  Failed to save screens data", "red")
 

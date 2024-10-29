@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ChevronDown,
   ChevronUp,
+  Clock,
   Code2,
   Eye,
   Share,
@@ -28,13 +29,16 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import Zoom from '@/components/Zoom';
+import { Toaster } from '@/components/ui/sonner';
 import MiniPagination from '@/components/MiniPagination';
+import ConversationToggle from '@/components/ConversationToggle';
 
 import NotFound from '@/assets/illustrations/not-found.svg?react';
 import ToDo from '@/assets/illustrations/to-do.svg?react';
 
 import Preview from '@/views/Screen/Preview/Preview';
 import Inspect from '@/views/Screen/Inspect/Inspect';
+import History from '@/views/Screen/History/History';
 
 import { getScreen } from '@/api/screens';
 
@@ -44,11 +48,11 @@ import { copyToClipboard, hexToRgb } from '@/utils';
 
 import defaultValues from '@/constants/defaultValues';
 
-import style from './Screen.module.scss';
 import useLocalStorage from '@/hooks/useLocalStorage';
+
 import { ThumbnailTray } from './ThumbnailTray';
-import ConversationToggle from '@/components/ConversationToggle';
-import { Toaster } from '@/components/ui/sonner';
+
+import style from './Screen.module.scss';
 
 function Screen() {
   const params = useParams();
@@ -293,6 +297,15 @@ function Screen() {
                 />
               )}
 
+              {(params.mode ?? 'preview') === 'history' && (
+                <History
+                  screen={screen}
+                  zoomLevel={zoomLevel}
+                  screenId={Number(params.screenId)}
+                  projectId={Number(params.projectId)}
+                />
+              )}
+
               {(params.mode ?? 'preview') === 'inspect' && (
                 <Inspect
                   zoomLevel={zoomLevel}
@@ -306,7 +319,9 @@ function Screen() {
               )}
 
               {/* Work in progress for tabs not developed yet */}
-              {!['preview', 'inspect'].includes(params.mode ?? 'preview') && (
+              {!['preview', 'inspect', 'history'].includes(
+                params.mode ?? 'preview',
+              ) && (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
                   <ToDo />
 
@@ -532,6 +547,42 @@ function Screen() {
 
               <TooltipContent side="top" sideOffset={5}>
                 Inspect <kbd>(I)</kbd>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="History"
+                  className={cn(
+                    'rounded-lg',
+                    (params.mode ?? 'preview') === 'history'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground',
+                  )}
+                  onClick={() =>
+                    navigate(
+                      `/projects/${params.projectId}/${params.screenId}/history`,
+                    )
+                  }
+                >
+                  <Hotkeys
+                    keyName="h"
+                    onKeyUp={() =>
+                      navigate(
+                        `/projects/${params.projectId}/${params.screenId}/history`,
+                      )
+                    }
+                  >
+                    <Clock className="size-5" />
+                  </Hotkeys>
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent side="top" sideOffset={5}>
+                History <kbd>(H)</kbd>
               </TooltipContent>
             </Tooltip>
           </div>
