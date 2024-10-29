@@ -3,7 +3,6 @@ import json
 import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from .download import json_patch_to_local_assets, save_json_data
 from .utils import color_print, is_test_mode
 from .api_requests import (
     fetch_tags,
@@ -14,6 +13,8 @@ from .api_requests import (
     get_project_screens,
     get_screen_inspect_details,
     get_project_archived_screens,
+    json_patch_to_local_assets,
+    save_json_data,
 )
 
 # Constants for directories
