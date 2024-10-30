@@ -1,5 +1,5 @@
-import os
 import json
+from pathlib import Path
 from flask import Blueprint, jsonify, current_app
 
 blueprint = Blueprint("tags", __name__)
@@ -8,11 +8,11 @@ blueprint = Blueprint("tags", __name__)
 @blueprint.route("/tags")
 def fetch_tags():
     try:
-        tags_json_path = os.path.join(current_app.static_folder, "common/tags.json")
+        tags_json_path = Path(current_app.static_folder) / "common" / "tags.json"
 
-        if os.path.exists(tags_json_path):
+        if tags_json_path.exists():
             # Read JSON file
-            with open(tags_json_path, "r") as file:
+            with tags_json_path.open("r") as file:
                 tags = json.load(file)
 
                 return jsonify(tags)

@@ -21,10 +21,6 @@ from .api_requests import (
 # Constants for directories
 DOCS_ROOT = os.getenv("DOCS_ROOT", "./docs")
 
-
-# Parallelized tasks
-PARALLELIZED_TASKS = min(5, os.cpu_count())
-
 # Ignore Archived project
 IGNORE_ARCHIVED_PROJECTS = False
 
@@ -301,7 +297,7 @@ def browse_project(project, ignored_project_ids, option, session: Session):
 
         browsed_screen_ids = set()
 
-        with ThreadPoolExecutor(max_workers=PARALLELIZED_TASKS) as executor:
+        with ThreadPoolExecutor() as executor:
             future_to_screen_id = {
                 executor.submit(browse_screen, screen, project, session): screen["id"]
                 for screen in (
@@ -358,7 +354,6 @@ def browse_projects(session: Session, option=None):
             project for project in allProjects if project["type"] == "prototype"
         ]
 
-        color_print(f"\nMaximum tasks parallelized: {PARALLELIZED_TASKS}", "green")
         color_print(f"\nRetrieving {len(allProjects)} projects:", "green")
 
         tags = fetch_tags(session)

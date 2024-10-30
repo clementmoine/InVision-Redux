@@ -1,5 +1,5 @@
-import os
 import json
+from pathlib import Path
 
 from flask import Blueprint, jsonify, current_app
 
@@ -12,22 +12,22 @@ def get_project_from_share_id(share_id):
     share_id = share_id.lower()
 
     # Define the directory where projects are stored
-    projects_dir = os.path.join(current_app.static_folder, "projects")
+    projects_dir = Path(current_app.static_folder) / "projects"
 
     try:
         # Iterate over all projects in the projects directory
-        for project_id in os.listdir(projects_dir):
-            project_dir = os.path.join(projects_dir, project_id)
+        for project_id in projects_dir.iterdir():
+            project_dir = projects_dir / project_id
 
             # Check if it's a directory (project folder)
-            if os.path.isdir(project_dir):
+            if project_dir.isdir():
                 # Define the path to the shares.json file
-                shares_json_path = os.path.join(project_dir, "shares.json")
+                shares_json_path = project_dir / "shares.json"
 
                 # Check if shares.json exists in the project folder
-                if os.path.exists(shares_json_path):
+                if shares_json_path.exists():
                     # Open and read the shares.json file
-                    with open(shares_json_path, "r") as file:
+                    with shares_json_path.open("r") as file:
                         shares_data = json.load(file)
 
                         # Check if the share_id exists in the shares data (case-insensitive)

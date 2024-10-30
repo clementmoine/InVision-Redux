@@ -1,7 +1,8 @@
-import os
 import json
 import math
+from pathlib import Path
 from unidecode import unidecode
+from concurrent.futures import ThreadPoolExecutor
 
 from flask import Blueprint, jsonify, current_app, request
 
@@ -31,61 +32,53 @@ def fetch_projects():
     # Get specific list of projects by their ids
     project_ids = request.args.getlist("project_ids")
 
-    projects_dir = os.path.join(current_app.static_folder, "projects")
+    projects_dir = Path(current_app.static_folder) / "projects"
     projects = []
 
+    def process_project(project_dir):
+        """Process a single project."""
+        project_json_path = project_dir / "project.json"
+        if project_json_path.exists():
+            with project_json_path.open("r") as file:
+                project = json.load(file)
+                project_data = project.get("data")
+
+                # Apply filters
+                include_project = (
+                    (
+                        project_type is None
+                        or project_data.get("type") == project_type
+                        or (
+                            project_type == "archived"
+                            and project_data.get("isArchived")
+                        )
+                    )
+                    and (
+                        not project_tag
+                        or any(
+                            str(tag.get("id")) == str(project_tag)
+                            for tag in project_data.get("tags", [])
+                        )
+                    )
+                    and (
+                        not search_query
+                        or unidecode(search_query.lower())
+                        in unidecode(project_data.get("name", "").lower())
+                    )
+                    and (not project_ids or project_data.get("id") in project_ids)
+                )
+
+                if include_project:
+                    return project
+        return None
+
     try:
-        # Browse projects folder
-        for project_id in os.listdir(projects_dir):
-            project_dir = os.path.join(projects_dir, project_id)
-
-            if os.path.isdir(project_dir):
-                project_json_path = os.path.join(project_dir, "project.json")
-
-                if os.path.exists(project_json_path):
-                    # Read JSON content
-                    with open(project_json_path, "r") as file:
-                        project = json.load(file)
-
-                        # Check if project should be included based on type and tag parameters
-                        project_data = project.get("data")
-
-                        # Determine if we should include the project
-                        include_project = False
-
-                        if project_type is None:
-                            # If project_type is "all", include both archived and non-archived
-                            include_project = True
-                        elif project_type == "archived" and project_data.get(
-                            "isArchived"
-                        ):
-                            # If filtering by "archived", include only archived projects
-                            include_project = True
-                        elif project_data.get(
-                            "type"
-                        ) == project_type and not project_data.get("isArchived"):
-                            # If filtering by a specific type, include only non-archived projects
-                            include_project = True
-
-                        # Check if the project matches the tag and search query
-                        if (
-                            include_project
-                            and (
-                                not project_tag
-                                or str(project_tag)
-                                in [
-                                    str(tag.get("id"))
-                                    for tag in project_data.get("tags", [])
-                                ]
-                            )
-                            and (
-                                not search_query
-                                or unidecode(search_query.lower())
-                                in unidecode(project_data.get("name", "").lower())
-                            )
-                        ):
-                            if not project_ids or project_id in project_ids:
-                                projects.append(project)
+        # Multithreaded project processing
+        with ThreadPoolExecutor() as executor:
+            # Filter valid projects by removing `None` results
+            projects = list(
+                filter(None, executor.map(process_project, projects_dir.iterdir()))
+            )
 
         # Sort projects based on the provided sort parameter
         if sort_by == "updatedAt":
@@ -126,15 +119,16 @@ def fetch_projects():
 def get_project(project_id):
     # Get search query if provided
     search_query = request.args.get("search", "")
-    project_dir = os.path.join(current_app.static_folder, "projects", str(project_id))
-    project_json_path = os.path.join(project_dir, "project.json")
-    screens_json_path = os.path.join(project_dir, "screens.json")
+    project_dir = Path(current_app.static_folder) / "projects" / str(project_id)
+    project_json_path = project_dir / "project.json"
+    screens_json_path = project_dir / "screens.json"
+
     try:
-        with open(project_json_path, "r") as project_file:
+        with project_json_path.open("r") as project_file:
             project_data = json.load(project_file)
 
-        if os.path.exists(screens_json_path):
-            with open(screens_json_path, "r") as screens_file:
+        if screens_json_path.exists():
+            with screens_json_path.open("r") as screens_file:
                 screens_data = json.load(screens_file)
 
                 # Filter the screens
@@ -155,7 +149,9 @@ def get_project(project_id):
                 screens_data["archivedscreens"] = filtered_archived_screens
                 # Add the screens_data to the project_data
                 project_data["screens"] = screens_data
+
         return jsonify(project_data)
+
     except FileNotFoundError:
         return "Project not found", 404
     except Exception as e:
