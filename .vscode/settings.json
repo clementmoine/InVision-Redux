@@ -10,5 +10,6 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
-  "makefile.configureOnOpen": false
+  "makefile.configureOnOpen": false,
+  "terminal.integrated.scrollback": 9999
 }

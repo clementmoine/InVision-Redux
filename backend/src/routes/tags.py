@@ -14,6 +14,7 @@ def fetch_tags():
             # Read JSON file
             with open(tags_json_path, "r") as file:
                 tags = json.load(file)
+
                 return jsonify(tags)
         else:
             return "Tags file not found", 404

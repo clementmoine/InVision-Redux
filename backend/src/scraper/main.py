@@ -2,6 +2,7 @@ import os
 import sys
 import shutil
 import requests
+from pathlib import Path
 from dotenv import load_dotenv
 
 from .src.browse import browse_projects
@@ -17,9 +18,9 @@ DOCS_ROOT = os.getenv("DOCS_ROOT", "./docs")
 def run_scraper(option=None):
     # Validate if DOCS_ROOT exists, is not empty, and no valid option is provided
     if (
-        os.path.exists(DOCS_ROOT)
-        and os.path.isdir(DOCS_ROOT)
-        and os.listdir(DOCS_ROOT)
+        Path(DOCS_ROOT).exists()
+        and Path(DOCS_ROOT).is_dir()
+        and any(Path(DOCS_ROOT).iterdir())
         and (not option or option not in ["overwrite", "update"])
     ):
         color_print(

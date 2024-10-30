@@ -1,4 +1,6 @@
 import os
+from requests import Session
+from pathlib import Path
 from bs4 import BeautifulSoup
 from requests.exceptions import HTTPError, RequestException
 
@@ -14,7 +16,7 @@ cooldown = 120
 DOCS_ROOT = os.getenv("DOCS_ROOT", "./docs")
 
 
-def request(session, method, *args, **kwargs):
+def request(session: Session, method, *args, **kwargs):
     retries = 0
 
     while retries < max_retries:
@@ -26,33 +28,38 @@ def request(session, method, *args, **kwargs):
             elif method == "PUT":
                 response = session.put(*args, **kwargs)
             else:
-                raise ValueError(f"Unsupported HTTP method: {method}")
+                raise ValueError(f"Unsupported HTTP method ({response.url}): {method}")
 
             if response and response.status_code == 200:
                 if response.cookies:
                     session.cookies.update(response.cookies)
                 return response
-            elif not response or response.status_code == 429:  # Rate limit exceeded
-                # print("API rate limit exceeded. Retrying after cooldown...")
+            elif not response or response.status_code in {
+                500,
+                502,
+                503,
+                504,
+                429,  # Rate limit exceeded
+            }:
                 time.sleep(cooldown)  # Wait before restart
                 retries += 1
+                color_print(
+                    f"Server error {response.status_code} ({response.url}), retrying ({retries}/{max_retries})...",
+                    "yellow",
+                )
             else:
-                error_message = "Unknown error"
-                if response:
-                    error_message = response.text
-
-                color_print(f"Failed to fetch data: {error_message}", "red")
+                color_print(
+                    f"Request failed: {response.text if response else 'Unknown error'}",
+                    "red",
+                )
                 return None
-        except HTTPError as e:
+        except (HTTPError, RequestException) as e:
             color_print(f"HTTP error occurred: {str(e)}", "red")
             time.sleep(cooldown)
             retries += 1
-        except RequestException as e:
-            color_print(f"Request exception occurred: {str(e)}", "red")
-            time.sleep(cooldown)
-            retries += 1
+
         except Exception as e:
-            color_print(f"An unexpected error occurred: {str(e)}", "red")
+            color_print(f"Unexpected error: {str(e)}", "red")
             time.sleep(cooldown)
             retries += 1
 
@@ -60,7 +67,7 @@ def request(session, method, *args, **kwargs):
     return None
 
 
-def login_classic(email, password, session):
+def login_classic(email, password, session: Session):
     url = "https://login.invisionapp.com/login-api/api/v2/login"
     data = {"deviceID": "App", "email": email, "password": password}
 
@@ -78,7 +85,7 @@ def login_classic(email, password, session):
         return None
 
 
-def login_api(email, password, session):
+def login_api(email, password, session: Session):
     url = "https://projects.invisionapp.com/api/account/login"
     data = {"email": email, "password": password, "webview": "false"}
     headers = {"x-xsrf-token": session.cookies.get("XSRF-TOKEN")}
@@ -97,7 +104,7 @@ def login_api(email, password, session):
         return None
 
 
-def get_user_id(session):
+def get_user_id(session: Session):
     url = "https://projects.invisionapp.com/api:unifiedprojects.getProjects"
     headers = {"x-xsrf-token": session.cookies.get("XSRF-TOKEN")}
 
@@ -119,7 +126,7 @@ def get_user_id(session):
         return None
 
 
-def fetch_tags(session):
+def fetch_tags(session: Session):
     url = "https://projects.invisionapp.com/api:unifiedprojects.getTags"
     headers = {"x-xsrf-token": session.cookies.get("XSRF-TOKEN")}
 
@@ -139,7 +146,7 @@ def fetch_tags(session):
         return None
 
 
-def fetch_projects(isArchived, isCollaborator, session):
+def fetch_projects(isArchived, isCollaborator, session: Session):
     url = "https://projects.invisionapp.com/api:unifiedprojects.getProjects"
     params = {"isArchived": isArchived, "isCollaborator": isCollaborator}
     headers = {"x-xsrf-token": session.cookies.get("XSRF-TOKEN")}
@@ -159,7 +166,7 @@ def fetch_projects(isArchived, isCollaborator, session):
         return None
 
 
-def export_project(project, user_id, session):
+def export_project(project, user_id, session: Session):
     try:
         if project["type"] == "prototype":
             url = f'https://projects.invisionapp.com/d/zipexport/generate/debugProjectID/{project["id"]}/debugUserID/{user_id}'
@@ -203,7 +210,7 @@ def export_project(project, user_id, session):
         return None
 
 
-def fetch_project_shares(project, session):
+def fetch_project_shares(project, session: Session):
     url = "https://projects.invisionapp.com/api:project_shares_tab_partials.getView"
     params = {
         "prototypeID": project["id"],
@@ -227,7 +234,7 @@ def fetch_project_shares(project, session):
         return None
 
 
-def get_project_archived_screens(project, session):
+def get_project_archived_screens(project, session: Session):
     url = (
         "https://projects.invisionapp.com/api:desktop_partials.projectScreens2Archived"
     )
@@ -255,7 +262,7 @@ def get_project_archived_screens(project, session):
         return None
 
 
-def get_project_screens(project, session):
+def get_project_screens(project, session: Session):
     url = "https://projects.invisionapp.com/api:desktop_partials.projectScreens2Grouped"
     params = {
         "id": project["id"],
@@ -279,7 +286,7 @@ def get_project_screens(project, session):
         return None
 
 
-def get_screen_details(screen, session):
+def get_screen_details(screen, session: Session):
 
     url = (
         "https://projects.invisionapp.com/api:desktop_partials/screenQuickView"
@@ -309,7 +316,7 @@ def get_screen_details(screen, session):
         return None
 
 
-def get_project_assets(project, session):
+def get_project_assets(project, session: Session):
     url = "https://projects.invisionapp.com/api:inspect.getProjectAssets"
     params = {
         "projectID": project["id"],
@@ -332,7 +339,7 @@ def get_project_assets(project, session):
         return None
 
 
-def get_screen_inspect_details(screen, session):
+def get_screen_inspect_details(screen, session: Session):
     url = "https://projects.invisionapp.com/api:inspect.getExtractionJSON"
     params = {
         "id": screen["id"],
@@ -356,7 +363,7 @@ def get_screen_inspect_details(screen, session):
         return None
 
 
-def get_screen_history(screen, session):
+def get_screen_history(screen, session: Session):
     url = "https://projects.invisionapp.com/api:desktop_partials/screenHistory"
     params = {
         "screenID": screen["id"],
@@ -379,55 +386,73 @@ def get_screen_history(screen, session):
         return None
 
 
-def download_file(url, destination, session):
+def download_file(url, destination: Path, session: Session):
     """
     Downloads a file from the given URL to the specified destination.
 
     Args:
         url (str): The URL of the file to download.
         destination (str): The path where the file will be saved.
-        session (requests.Session): Session object for making HTTP requests.
+        session (requests.Session: Session): Session object for making HTTP requests.
 
     Returns:
         bool: True if the file was downloaded successfully, False otherwise.
     """
-    if os.path.exists(destination):
+    if destination.exists():
         return True
 
-    response = request(session, "GET", url=url)
-    if response and response.status_code == 200:
-        # Save the file content to the destination
-        with open(destination, "wb") as f:
-            f.write(response.content)
-        return True
-    else:
-        color_print(f"   ✘  Failed to download file: {url}", "red")
+    try:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+
+        headers = {"x-xsrf-token": session.cookies.get("XSRF-TOKEN")}
+
+        response = request(session, "GET", url=url, headers=headers)
+        if response and response.status_code == 200:
+            # Attempt to save the file content
+            with destination.open("wb") as f:
+                f.write(response.content)
+            return True
+        else:
+            color_print(f"   ✘  Failed to download file: {url}", "red")
+            return False
+
+    except OSError as e:
+        color_print(
+            f"Error creating the file {destination}: {e}",
+            "red",
+        )
+        return False
+    except Exception as e:
+        color_print(f"Unexpected error during download of {url}: {e}", "red")
         return False
 
 
-def json_patch_to_local_assets(json_data, project_id, screen_id, session):
+def json_patch_to_local_assets(json_data, project_id, screen_id, session: Session):
     """
     Downloads files from URLs in the JSON data and updates the JSON with local file paths.
 
     Args:
         json_data (dict): JSON data containing URLs of files to be downloaded.
         project_id (str): ID of the project.
-        session (requests.Session): Session object for making HTTP requests.
+        session (requests.Session: Session): Session object for making HTTP requests.
 
     Returns:
         dict: Updated JSON data with local file paths.
     """
-    project_dir = os.path.join(DOCS_ROOT, "projects", str(project_id))
-    os.makedirs(project_dir, exist_ok=True)
+    project_dir = Path(DOCS_ROOT) / "projects" / str(project_id)
+    project_dir.mkdir(parents=True, exist_ok=True)
 
-    avatars_dir = os.path.join(DOCS_ROOT, "common/avatars")
-    os.makedirs(avatars_dir, exist_ok=True)
+    avatars_dir = Path(DOCS_ROOT) / "common" / "avatars"
+    avatars_dir.mkdir(parents=True, exist_ok=True)
 
     if screen_id:
-        screen_dir = os.path.join(
-            DOCS_ROOT, "projects", str(project_id), "screens", str(screen_id)
+        screen_dir = (
+            Path(DOCS_ROOT) / "projects" / str(project_id) / "screens" / str(screen_id)
         )
-        os.makedirs(screen_dir, exist_ok=True)
+        screen_dir.mkdir(parents=True, exist_ok=True)
+
+        versions_dir = screen_dir / "versions"
+        versions_dir.mkdir(parents=True, exist_ok=True)
 
     def download_and_patch(data):
         """
@@ -452,11 +477,11 @@ def json_patch_to_local_assets(json_data, project_id, screen_id, session):
 
                     # Custom case for common assets
                     if "avatars" in dir_name:
-                        file_path = os.path.join(avatars_dir, file_name)
+                        file_path = avatars_dir / file_name
 
                     # Screen versions (we save them in the screen dir under a versions dir)
                     if "versions/files" in dir_name:
-                        file_path = os.path.join(screen_dir, "versions", file_name)
+                        file_path = versions_dir / file_name
 
                     # Screens and thumbnails
                     elif (
@@ -468,15 +493,11 @@ def json_patch_to_local_assets(json_data, project_id, screen_id, session):
                             file_name = f"{'thumbnail' if 'thumbnails' in dir_name else 'image'}{file_extension}"
                             dir_name = f"screens/{screen_id}"
 
-                        file_path = os.path.join(project_dir, dir_name, file_name)
+                        file_path = project_dir / dir_name / file_name
 
                     # Project assets
                     else:
-                        file_path = os.path.join(
-                            project_dir, "assets", dir_name, file_name
-                        )
-
-                    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                        file_path = project_dir / "assets" / dir_name / file_name
 
                     if download_file(value, file_path, session):
                         data[key] = "/" + os.path.relpath(
@@ -495,7 +516,7 @@ def json_patch_to_local_assets(json_data, project_id, screen_id, session):
     return updated_json_data
 
 
-def save_json_data(data, folder_path, file_name):
+def save_json_data(data, folder_path: Path, file_name: str):
     """
     Saves JSON data to a file.
 
@@ -507,12 +528,12 @@ def save_json_data(data, folder_path, file_name):
     Returns:
         bool: True if the data was saved successfully, False otherwise.
     """
-    file_path = os.path.join(folder_path, file_name)
+    file_path = folder_path / file_name
 
     try:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        folder_path.mkdir(parents=True, exist_ok=True)
 
-        with open(file_path, "w") as json_file:
+        with file_path.open("w") as json_file:
             json.dump(data, json_file, indent=4)
 
         return True

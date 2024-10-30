@@ -1,7 +1,8 @@
-import glob
 import json
 import os
 import shutil
+from pathlib import Path
+from requests import Session
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .utils import color_print, is_test_mode
 from .api_requests import (
@@ -34,7 +35,7 @@ def is_valid_response(response, expected_keys):
     return all(key in response for key in expected_keys)
 
 
-def browse_screen(screen, project, session):
+def browse_screen(screen, project, session: Session):
     """
     Browse a screen, download its assets, and save JSON data locally.
 
@@ -46,8 +47,8 @@ def browse_screen(screen, project, session):
     Returns:
         bool: True if the screen was successfully browsed or if the data already existed, False otherwise.
     """
-    project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
-    screen_json_folder = os.path.join(project_folder, "screens", str(screen["id"]))
+    project_folder = Path(DOCS_ROOT) / "projects" / str(project["id"])
+    screen_folder = project_folder / "screens" / str(screen["id"])
 
     # Files we expect to see when the screen already exists
     file_names = [
@@ -56,113 +57,128 @@ def browse_screen(screen, project, session):
         "screen.json",
     ]
 
-    # Remove inspect.json to expected files if the screen is archived
-    if screen.get("isArchived", False):
-        file_names.remove("history.json")
-        file_names.remove("inspect.json")
+    try:
+        screen_folder.mkdir(parents=True, exist_ok=True)
 
-    # Check if any image file exists (versions images doesn't exists everytime so we don't check here)
-    image_files = glob.glob(os.path.join(screen_json_folder, "image.*"))
-    thumbnail_files = glob.glob(os.path.join(screen_json_folder, "thumbnail.*"))
+        # Remove inspect.json to expected files if the screen is archived
+        if screen.get("isArchived", False):
+            file_names.remove("history.json")
+            file_names.remove("inspect.json")
 
-    if (
-        image_files
-        and thumbnail_files
-        and all(
-            map(
-                lambda file_name: os.path.exists(
-                    os.path.join(screen_json_folder, file_name)
-                ),
-                file_names,
+        # Check if any image file exists (versions images doesn't exists everytime so we don't check here)
+        image_files = list(screen_folder.glob("image.*"))
+        thumbnail_files = list(screen_folder.glob("thumbnail.*"))
+
+        versions_folder = screen_folder / "versions"
+        history_json_path = screen_folder / "history.json"
+
+        version_count = 0
+        excepted_version_count = 0
+
+        if not screen.get("isArchived", False):
+            if versions_folder.exists():
+                version_count = len(list(versions_folder.iterdir())) + 1
+
+            if history_json_path.exists() and history_json_path.stat().st_size > 0:
+                with history_json_path.open("r") as f:
+                    excepted_version_count = len(json.load(f).get("versions", []))
+
+        if (
+            len(image_files) >= 1
+            and len(thumbnail_files) >= 1
+            and (screen.get("isArchived") or version_count == excepted_version_count)
+            and all(
+                (Path(screen_folder / file_name).exists() for file_name in file_names)
             )
-        )
-    ):
-        color_print(
-            f"   ⮑  Screen {screen['name']} data already exists locally. Skipping.",
-            "yellow",
-        )
-
-        return True
-
-    screen_details = get_screen_details(screen, session)
-
-    if screen_details:
-        screen_details_patched = json_patch_to_local_assets(
-            screen_details, project["id"], screen["id"], session
-        )
-
-        if not save_json_data(
-            screen_details_patched, screen_json_folder, "screen.json"
         ):
             color_print(
-                f"   ✘  Failed to save screen details for {screen['name']}", "red"
+                f"   ⮑  Screen {screen['id']} data already exists locally. Skipping.",
+                "yellow",
             )
 
-            return False
-
-        if screen["isArchived"]:
-            color_print(
-                f"   ⮑  Archived screen {screen['name']} (details) gathered", "green"
-            )
             return True
 
-        screen_inspect_details = get_screen_inspect_details(screen, session)
+        screen_details = get_screen_details(screen, session)
 
-        if screen_inspect_details:
-            screen_inspect_details_patched = json_patch_to_local_assets(
-                screen_inspect_details, project["id"], screen["id"], session
+        if screen_details:
+            screen_details_patched = json_patch_to_local_assets(
+                screen_details, project["id"], screen["id"], session
             )
 
-            if not save_json_data(
-                screen_inspect_details_patched, screen_json_folder, "inspect.json"
-            ):
+            if not save_json_data(screen_details_patched, screen_folder, "screen.json"):
                 color_print(
-                    f"   ✘  Failed to save inspect data for {screen['name']}", "red"
+                    f"   ✘  Failed to save screen details for {screen['id']}", "red"
                 )
 
                 return False
 
-        screen_history = get_screen_history(screen, session)
-
-        if screen_history:
-            screen_history_patched = json_patch_to_local_assets(
-                screen_history, project["id"], screen["id"], session
-            )
-
-            if not save_json_data(
-                screen_history_patched, screen_json_folder, "history.json"
-            ):
+            if screen["isArchived"]:
                 color_print(
-                    f"   ✘  Failed to save history data for {screen['name']}", "red"
+                    f"   ⮑  Archived screen {screen['id']} (details) gathered", "green"
+                )
+                return True
+
+            screen_inspect_details = get_screen_inspect_details(screen, session)
+
+            if screen_inspect_details:
+                screen_inspect_details_patched = json_patch_to_local_assets(
+                    screen_inspect_details, project["id"], screen["id"], session
                 )
 
-                return False
+                if not save_json_data(
+                    screen_inspect_details_patched, screen_folder, "inspect.json"
+                ):
+                    color_print(
+                        f"   ✘  Failed to save inspect data for {screen['id']}", "red"
+                    )
 
-            color_print(
-                f"   ⮑  Screen {screen['name']} (details, inspect, history) gathered",
-                "green",
-            )
-            return True
+                    return False
 
-    color_print(f"   ✘  Failed to browse the screen {screen['name']}", "red")
+            screen_history = get_screen_history(screen, session)
 
+            if screen_history:
+                screen_history_patched = json_patch_to_local_assets(
+                    screen_history, project["id"], screen["id"], session
+                )
+
+                if not save_json_data(
+                    screen_history_patched, screen_folder, "history.json"
+                ):
+                    color_print(
+                        f"   ✘  Failed to save history data for {screen['id']}", "red"
+                    )
+
+                    return False
+
+                color_print(
+                    f"   ⮑  Screen {screen['id']} (details, inspect, history) gathered",
+                    "green",
+                )
+                return True
+
+    except Exception as e:
+        color_print(f"   ✘  Failed to browse the screen {screen['id']}: {e}", "red")
+
+        return False
+
+    color_print(f"   ✘  Failed to browse the screen {screen['id']}", "red")
     return False
 
 
-def browse_project(project, ignored_project_ids, option, session):
+def browse_project(project, ignored_project_ids, option, session: Session):
     """
     Browse a project, download its assets, and save JSON data locally.
 
     Args:
         project (dict): Project data.
-        session (requests.Session): Session object for making HTTP requests.
+        session (requests.Session: Session): Session object for making HTTP requests.
 
     Returns:
         dict or None: Updated project data if successful, None otherwise.
     """
-    project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
+    project_folder = Path(DOCS_ROOT) / "projects" / str(project["id"])
 
-    os.makedirs(project_folder, exist_ok=True)
+    project_folder.mkdir(parents=True, exist_ok=True)
 
     patched_project = json_patch_to_local_assets(project, project["id"], None, session)
     if not save_json_data(patched_project, project_folder, "project.json"):
@@ -172,14 +188,15 @@ def browse_project(project, ignored_project_ids, option, session):
 
     shares = fetch_project_shares(project, session)
     if shares:
-        shares_json_path = os.path.join(project_folder, "shares.json")
+        shares_json_path = project_folder / "shares.json"
 
         # Load local shares.json if it exists
-        if os.path.exists(shares_json_path):
-            if os.path.getsize(shares_json_path) > 0:
+        if shares_json_path.exists():
+            if shares_json_path.stat().st_size > 0:
                 try:
-                    with open(shares_json_path, "r") as f:
+                    with shares_json_path.open("r") as f:
                         local_shares_data = json.load(f)
+
                 except json.JSONDecodeError:
                     local_shares_data = {}
             else:
@@ -223,11 +240,11 @@ def browse_project(project, ignored_project_ids, option, session):
             "green",
         )
 
-        screens_json_path = os.path.join(project_folder, "screens.json")
+        screens_json_path = project_folder / "screens.json"
 
         # Check if the screens are up to date
-        if option == "update" and os.path.exists(screens_json_path):
-            with open(screens_json_path, "r") as f:
+        if option == "update" and screens_json_path.exists():
+            with screens_json_path.open("r") as f:
                 local_screens_data = json.load(f)
 
             screens_to_delete = []
@@ -258,37 +275,14 @@ def browse_project(project, ignored_project_ids, option, session):
 
             # Remove outdated screens folders
             for screen in screens_to_delete:
-                screen_folder = os.path.join(
-                    project_folder, "screens", str(screen["id"])
-                )
-                if os.path.exists(screen_folder):
+                screen_folder = project_folder / "screens" / str(screen["id"])
+
+                if screen_folder.exists():
                     shutil.rmtree(screen_folder, ignore_errors=True)
                     color_print(
-                        f"   ⮑  Screen {screen['name']} folder deleted for update",
+                        f"   ⮑  Screen {screen['id']} folder deleted for update",
                         "yellow",
                     )
-
-            # After deleting, check if all screens are up-to-date
-            if (
-                not screens_to_delete
-                and archived_screens_count
-                == len(local_screens_data.get("archivedscreens", []))
-                and all(
-                    archived_screen.get("updatedAt")
-                    == local_archived_screen.get("updatedAt")
-                    for archived_screen, local_archived_screen in zip(
-                        screens.get("archivedscreens", []),
-                        local_screens_data.get("archivedscreens", []),
-                    )
-                )
-            ):
-                # Ignore the project if everything is up to date
-                color_print(
-                    f"   ⮑  Up-to-date project skipped ({screens_count} screens, {archived_screens_count} archived)",
-                    "yellow",
-                )
-                ignored_project_ids.add(project["id"])
-                return False
 
         screens_patched = json_patch_to_local_assets(
             screens, project["id"], None, session
@@ -339,7 +333,7 @@ def browse_project(project, ignored_project_ids, option, session):
         return False
 
 
-def browse_projects(session, option=None):
+def browse_projects(session: Session, option=None):
     projects = fetch_projects(isArchived=False, isCollaborator=True, session=session)
 
     archivedProjects = (
@@ -368,7 +362,8 @@ def browse_projects(session, option=None):
         color_print(f"\nRetrieving {len(allProjects)} projects:", "green")
 
         tags = fetch_tags(session)
-        if not save_json_data(tags, os.path.join(DOCS_ROOT, "common"), "tags.json"):
+        common_folder = Path(DOCS_ROOT) / "common"
+        if not save_json_data(tags, common_folder, "tags.json"):
             color_print(f" ✘  Failed to save tags data", "red")
 
             return False
@@ -379,24 +374,21 @@ def browse_projects(session, option=None):
         for project in allProjects:
             color_print(f" • {project['data']['name']} ({project['id']}):", "white")
 
-            project_folder = os.path.join(DOCS_ROOT, "projects", str(project["id"]))
+            project_folder = Path(DOCS_ROOT) / "projects" / str(project["id"])
 
             # Ignore existing valid project folders
-            if option == "update" and os.path.exists(project_folder):
+            if option == "update" and project_folder.exists():
                 required_files = ["project.json", "screens.json"]
-                if all(
-                    os.path.exists(os.path.join(project_folder, f))
-                    for f in required_files
-                ):
+                if all((project_folder / f).exists() for f in required_files):
                     # Grab the project updated date from the project and project.json
                     # Grab the projet item count from the project and project.json
                     # If they match ignore the project, if they don't remove the project dir to scrap that again
                     project_update_date = project["data"].get("updatedAt")
                     project_item_count = project["data"].get("itemCount")
 
-                    project_json_path = os.path.join(project_folder, "project.json")
+                    project_json_path = project_folder / "project.json"
 
-                    with open(project_json_path, "r") as f:
+                    with project_json_path.open("r") as f:
                         local_project_data = json.load(f)
 
                     # Protect the local data if the response is invalid

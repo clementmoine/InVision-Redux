@@ -22,6 +22,7 @@ def get_screen(project_id, screen_id):
         if os.path.exists(screen_json_path):
             with open(screen_json_path, "r") as screen_file:
                 screen_data = json.load(screen_file)
+
             return jsonify(screen_data)
         else:
             return (
@@ -50,6 +51,7 @@ def get_screen_inspect(project_id, screen_id):
         if os.path.exists(inspect_json_path):
             with open(inspect_json_path, "r") as inspect_file:
                 inspect_data = json.load(inspect_file)
+
             return jsonify(inspect_data)
         else:
             return (
@@ -78,6 +80,7 @@ def get_screen_history(project_id, screen_id):
         if os.path.exists(history_json_path):
             with open(history_json_path, "r") as history_file:
                 history_data = json.load(history_file)
+
             return jsonify(history_data)
         else:
             return (

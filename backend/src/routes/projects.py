@@ -132,9 +132,11 @@ def get_project(project_id):
     try:
         with open(project_json_path, "r") as project_file:
             project_data = json.load(project_file)
+
         if os.path.exists(screens_json_path):
             with open(screens_json_path, "r") as screens_file:
                 screens_data = json.load(screens_file)
+
                 # Filter the screens
                 filtered_screens = [
                     screen
