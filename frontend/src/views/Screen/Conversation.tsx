@@ -236,11 +236,13 @@ const Conversation: React.FC<ConversationProps> = props => {
 
                     <div className="flex gap-2 flex-col w-full ">
                       <div className="flex gap-2 text-foreground">
-                        <p>{comment.userName}</p>
+                        <p className="text-ellipsis overflow-hidden line-clamp-2 break-words">
+                          {comment.userName}
+                        </p>
 
                         {/* Comment date */}
                         <p
-                          className="text-muted-foreground"
+                          className="text-muted-foreground shrink-0"
                           title={dayjs(comment.createdAt).format('L LT')}
                         >
                           {dayjs(comment.createdAt).fromNow()}

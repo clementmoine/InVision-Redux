@@ -80,7 +80,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 <Archive aria-label="Archived" className="shrink-0 size-4" />
               )}
 
-              <span className="text-ellipsis whitespace-nowrap overflow-hidden">
+              <span className="text-ellipsis overflow-hidden break-words line-clamp-2">
                 {project.data.name}
               </span>
             </CardTitle>

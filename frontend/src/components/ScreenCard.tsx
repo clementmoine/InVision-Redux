@@ -89,7 +89,7 @@ const ScreenCard: React.FC<ScreenCardProps> = props => {
               <Archive aria-label="Archived" className="h-4 w-4" />
             )}
 
-            <span className="text-ellipsis whitespace-nowrap overflow-hidden">
+            <span className="text-ellipsis overflow-hidden break-words line-clamp-2">
               {screen.name}
             </span>
           </CardTitle>

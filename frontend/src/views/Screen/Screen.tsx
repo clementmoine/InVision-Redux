@@ -432,7 +432,7 @@ function Screen() {
                     <BreadcrumbLink
                       title={data?.project.name}
                       href={`/projects/${params.projectId}`}
-                      className="text-nowrap overflow-hidden text-ellipsis"
+                      className="verflow-hidden text-ellipsis break-words line-clamp-2"
                     >
                       {data?.project.name}
                     </BreadcrumbLink>

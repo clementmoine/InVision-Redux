@@ -131,12 +131,14 @@ function History(props: HistoryProps) {
                         </AvatarFallback>
                       </Avatar>
 
-                      <p className="text-sm">{version.userName}</p>
+                      <p className="text-sm overflow-hidden text-ellipsis break-words line-clamp-2">
+                        {version.userName}
+                      </p>
                     </span>
 
                     {isCurrentVersion(version) && (
                       <span
-                        className="flex bg-current p-1 overflow-hidden w-fit rounded-sm"
+                        className="flex shrink-0 self-start bg-current p-1 overflow-hidden w-fit rounded-sm"
                         style={{ fontSize: 10 }}
                       >
                         <span className="text-stone-50">Latest version</span>
