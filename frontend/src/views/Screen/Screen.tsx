@@ -61,6 +61,7 @@ function Screen() {
   const [showConversations, setShowConversations] = useState<boolean | 'all'>(
     true,
   );
+
   const [isTrayOpen, setIsTrayOpen] = useState<boolean>(false);
   const [rightPanelWidth, setRightPanelWidth] = useState<number>(0);
 

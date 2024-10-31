@@ -21,6 +21,8 @@ import useLocalStorage from '@/hooks/useLocalStorage';
 
 import style from './History.module.scss';
 import dayjs from 'dayjs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Blend, Columns, Fullscreen } from 'lucide-react';
 
 interface HistoryProps {
   screenId: Screen['id'];
@@ -37,6 +39,8 @@ function History(props: HistoryProps) {
   const [_selectedVersion, setSelectedVersion] = useState<ScreenVersion | null>(
     null,
   );
+
+  const [compareMode, setCompareMode] = useState<string>('solo');
 
   const params = useParams();
 
@@ -56,6 +60,18 @@ function History(props: HistoryProps) {
     [data],
   );
 
+  const currentVersion = useMemo(
+    () =>
+      sortedVersions?.find(
+        version =>
+          'imageVersion' in screen &&
+          version &&
+          version.version === screen.imageVersion &&
+          version.imageUrl === screen.imageUrl,
+      ),
+    [sortedVersions, screen],
+  );
+
   const selectedVersion = useMemo(
     () => _selectedVersion || sortedVersions?.[0],
     [_selectedVersion, sortedVersions],
@@ -63,11 +79,11 @@ function History(props: HistoryProps) {
 
   const isCurrentVersion = useCallback(
     (version?: ScreenVersion) =>
-      'imageVersion' in screen &&
       version &&
-      version.version === screen.imageVersion &&
-      version.imageUrl === screen.imageUrl,
-    [screen],
+      currentVersion &&
+      version.version === currentVersion.version &&
+      version.imageUrl === currentVersion.imageUrl,
+    [currentVersion],
   );
 
   // Reset the current version when screen changed
@@ -141,7 +157,7 @@ function History(props: HistoryProps) {
                         className="flex shrink-0 self-start bg-current p-1 overflow-hidden w-fit rounded-sm"
                         style={{ fontSize: 10 }}
                       >
-                        <span className="text-stone-50">Latest version</span>
+                        <span className="text-stone-50">Current</span>
                       </span>
                     )}
                   </span>
@@ -164,37 +180,96 @@ function History(props: HistoryProps) {
         minSize={50}
         defaultSize={75}
         data-version={selectedVersion?.version}
-        className="flex"
+        className="flex justify-center relative"
       >
+        {!isCurrentVersion(selectedVersion) && (
+          <Tabs
+            value={compareMode}
+            defaultValue="solo"
+            className="absolute mt-2 z-[999]"
+            onValueChange={value => setCompareMode(value)}
+          >
+            <TabsList>
+              <TabsTrigger value="solo" className="gap-1">
+                <Fullscreen className="size-5" /> Solo
+              </TabsTrigger>
+              <TabsTrigger value="side" className="gap-1">
+                <Columns className="size-5" /> Side by side
+              </TabsTrigger>
+
+              <TabsTrigger value="overlay" className="gap-1">
+                <Blend className="size-5" />
+                Overlay
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
+
         <div
           className={cn(
-            'flex w-full items-start !overflow-auto text-neutral-200 bg-slate-50 p-16',
+            'flex w-full items-start !overflow-auto text-neutral-200 bg-slate-50',
             style['checkerboard'],
           )}
         >
-          {/* Image */}
-          <img
-            key={selectedVersion?.version}
-            decoding="sync"
-            src={`/api/static/${selectedVersion?.imageUrl}`}
-            className={cn('h-auto mx-auto', {
-              'h-auto': !isCurrentVersion(selectedVersion),
+          <div
+            className={cn('flex mx-auto gap-16 p-16 relative items-start', {
+              invert:
+                isCurrentVersion(selectedVersion) === false &&
+                compareMode === 'overlay',
             })}
-            style={{
-              width: screen.width * zoomLevel,
-              minWidth: screen.width * zoomLevel,
-              maxWidth: screen.width * zoomLevel,
-              height: isCurrentVersion(selectedVersion)
-                ? screen.height * zoomLevel
-                : undefined,
-              minHeight: isCurrentVersion(selectedVersion)
-                ? screen.height * zoomLevel
-                : undefined,
-              maxHeight: isCurrentVersion(selectedVersion)
-                ? screen.height * zoomLevel
-                : undefined,
-            }}
-          />
+          >
+            {/* Current version (the screen) */}
+            {(compareMode !== 'solo' || isCurrentVersion(selectedVersion)) && (
+              <img
+                key={currentVersion?.version}
+                decoding="sync"
+                src={`/api/static/${currentVersion?.imageUrl}`}
+                style={{
+                  width: screen.width * zoomLevel,
+                  minWidth: screen.width * zoomLevel,
+                  maxWidth: screen.width * zoomLevel,
+                  height: screen.height * zoomLevel,
+                  minHeight: screen.height * zoomLevel,
+                  maxHeight: screen.height * zoomLevel,
+                }}
+              />
+            )}
+
+            {/* Selected version */}
+            {!isCurrentVersion(selectedVersion) && (
+              <img
+                key={selectedVersion?.version}
+                decoding="sync"
+                src={`/api/static/${selectedVersion?.imageUrl}`}
+                className={cn('h-auto ', {
+                  absolute: compareMode === 'overlay',
+                  'mix-blend-difference': compareMode === 'overlay',
+                  'opacity-100': compareMode === 'overlay',
+                  'object-contain': compareMode === 'overlay',
+                  'object-top': compareMode === 'overlay',
+                })}
+                style={{
+                  width: screen.width * zoomLevel,
+                  minWidth: screen.width * zoomLevel,
+                  maxWidth: screen.width * zoomLevel,
+                  height:
+                    compareMode === 'overlay'
+                      ? screen.height * zoomLevel
+                      : undefined,
+                  minHeight:
+                    compareMode === 'overlay'
+                      ? screen.height * zoomLevel
+                      : undefined,
+                  maxHeight:
+                    compareMode === 'overlay'
+                      ? screen.height * zoomLevel
+                      : undefined,
+                  backgroundImage: `url("/api/static/${currentVersion?.imageUrl}")`,
+                  backgroundSize: 'cover',
+                }}
+              />
+            )}
+          </div>
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
