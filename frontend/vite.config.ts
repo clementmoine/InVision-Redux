@@ -47,6 +47,10 @@ export default (props: { mode: string }) => {
           },
         },
       },
+      watch: {
+        usePolling: true,
+      },
+      hmr: { host: '0.0.0.0' },
     },
   });
 };
