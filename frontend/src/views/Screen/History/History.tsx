@@ -207,7 +207,7 @@ function History(props: HistoryProps) {
 
         <div
           className={cn(
-            'flex w-full items-start !overflow-auto text-neutral-200 bg-slate-50',
+            'flex w-full items-start !overflow-auto text-background bg-muted',
             style['checkerboard'],
           )}
         >

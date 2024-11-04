@@ -156,7 +156,7 @@ const Conversation: React.FC<ConversationProps> = props => {
             className={cn(
               'absolute h-8 min-w-8 z-[9998] -translate-y-full opacity-70 hover:opacity-100 transition-opacity',
               {
-                'text-white': !conversation.isTourPoint,
+                'text-background': !conversation.isTourPoint,
                 'text-blue-400': conversation.isTourPoint,
                 'opacity-100': isOpen || conversation.isTourPoint,
                 grayscale: conversation.isComplete,
