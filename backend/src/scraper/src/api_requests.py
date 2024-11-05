@@ -480,7 +480,7 @@ def json_patch_to_local_assets(json_data, project_id, screen_id, session: Sessio
                         file_path = avatars_dir / file_name
 
                     # Screen versions (we save them in the screen dir under a versions dir)
-                    if "versions/files" in dir_name:
+                    elif "versions/files" in dir_name:
                         file_path = versions_dir / file_name
 
                     # Screens and thumbnails
