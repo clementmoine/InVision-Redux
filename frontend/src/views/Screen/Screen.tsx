@@ -84,13 +84,26 @@ function Screen() {
     placeholderData: keepPreviousData,
   });
 
-  const allScreens = useMemo(
-    () =>
-      data != null && 'activeScreens' in data
-        ? data.activeScreens.sort((a, b) => a.sort - b.sort)
-        : undefined,
-    [data],
-  );
+  const allScreens = useMemo(() => {
+    if (!data || !('activeScreens' in data)) {
+      return undefined;
+    }
+
+    // Sort the screens
+    return [...data.activeScreens].sort((a, b) => {
+      const dividerA = data.dividers.find(d => d.dividerID === a.screenGroupId);
+      const dividerB = data.dividers.find(d => d.dividerID === b.screenGroupId);
+
+      // Sort by `divider.sort`
+      const dividersSort = (dividerA?.sort || 0) - (dividerB?.sort || 0);
+      if (dividersSort !== 0) {
+        return dividersSort;
+      }
+
+      // If `divider.sort` is the same, sort by `screen.sort`
+      return a.sort - b.sort;
+    });
+  }, [data]);
 
   const conversations = useMemo(
     () =>
