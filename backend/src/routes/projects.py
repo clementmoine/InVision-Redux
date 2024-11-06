@@ -65,7 +65,10 @@ def fetch_projects():
                         or unidecode(search_query.lower())
                         in unidecode(project_data.get("name", "").lower())
                     )
-                    and (not project_ids or project_data.get("id") in project_ids)
+                    and (
+                        not project_ids
+                        or str(project_data.get("id")) in map(str, project_ids)
+                    )
                 )
 
                 if include_project:
