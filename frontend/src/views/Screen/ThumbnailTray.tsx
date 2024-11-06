@@ -163,7 +163,7 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
 
       <ol
         ref={containerRef}
-        className="flex flex-row px-3 overflow-x-auto items-end gap-5"
+        className="flex flex-row px-3 overflow-x-auto gap-5 items-stretch"
       >
         {filteredDividers.map(divider => {
           if (divider != null) {
@@ -176,7 +176,7 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
                   {divider.label}
                 </h3>
 
-                <ol className="flex flex-row gap-3">
+                <ol className="flex flex-row gap-3 h-full">
                   {divider.screens.map(screen => (
                     <li
                       key={screen.id}
