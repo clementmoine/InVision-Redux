@@ -35,7 +35,7 @@ const ConversationToggle = forwardRef<
   const isControlled = 'checked' in props;
 
   const [isChecked, setIsChecked] = useState<boolean>(
-    isControlled ? !controlledChecked : defaultChecked ?? false,
+    isControlled ? !controlledChecked : (defaultChecked ?? false),
   );
   const [isShiftPressed, setIsShiftPressed] = useState(false); // State to track Shift key
 
@@ -95,8 +95,8 @@ const ConversationToggle = forwardRef<
                 )}
               >
                 {isShiftPressed && !isCurrentlyChecked
-                  ? totalCount ?? 0
-                  : count ?? 0}
+                  ? (totalCount ?? 0)
+                  : (count ?? 0)}
               </Badge>
             )}
 
@@ -109,7 +109,7 @@ const ConversationToggle = forwardRef<
         </Button>
       </TooltipTrigger>
 
-      <TooltipContent side="left" sideOffset={5}>
+      <TooltipContent side="top" sideOffset={5}>
         {isCurrentlyChecked
           ? 'Hide conversations'
           : isShiftPressed

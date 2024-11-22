@@ -1,5 +1,79 @@
 import { toast } from 'sonner';
 
+export const copyImageToClipboard = async (
+  imageUrl?: string,
+  altText?: string,
+) => {
+  if (!imageUrl) {
+    toast('No image URL', {
+      description: 'No image URL was provided.',
+      duration: 1500,
+    });
+    return false;
+  }
+
+  if (!navigator.clipboard || !('write' in navigator.clipboard)) {
+    toast('Clipboard API not supported', {
+      description: 'Your browser does not support copying to the clipboard.',
+      duration: 1500,
+    });
+    return false;
+  }
+
+  try {
+    const imageResponse = await fetch(`/api/static/${imageUrl}`);
+    const imageBlob = await imageResponse.blob();
+
+    // Check if the image size exceeds a reasonable limit (5 MB in this case)
+    if (imageBlob.size > 5 * 1024 * 1024) {
+      toast('Image too large', {
+        description: 'The image is too large to copy to the clipboard.',
+        duration: 1500,
+      });
+      return false;
+    }
+
+    // Convert the image Blob to Base64
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(imageBlob);
+    });
+
+    // Generate HTML content with the Base64 image
+    const htmlContent = `<img src="${base64}" alt="${altText || ''}">`;
+
+    // Create a Blob for the HTML
+    const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+
+    // Copy the HTML Blob to the clipboard
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        [htmlBlob.type]: htmlBlob,
+      }),
+    ]);
+
+    // Notify the user of success
+    toast('Copied! 🎉', {
+      description: 'Image copied to clipboard successfully.',
+      duration: 1500,
+    });
+
+    return true;
+  } catch (err) {
+    console.error('Failed to copy HTML with image:', err);
+
+    // Notify the user of failure
+    toast('Failed to copy 😔', {
+      description: 'An error occurred while copying the content.',
+      duration: 1500,
+    });
+
+    return false;
+  }
+};
+
 export const copyToClipboard = async (text?: string) => {
   if (!text) return false;
 

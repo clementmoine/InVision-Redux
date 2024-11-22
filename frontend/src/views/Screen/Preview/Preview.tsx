@@ -336,6 +336,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
         <img
           // key={screen.id}
           decoding="sync"
+          alt={screen.name}
           src={`/api/static/${screen.imageUrl}`}
           className={cn('object-contain', {
             'bg-[rgb(var(--screen-background-color))]': !isEmbedded,

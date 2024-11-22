@@ -10,6 +10,8 @@ import {
   ChevronUp,
   Clock,
   Code2,
+  Copy,
+  DownloadCloud,
   Eye,
   Share,
 } from 'lucide-react';
@@ -44,7 +46,7 @@ import { getScreen } from '@/api/screens';
 
 import { ArchivedScreenDetails, Screen as ScreenType } from '@/types';
 
-import { copyToClipboard, hexToRgb } from '@/utils';
+import { copyImageToClipboard, copyToClipboard, hexToRgb } from '@/utils';
 
 import defaultValues from '@/constants/defaultValues';
 
@@ -220,6 +222,19 @@ function Screen() {
     }
 
     return '255 255 255';
+  }, [screen]);
+
+  const downloadScreen = useCallback(() => {
+    if (screen?.imageUrl) {
+      const link = document.createElement('a');
+      link.href = `/api/static/${screen.imageUrl}`;
+      link.download = `${screen.name || 'screen'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      console.error('No screen image url available.');
+    }
   }, [screen]);
 
   const handlePageChange = useCallback(
@@ -446,7 +461,7 @@ function Screen() {
                     <BreadcrumbLink
                       title={data?.project.name}
                       href={`/projects/${params.projectId}`}
-                      className="verflow-hidden text-ellipsis break-words line-clamp-2"
+                      className="overflow-hidden text-ellipsis whitespace-nowrap"
                     >
                       {data?.project.name}
                     </BreadcrumbLink>
@@ -613,6 +628,42 @@ function Screen() {
               onCheckedChange={handleEnableConversations}
             />
 
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="relative text-muted-foreground"
+                  onClick={downloadScreen}
+                >
+                  <DownloadCloud className="size-5 shrink-0" />
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent side="top" sideOffset={5}>
+                Download Screen
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="relative text-muted-foreground"
+                  onClick={() =>
+                    copyImageToClipboard(screen?.imageUrl, screen?.name)
+                  }
+                >
+                  <Copy className="size-5 shrink-0" />
+                </Button>
+              </TooltipTrigger>
+
+              <TooltipContent side="top" sideOffset={5}>
+                Copy image to clipboard
+              </TooltipContent>
+            </Tooltip>
+
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <Button
@@ -626,7 +677,7 @@ function Screen() {
                 </Button>
               </TooltipTrigger>
 
-              <TooltipContent side="left" sideOffset={5}>
+              <TooltipContent side="top" sideOffset={5}>
                 Copy to clipboard
               </TooltipContent>
             </Tooltip>

@@ -4,10 +4,10 @@
   "version": "0.0.1",
   "type": "module",
   "engines": {
-    "node": "22.8.0"
+    "node": "22.10.0"
   },
   "volta": {
-    "node": "22.8.0"
+    "node": "22.10.0"
   },
   "scripts": {
     "dev": "vite",

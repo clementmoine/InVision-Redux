@@ -223,6 +223,7 @@ function History(props: HistoryProps) {
               <img
                 key={currentVersion?.version}
                 decoding="sync"
+                alt={`${screen.name} version ${currentVersion?.version}`}
                 src={`/api/static/${currentVersion?.imageUrl}`}
                 style={{
                   width: screen.width * zoomLevel,
@@ -240,6 +241,7 @@ function History(props: HistoryProps) {
               <img
                 key={selectedVersion?.version}
                 decoding="sync"
+                alt={`${screen.name} version ${selectedVersion?.version}`}
                 src={`/api/static/${selectedVersion?.imageUrl}`}
                 className={cn('h-auto ', {
                   absolute: compareMode === 'overlay',

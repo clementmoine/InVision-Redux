@@ -449,6 +449,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       {/* Image */}
       <img
         decoding="sync"
+        alt={screen.name}
         src={`/api/static/${screen.imageUrl}`}
         className="object-contain mx-auto select-none pointer-events-none bg-[rgb(var(--screen-background-color))]"
         style={{
