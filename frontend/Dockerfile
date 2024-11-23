@@ -1,4 +1,4 @@
-ARG NODE_VERSION=22.8.0
+ARG NODE_VERSION=22.10.0
 FROM node:${NODE_VERSION}
 
 # Use production node environment by default.
