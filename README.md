@@ -2,7 +2,7 @@
 
 InVision Redux is a complete app designed to help users backup their projects from InVision before its closure in December 2024. With this tool, users can retrieve all their projects and preserve the prototypes along with their hotspots in complete web application.
 
-![Migration from InVision to InVision Redux](./screenshot.png)
+![Migration from InVision to InVision Redux](./preview.png)
 
 ## Work in Progress
 
