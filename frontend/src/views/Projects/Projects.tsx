@@ -3,7 +3,7 @@ import debounce from 'debounce';
 import { useForm } from 'react-hook-form';
 import { useCallback, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowDownAZ, Search, Tag } from 'lucide-react';
+import { ArrowDownAZ, Tag } from 'lucide-react';
 import { useIsFetching, useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -14,6 +14,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useSearchParams } from 'react-router-dom';
+
+import { SearchIcon } from '@/components/icons/search';
 
 import {
   Select,
@@ -118,7 +120,7 @@ function Projects() {
                     {field.value !== '' && isFetching ? (
                       <Spinner className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                     ) : (
-                      <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      <SearchIcon className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                     )}
 
                     <Input

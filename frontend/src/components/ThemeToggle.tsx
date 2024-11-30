@@ -1,4 +1,6 @@
-import { Moon, Sun } from 'lucide-react';
+import { Moon } from 'lucide-react';
+
+import { SunIcon } from '@/components/icons/sun';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +34,7 @@ function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon" className="text-foreground">
-          <Sun
+          <SunIcon
             className={cn(
               'h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all',
               {
@@ -40,6 +42,7 @@ function ThemeToggle() {
               },
             )}
           />
+
           <Moon
             className={cn(
               'absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all',

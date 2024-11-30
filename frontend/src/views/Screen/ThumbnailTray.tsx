@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Search, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import React, {
   MouseEvent,
@@ -10,6 +10,8 @@ import React, {
   useState,
 } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+
+import { SearchIcon } from '@/components/icons/search';
 
 import {
   Form,
@@ -119,7 +121,7 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
                 <FormItem>
                   <FormControl>
                     <div className="flex relative ml-auto flex-1 md:grow-0 items-center">
-                      <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                      <SearchIcon className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                       <Input
                         type="search"
                         placeholder={`Search in ${

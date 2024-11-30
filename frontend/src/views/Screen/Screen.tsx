@@ -5,16 +5,17 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import {
-  ArrowLeft,
   ChevronDown,
   ChevronUp,
-  Clock,
   Code2,
-  Copy,
   DownloadCloud,
   Eye,
   Share,
 } from 'lucide-react';
+
+import { ArrowLeftIcon } from '@/components/icons/arrow-left';
+import { ClockIcon } from '@/components/icons/clock';
+import { CopyIcon } from '@/components/icons/copy';
 
 import {
   Tooltip,
@@ -445,7 +446,7 @@ function Screen() {
                   aria-label="Back"
                   onClick={() => navigate(`/projects/${params.projectId}`)}
                 >
-                  <ArrowLeft className="size-5" />
+                  <ArrowLeftIcon className="size-5" />
                 </Button>
               </TooltipTrigger>
 
@@ -605,7 +606,7 @@ function Screen() {
                       )
                     }
                   >
-                    <Clock className="size-5" />
+                    <ClockIcon className="size-5" />
                   </Hotkeys>
                 </Button>
               </TooltipTrigger>
@@ -655,7 +656,7 @@ function Screen() {
                     copyImageToClipboard(screen?.imageUrl, screen?.name)
                   }
                 >
-                  <Copy className="size-5 shrink-0" />
+                  <CopyIcon className="size-5 shrink-0" />
                 </Button>
               </TooltipTrigger>
 

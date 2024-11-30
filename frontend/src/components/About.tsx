@@ -1,4 +1,8 @@
-import { Coffee, Github, Info, PenToolIcon } from 'lucide-react';
+import { Info } from 'lucide-react';
+
+import { RocketIcon } from '@/components/icons/rocket';
+import { CoffeeIcon } from '@/components/icons/coffee';
+import { PenToolIcon } from '@/components/icons/pen';
 
 import pkg from '../../package.json';
 
@@ -68,7 +72,7 @@ function About() {
               className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
               aria-label="Visit the Invision Redux project on GitHub"
             >
-              <Github className="h-4 w-4" />
+              <RocketIcon className="h-4 w-4" />
               Invision Redux on Github
             </a>
             <a
@@ -76,7 +80,7 @@ function About() {
               className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
               aria-label="Developed by Clément Moine"
             >
-              <Coffee className="h-4 w-4" />
+              <CoffeeIcon className="h-4 w-4" />
               Developed by Clément Moine
             </a>
             <a

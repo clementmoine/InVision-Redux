@@ -1,14 +1,17 @@
 import { forwardRef, useState, useEffect, useCallback } from 'react';
 import Hotkeys from 'react-hot-keys';
 import { cn } from '@/lib/utils';
-import { MessageCircle, MessageCircleOff } from 'lucide-react';
+import { MessageCircleOff } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Badge } from './ui/badge';
+import { Badge } from '@/components/ui/badge';
+
+import { MessageCircleIcon } from '@/components/icons/message-circle';
 
 interface ConversationToggleProps {
   className?: string;
@@ -101,7 +104,7 @@ const ConversationToggle = forwardRef<
             )}
 
             {isCurrentlyChecked ? (
-              <MessageCircle className="size-5 shrink-0" />
+              <MessageCircleIcon className="size-5 shrink-0" />
             ) : (
               <MessageCircleOff className="size-5 shrink-0" />
             )}

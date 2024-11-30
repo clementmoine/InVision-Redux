@@ -1,12 +1,14 @@
 import { z } from 'zod';
 import debounce from 'debounce';
 import { useCallback, useMemo } from 'react';
-import { Archive, Search, Share, StarIcon } from 'lucide-react';
+import { Archive, Share, StarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams, useParams, Link } from 'react-router-dom';
+
+import { SearchIcon } from '@/components/icons/search';
 
 import {
   Form,
@@ -226,7 +228,7 @@ function Project() {
                         {field.value !== '' && isFetching ? (
                           <Spinner className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                         ) : (
-                          <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+                          <SearchIcon className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
                         )}
 
                         <Input
