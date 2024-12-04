@@ -1,9 +1,6 @@
 import { toast } from 'sonner';
 
-export const copyImageToClipboard = async (
-  imageUrl?: string,
-  altText?: string,
-) => {
+export const copyImageToClipboard = async (imageUrl?: string) => {
   if (!imageUrl) {
     toast('No image URL', {
       description: 'No image URL was provided.',
@@ -33,24 +30,10 @@ export const copyImageToClipboard = async (
       return false;
     }
 
-    // Convert the image Blob to Base64
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(imageBlob);
-    });
-
-    // Generate HTML content with the Base64 image
-    const htmlContent = `<img src="${base64}" alt="${altText || ''}">`;
-
-    // Create a Blob for the HTML
-    const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-
-    // Copy the HTML Blob to the clipboard
+    // Copy the Blob (image data) to the clipboard
     await navigator.clipboard.write([
       new ClipboardItem({
-        [htmlBlob.type]: htmlBlob,
+        [imageBlob.type]: imageBlob,
       }),
     ]);
 
@@ -62,11 +45,11 @@ export const copyImageToClipboard = async (
 
     return true;
   } catch (err) {
-    console.error('Failed to copy HTML with image:', err);
+    console.error('Failed to copy image:', err);
 
     // Notify the user of failure
     toast('Failed to copy 😔', {
-      description: 'An error occurred while copying the content.',
+      description: 'An error occurred while copying the image.',
       duration: 1500,
     });
 
