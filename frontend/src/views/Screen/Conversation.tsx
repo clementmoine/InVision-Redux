@@ -26,7 +26,7 @@ import {
   Comment,
 } from '@/types';
 
-import { isSystemAvatar, getInitials } from '@/utils';
+import { isSystemAvatar, getInitials, getStaticUrl } from '@/utils';
 
 import dayjs from 'dayjs';
 import { Card } from '@/components/ui/card';
@@ -184,7 +184,7 @@ const Conversation: React.FC<ConversationProps> = props => {
                     src={
                       isSystemAvatar(commenter.avatarID)
                         ? undefined
-                        : `/api/static/${commenter.avatarUrl}`
+                        : getStaticUrl(commenter.avatarUrl)
                     }
                     alt={commenter.userName}
                   />
@@ -224,7 +224,7 @@ const Conversation: React.FC<ConversationProps> = props => {
                         src={
                           isSystemAvatar(comment.avatarID)
                             ? undefined
-                            : `/api/static/${comment.avatarUrl}`
+                            : getStaticUrl(comment.avatarUrl)
                         }
                         alt={comment.userName}
                       />

@@ -18,6 +18,7 @@ import {
 import DistanceDisplay from './DistanceDisplay';
 import { cn } from '@/lib/utils';
 import Conversation from '../Conversation';
+import { getStaticUrl } from '@/utils';
 
 interface InspectMiddlePanelProps {
   data?: ScreenInspect | null;
@@ -450,7 +451,7 @@ function InspectMiddlePanel(props: InspectMiddlePanelProps) {
       <img
         decoding="sync"
         alt={screen.name}
-        src={`/api/static/${screen.imageUrl}`}
+        src={getStaticUrl(screen.imageUrl)}
         className="object-contain mx-auto select-none pointer-events-none bg-[rgb(var(--screen-background-color))]"
         style={{
           width: screen.width * zoomLevel,

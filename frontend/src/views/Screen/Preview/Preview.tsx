@@ -21,6 +21,7 @@ import {
 } from '@/types';
 import { cn } from '@/lib/utils';
 import Conversation from '../Conversation';
+import { getStaticUrl } from '@/utils';
 
 interface ScreenPreviewProps {
   isEmbedded?: boolean;
@@ -337,7 +338,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
           // key={screen.id}
           decoding="sync"
           alt={screen.name}
-          src={`/api/static/${screen.imageUrl}`}
+          src={getStaticUrl(screen.imageUrl)}
           className={cn('object-contain', {
             'bg-[rgb(var(--screen-background-color))]': !isEmbedded,
           })}
@@ -409,7 +410,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
             style={{
               height: `${screen.fixedHeaderHeight * zoomLevel}px`,
               width: screen.width * zoomLevel,
-              backgroundImage: `url("/api/static/${screen.imageUrl}")`,
+              backgroundImage: `url("${getStaticUrl(screen.imageUrl)}")`,
             }}
             onClick={onHotspotGroupClick}
           >
@@ -440,7 +441,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
             style={{
               height: `${screen.fixedFooterHeight * zoomLevel}px`,
               width: screen.width * zoomLevel,
-              backgroundImage: `url("/api/static/${screen.imageUrl}")`,
+              backgroundImage: `url("${getStaticUrl(screen.imageUrl)}")`,
             }}
             onClick={onHotspotGroupClick}
           >

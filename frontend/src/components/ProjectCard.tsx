@@ -17,6 +17,7 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { useFavorites } from '@/hooks/useFavorites';
 
 import { Project as ProjectType } from '@/types';
+import { getStaticUrl } from '@/utils';
 
 interface ProjectCardProps {
   project: ProjectType;
@@ -39,7 +40,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             {project.data.thumbnailUrl ? (
               <img
                 className="absolute inset-0 h-auto w-full object-cover transition-all hover:scale-105"
-                src={`/api/static/${project.data.thumbnailUrl}`}
+                src={getStaticUrl(project.data.thumbnailUrl)}
                 alt={project.data.name}
               />
             ) : (

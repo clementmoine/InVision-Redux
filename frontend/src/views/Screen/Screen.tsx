@@ -47,7 +47,12 @@ import { getScreen } from '@/api/screens';
 
 import { ArchivedScreenDetails, Screen as ScreenType } from '@/types';
 
-import { copyImageToClipboard, copyToClipboard, hexToRgb } from '@/utils';
+import {
+  copyImageToClipboard,
+  copyToClipboard,
+  getStaticUrl,
+  hexToRgb,
+} from '@/utils';
 
 import defaultValues from '@/constants/defaultValues';
 
@@ -228,7 +233,7 @@ function Screen() {
   const downloadScreen = useCallback(() => {
     if (screen?.imageUrl) {
       const link = document.createElement('a');
-      link.href = `/api/static/${screen.imageUrl}`;
+      link.href = getStaticUrl(screen.imageUrl);
       link.download = `${screen.name || 'screen'}.png`;
       document.body.appendChild(link);
       link.click();
@@ -652,9 +657,7 @@ function Screen() {
                   size="icon"
                   variant="ghost"
                   className="relative text-muted-foreground"
-                  onClick={() =>
-                    copyImageToClipboard(screen?.imageUrl, screen?.name)
-                  }
+                  onClick={() => copyImageToClipboard(screen?.imageUrl)}
                 >
                   <CopyIcon className="size-5 shrink-0" />
                 </Button>

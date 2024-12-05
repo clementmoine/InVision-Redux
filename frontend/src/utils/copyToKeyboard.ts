@@ -1,5 +1,7 @@
 import { toast } from 'sonner';
 
+import { getStaticUrl } from '@/utils'
+
 export const copyImageToClipboard = async (imageUrl?: string) => {
   if (!imageUrl) {
     toast('No image URL', {
@@ -18,7 +20,7 @@ export const copyImageToClipboard = async (imageUrl?: string) => {
   }
 
   try {
-    const imageResponse = await fetch(`/api/static/${imageUrl}`);
+    const imageResponse = await fetch(getStaticUrl(imageUrl));
     const imageBlob = await imageResponse.blob();
 
     // Check if the image size exceeds a reasonable limit (5 MB in this case)

@@ -18,6 +18,7 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 import { ScreenForProject } from '@/types';
 import { cn } from '@/lib/utils';
+import { getStaticUrl } from '@/utils';
 
 interface ScreenCardProps {
   screen: ScreenForProject;
@@ -63,7 +64,7 @@ const ScreenCard: React.FC<ScreenCardProps> = props => {
                     'hover:scale-105': !disabled,
                   },
                 )}
-                src={`/api/static/${screen.thumbnailUrl}`}
+                src={getStaticUrl(screen.thumbnailUrl)}
                 alt={screen.name}
               />
             ) : (

@@ -8,7 +8,7 @@ import { getScreenHistory } from '@/api/screens';
 
 import { ArchivedScreenDetails, Project, Screen, ScreenVersion } from '@/types';
 
-import { getInitials, isSystemAvatar } from '@/utils';
+import { getInitials, getStaticUrl, isSystemAvatar } from '@/utils';
 
 import {
   ResizableHandle,
@@ -137,7 +137,7 @@ function History(props: HistoryProps) {
                           src={
                             isSystemAvatar(version.avatarID)
                               ? undefined
-                              : `/api/static/${version.avatarUrl}`
+                              : getStaticUrl(version.avatarUrl)
                           }
                           alt={version.userName}
                         />
@@ -224,7 +224,7 @@ function History(props: HistoryProps) {
                 key={currentVersion?.version}
                 decoding="sync"
                 alt={`${screen.name} version ${currentVersion?.version}`}
-                src={`/api/static/${currentVersion?.imageUrl}`}
+                src={getStaticUrl(currentVersion?.imageUrl)}
                 style={{
                   width: screen.width * zoomLevel,
                   minWidth: screen.width * zoomLevel,
@@ -242,7 +242,7 @@ function History(props: HistoryProps) {
                 key={selectedVersion?.version}
                 decoding="sync"
                 alt={`${screen.name} version ${selectedVersion?.version}`}
-                src={`/api/static/${selectedVersion?.imageUrl}`}
+                src={getStaticUrl(selectedVersion?.imageUrl)}
                 className={cn('h-auto ', {
                   absolute: compareMode === 'overlay',
                   'mix-blend-difference': compareMode === 'overlay',
@@ -266,7 +266,7 @@ function History(props: HistoryProps) {
                     compareMode === 'overlay'
                       ? screen.height * zoomLevel
                       : undefined,
-                  backgroundImage: `url("/api/static/${currentVersion?.imageUrl}")`,
+                  backgroundImage: `url("${getStaticUrl(currentVersion?.imageUrl)}")`,
                   backgroundSize: 'cover',
                 }}
               />
