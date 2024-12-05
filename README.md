@@ -96,6 +96,18 @@ To begin using InVision Redux, follow these steps:
    make scrape
    ```
 
+   to update existing documentation files (fastest, will refetch only updated)
+
+   ```
+   make scrape-update
+   ```
+
+   to overwrite existing documentation files (longer, will refetch everything)
+
+   ```
+   make scrape-overwrite
+   ```
+
 6. **Review the Exported Projects**:
    Once the scraper has finished running, you can find the exported projects in the `docs` directory. To start the frontend and backend containers serving the documentation:
 

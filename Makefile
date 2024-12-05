@@ -29,8 +29,8 @@ dev:
 
 # Run in production mode
 prod:
-	docker compose -f docker-compose.prod.yml build
-	docker compose -f docker-compose.prod.yml up -d
+	docker compose -f compose.prod.yml build
+	docker compose -f compose.prod.yml up -d
 
 # Stop all
 stop:
