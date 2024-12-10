@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -21,6 +21,17 @@ const Share: React.FC = () => {
     queryKey: ['projectByShareId', shareId!],
     queryFn: getProjectByShareId,
   });
+
+  // Handle navigation in an effect to avoid updating state during render
+  useEffect(() => {
+    if (data?.project_id) {
+      if (screenId) {
+        navigate(`/projects/${data.project_id}/${screenId}`);
+      } else {
+        navigate(`/projects/${data.project_id}`);
+      }
+    }
+  }, [data?.project_id, screenId, navigate]);
 
   // Handle loading and error states
   if (isFetching) {
@@ -52,17 +63,7 @@ const Share: React.FC = () => {
     );
   }
 
-  // Navigate to the project page when the project ID is fetched
-  if (data?.project_id) {
-    if (screenId) {
-      navigate(`/projects/${data.project_id}/${screenId}`);
-      return;
-    }
-
-    navigate(`/projects/${data.project_id}`);
-  }
-
-  return null; // Render nothing, since navigation will occur after fetching
+  return null; // Render nothing while waiting for navigation
 };
 
 export default Share;
