@@ -20,7 +20,7 @@ def get_project_from_share_id(share_id):
             project_dir = projects_dir / project_id
 
             # Check if it's a directory (project folder)
-            if project_dir.isdir():
+            if project_dir.is_dir():
                 # Define the path to the shares.json file
                 shares_json_path = project_dir / "shares.json"
 
@@ -35,7 +35,7 @@ def get_project_from_share_id(share_id):
                             # Convert the share id to string and make it lowercase for comparison
                             if str(share.get("key", "")).lower() == share_id:
                                 # Return the project ID if share_id is found
-                                return jsonify({"project_id": project_id}), 200
+                                return jsonify({"project_id": project_dir.name}), 200
 
         # If share_id not found in any project
         return jsonify({"error": "Share ID not found"}), 404
