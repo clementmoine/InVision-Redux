@@ -638,15 +638,17 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                   );
                 })}
 
-              {/* Border radius */}
-              {!!selectedLayer.borderRadius?.length && (
+              {/* Border radius / Opacity */}
+              {(!!selectedLayer.borderRadius?.length ||
+                Number(selectedLayer.opacity) < 1 ||
+                Number(selectedLayer.rotation) % 360 > 0) && (
                 <ul
-                  id="radius"
+                  id="transform"
                   className="flex flex-col px-2 text-sm text-popover-foreground empty:hidden"
                 >
                   {renderInfo(
                     'Radius',
-                    selectedLayer.borderRadius.every(
+                    selectedLayer.borderRadius?.every(
                       borderRadius =>
                         borderRadius === selectedLayer.borderRadius?.[0],
                     )
@@ -654,8 +656,20 @@ function InspectRightPanel(props: InspectRightPanelProps) {
                         ? `${selectedLayer.borderRadius[0]}px`
                         : undefined
                       : selectedLayer.borderRadius
-                          .map(borderRadius => `${borderRadius}px`)
+                          ?.map(borderRadius => `${borderRadius}px`)
                           .join(', '),
+                  )}
+                  {renderInfo(
+                    'Opacity',
+                    Number(selectedLayer.opacity) < 1
+                      ? `${selectedLayer.opacity * 100}%`
+                      : undefined,
+                  )}
+                  {renderInfo(
+                    'Rotation',
+                    Number(selectedLayer.rotation) % 360 > 0
+                      ? `${selectedLayer.rotation % 360}deg`
+                      : undefined,
                   )}
                 </ul>
               )}
