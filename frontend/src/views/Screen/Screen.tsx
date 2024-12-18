@@ -59,6 +59,7 @@ import defaultValues from '@/constants/defaultValues';
 import useLocalStorage from '@/hooks/useLocalStorage';
 
 import { ThumbnailTray } from './ThumbnailTray';
+import FigmaButton from './FigmaButton';
 
 import style from './Screen.module.scss';
 
@@ -439,8 +440,8 @@ function Screen() {
       )}
 
       {/* Footer */}
-      <footer className="dark flex fixed bottom-0 w-full h-16 items-center border-t p-3 z-[100] overflow-hidden bg-background flex-shrink-0">
-        <nav className="flex flex-1 gap-1 justify-between overflow-hidden">
+      <footer className="dark flex fixed bottom-0 w-full h-16 items-center border-t z-[100] overflow-hidden bg-background flex-shrink-0">
+        <nav className="flex flex-1 gap-1 justify-between p-3 overflow-hidden">
           <div className="flex flex-1 overflow-hidden items-center gap-4 justify-start">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -667,6 +668,9 @@ function Screen() {
                 Copy image to clipboard
               </TooltipContent>
             </Tooltip>
+
+            {/* Open in Figma */}
+            <FigmaButton />
 
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>

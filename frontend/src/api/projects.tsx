@@ -1,5 +1,5 @@
 import { Project, ProjectWithScreens, Tag } from '@/types';
-import { QueryFunction } from '@tanstack/react-query';
+import { MutationFunction, QueryFunction } from '@tanstack/react-query';
 
 export interface FetchProjectsParams {
   project_ids?: Array<Project['id']>;
@@ -94,6 +94,54 @@ export const getProject: QueryFunction<
     })
     .then(project => {
       return project;
+    })
+    .catch(error => {
+      throw error;
+    });
+};
+
+export const getProjectFigmaUrl: QueryFunction<
+  string,
+  [string, Project['id']]
+> = ({ queryKey }) => {
+  const [_key, id] = queryKey;
+
+  return fetch(`/api/projects/${id}/figma`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      return response.json();
+    })
+    .then(response => {
+      return response.figma_url;
+    })
+    .catch(error => {
+      throw error;
+    });
+};
+
+export const updateProjectFigmaUrl: MutationFunction<
+  string,
+  { id: Project['id']; url?: string }
+> = ({ id, url }) => {
+  return fetch(`/api/projects/${id}/figma`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url }),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      return response.json();
+    })
+    .then(response => {
+      return response.data.figma_url;
     })
     .catch(error => {
       throw error;

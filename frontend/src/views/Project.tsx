@@ -46,6 +46,8 @@ import {
 import { copyToClipboard } from '@/utils';
 import { Spinner } from '@/components/Spinner';
 
+import FigmaButton from './Screen/FigmaButton';
+
 const formSchema = z.object({
   search: z.string(),
 });
@@ -196,23 +198,28 @@ function Project() {
               </div>
             </div>
 
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="default"
-                  className="rounded-lg gap-2"
-                  aria-label="Share"
-                  onClick={() => copyToClipboard(window.location.href)}
-                >
-                  <Share className="size-5" />
-                  Share
-                </Button>
-              </TooltipTrigger>
+            <div className="flex gap-2">
+              {/* Open in Figma */}
+              <FigmaButton />
 
-              <TooltipContent side="left" sideOffset={5}>
-                Copy to clipboard
-              </TooltipContent>
-            </Tooltip>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="default"
+                    className="rounded-lg gap-2"
+                    aria-label="Share"
+                    onClick={() => copyToClipboard(window.location.href)}
+                  >
+                    <Share className="size-5" />
+                    Share
+                  </Button>
+                </TooltipTrigger>
+
+                <TooltipContent side="bottom" sideOffset={5}>
+                  Copy to clipboard
+                </TooltipContent>
+              </Tooltip>
+            </div>
           </div>
 
           {/* Search Input */}

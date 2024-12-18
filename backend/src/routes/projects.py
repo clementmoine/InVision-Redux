@@ -159,3 +159,69 @@ def get_project(project_id):
         return "Project not found", 404
     except Exception as e:
         return f"Error fetching project: {e}", 500
+
+
+@blueprint.route("/projects/<int:project_id>/figma", methods=["PATCH"])
+def update_project_figma_url(project_id):
+    """Update the Figma URL for a project."""
+    figma_file = Path(current_app.static_folder) / "common/figma.json"
+
+    try:
+        # Ensure the file exists, if not create it with an empty dictionary
+        if not figma_file.exists():
+            figma_file.parent.mkdir(parents=True, exist_ok=True)
+            figma_file.write_text(json.dumps({}))
+
+        # Load existing Figma URL mappings
+        with figma_file.open("r") as file:
+            figma_data = json.load(file)
+
+        # Get the URL from the request body
+        figma_url = request.json.get("url")
+
+        # Update the mapping for the given project
+        figma_data[str(project_id)] = figma_url
+
+        # Save the updated data back to the file
+        with figma_file.open("w") as file:
+            json.dump(figma_data, file, indent=4)
+
+        return (
+            jsonify(
+                {
+                    "message": "Figma URL updated successfully",
+                    "data": {"project_id": project_id, "figma_url": figma_url},
+                }
+            ),
+            200,
+        )
+
+    except json.JSONDecodeError:
+        return jsonify({"error": "Failed to parse Figma JSON file"}), 500
+    except Exception as e:
+        return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
+
+
+@blueprint.route("/projects/<int:project_id>/figma", methods=["GET"])
+def get_project_figma_url(project_id):
+    """Retrieve the Figma URL for a project."""
+    figma_file = Path(current_app.static_folder) / "common/figma.json"
+
+    try:
+        # Ensure the file exists
+        if not figma_file.exists():
+            return jsonify({"error": "Figma data not found"}), 404
+
+        # Load existing Figma URL mappings
+        with figma_file.open("r") as file:
+            figma_data = json.load(file)
+
+        # Retrieve the URL for the given project ID
+        figma_url = figma_data.get(str(project_id))
+
+        return jsonify({"project_id": project_id, "figma_url": figma_url}), 200
+
+    except json.JSONDecodeError:
+        return jsonify({"error": "Failed to parse Figma JSON file"}), 500
+    except Exception as e:
+        return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
