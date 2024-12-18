@@ -436,7 +436,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
       {isOverlayOpen && !isEmbedded && targetScreen && (
         <FloatingPortal id={`overlay-${currentScreen.id}`}>
           <div
-            className="inset-0 z-100 flex items-center justify-center"
+            className="inset-0 z-20 flex items-center justify-center"
             style={{
               ...overlayContainerStyle,
               backgroundColor: `rgb(var(--screen-background-color) / ${
@@ -449,7 +449,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
               ref={refs.setFloating}
               {...getFloatingProps()}
               data-position={position}
-              className="absolute z-50"
+              className="absolute z-20"
               style={{
                 transform:
                   position === 'Custom'

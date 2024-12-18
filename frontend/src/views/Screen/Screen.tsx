@@ -440,7 +440,7 @@ function Screen() {
       )}
 
       {/* Footer */}
-      <footer className="dark flex fixed bottom-0 w-full h-16 items-center border-t z-[100] overflow-hidden bg-background flex-shrink-0">
+      <footer className="dark flex fixed bottom-0 w-full h-16 items-center border-t z-auto overflow-hidden bg-background flex-shrink-0">
         <nav className="flex flex-1 gap-1 justify-between p-3 overflow-hidden">
           <div className="flex flex-1 overflow-hidden items-center gap-4 justify-start">
             <Tooltip>

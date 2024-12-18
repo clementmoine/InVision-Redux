@@ -109,7 +109,7 @@ const ThumbnailTray: React.FC<DistanceDisplayProps> = props => {
   }, [params.screenId, filteredDividers]);
 
   return (
-    <div className="dark flex flex-col fixed bottom-16 w-full gap-3 h-fit py-3 z-[9999] overflow-hidden bg-background flex-shrink-0">
+    <div className="dark flex flex-col fixed bottom-16 w-full gap-3 h-fit py-3 z-50 overflow-hidden bg-background flex-shrink-0">
       <div className="flex justify-between px-3">
         {/* Search Input */}
         <Form {...form}>

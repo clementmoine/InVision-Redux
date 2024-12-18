@@ -186,7 +186,7 @@ function History(props: HistoryProps) {
           <Tabs
             value={compareMode}
             defaultValue="solo"
-            className="absolute mt-2 z-[999]"
+            className="absolute mt-2 z-50"
             onValueChange={value => setCompareMode(value)}
           >
             <TabsList>

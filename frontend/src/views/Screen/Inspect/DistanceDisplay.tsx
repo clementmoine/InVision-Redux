@@ -839,7 +839,7 @@ const DistanceDisplay: React.FC<DistanceDisplayProps> = ({
         <>
           {/* Measure */}
           <div
-            className="absolute bg-primary text-white rounded-sm text-[10px] p-[2px] z-[5000]"
+            className="absolute bg-primary text-white rounded-sm text-[10px] p-[2px] z-20"
             style={style}
           >
             {formattedDistance}
