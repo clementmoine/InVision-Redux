@@ -9,6 +9,7 @@ import { FavoritesProvider } from '@/context/favorites-provider';
 import { CollapsedGroupsProvider } from '@/context/collapsed-groups-provider';
 
 import { TooltipProvider } from '@/components/ui/tooltip';
+import Onboarding from '@/components/Onboarding';
 
 import App from './App.tsx';
 
@@ -30,6 +31,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <CollapsedGroupsProvider>
               <BrowserRouter>
                 <QueryClientProvider client={queryClient}>
+                  <Onboarding />
                   <App />
                 </QueryClientProvider>
               </BrowserRouter>

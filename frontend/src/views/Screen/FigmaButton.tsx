@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/form';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -27,6 +26,11 @@ import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getProjectFigmaUrl, updateProjectFigmaUrl } from '@/api/projects';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface FigmaButtonProps {}
 
@@ -75,6 +79,11 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
   const figmaUrl: string = useMemo(
     () => (_figmaUrl && isValidUrl(_figmaUrl) ? _figmaUrl.trim() : ''),
     [_figmaUrl],
+  );
+
+  const isConfigured = useMemo(
+    () => figmaUrl.length > 0 && !isShiftPressed,
+    [figmaUrl, isShiftPressed],
   );
 
   const { mutate } = useMutation({
@@ -130,11 +139,10 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
         return;
       }
 
-      // No figma URL set or shift pressed to reconfigure
-      if (figmaUrl.length == 0 || isShiftPressed) {
-        setIsOpen(true); // Open form to configure figma url
-      } else {
+      if (isConfigured) {
         window.open(figmaUrl, '_blank', 'noopener,noreferrer,nofollow'); // Navigate to the URL
+      } else {
+        setIsOpen(true); // Open form to (re)configure figma url
       }
     },
     [figmaUrl, isShiftPressed],
@@ -153,18 +161,18 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
 
   return (
     <>
+      {/* Button */}
       <AlertDialog open={isOpen} onOpenChange={handleOpen} defaultOpen={false}>
         <AlertDialogTrigger asChild>
           <Button
             variant="secondary"
             className="relative rounded-lg gap-2"
-            aria-label="Share"
+            id={isConfigured ? 'open-in-figma' : 'configure-figma'}
+            aria-label={isConfigured ? 'Open in Figma' : 'Configure Figma'}
           >
             <FigmaIcon className="h-4 w-4" />
-            {figmaUrl.length > 0 && !isShiftPressed
-              ? 'Open in Figma'
-              : 'Configure Figma'}
-            {figmaUrl.length > 0 && !isShiftPressed && (
+            {isConfigured ? 'Open in Figma' : 'Configure Figma'}
+            {isConfigured && (
               <div className="absolute -inset-[2px] rounded-[calc(var(--radius)+2px)] bg-[linear-gradient(to_right,#FF7262,#A259FF,#1ABCFE,#0ACF83)] -z-10"></div>
             )}
           </Button>
@@ -178,12 +186,12 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
             >
               <AlertDialogHeader>
                 <AlertDialogTitle className="flex gap-4">
-                  Figma prototype
+                  Figma migration
                 </AlertDialogTitle>
 
                 <AlertDialogDescription className="flex flex-col gap-4">
-                  Enter the URL of your Figma project to let viewers know that
-                  the project has been migrated to Figma.
+                  Enter your Figma project URL to let viewers access the
+                  migrated prototype and be informed of the migration.
                 </AlertDialogDescription>
               </AlertDialogHeader>
 
@@ -210,8 +218,8 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
               />
 
               <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <Button type="submit">Enregistrer</Button>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <Button type="submit">Save</Button>
               </AlertDialogFooter>
             </form>
           </Form>
