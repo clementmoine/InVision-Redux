@@ -11,12 +11,14 @@ import {
   FloatingPortal,
   flip,
 } from '@floating-ui/react';
+import dayjs from 'dayjs';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import Linkify from 'linkify-react';
+import { IntermediateRepresentation } from 'linkifyjs';
 import { useCallback, useMemo, useState } from 'react';
 
 import {
@@ -28,15 +30,14 @@ import {
 
 import { isSystemAvatar, getInitials, getStaticUrl } from '@/utils';
 
-import dayjs from 'dayjs';
-import { Card } from '@/components/ui/card';
-import { IntermediateRepresentation } from 'linkifyjs';
-import style from './Conversation.module.scss';
 import { cn } from '@/lib/utils';
+
+import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-import 'linkify-plugin-mention';
+import style from './Conversation.module.scss';
 
+import 'linkify-plugin-mention';
 interface ConversationProps {
   conversation: ConversationType;
   visible: boolean | 'all';

@@ -1,10 +1,13 @@
 import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { useParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { FigmaIcon } from '@/components/icons/figma';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useParams } from 'react-router-dom';
+import { FigmaIcon } from '@/components/icons/figma';
 import {
   Form,
   FormControl,
@@ -22,15 +25,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { getProjectFigmaUrl, updateProjectFigmaUrl } from '@/api/projects';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+
+import style from './FigmaButton.module.scss';
+import { cn } from '@/lib/utils';
 
 interface FigmaButtonProps {}
 
@@ -59,7 +58,7 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
     return result.success;
   }, []);
 
-  const getProjectId = useMemo(() => {
+  const projectId = useMemo(() => {
     if ('projectId' in params) {
       return params.projectId;
     } else if ('id' in params) {
@@ -72,7 +71,7 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
   const queryClient = useQueryClient();
 
   const { data: _figmaUrl } = useQuery({
-    queryKey: ['figma', Number(getProjectId)],
+    queryKey: ['figma', Number(projectId)],
     queryFn: getProjectFigmaUrl,
   });
 
@@ -90,14 +89,14 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
     mutationFn: updateProjectFigmaUrl,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['figma', Number(getProjectId)],
+        queryKey: ['figma', Number(projectId)],
       });
     },
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    values: {
       url: figmaUrl,
     },
   });
@@ -107,7 +106,7 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
       const { url } = values;
 
       mutate(
-        { id: Number(getProjectId), url },
+        { id: Number(projectId), url },
         {
           onSuccess: () => {
             setIsOpen(false); // Close the modal on success
@@ -115,7 +114,7 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
         },
       );
     },
-    [mutate, getProjectId],
+    [mutate, projectId],
   );
 
   // Handle shift key press and release
@@ -166,15 +165,14 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
         <AlertDialogTrigger asChild>
           <Button
             variant="secondary"
-            className="relative rounded-lg gap-2"
             id={isConfigured ? 'open-in-figma' : 'configure-figma'}
+            className={cn('relative rounded-lg gap-2', {
+              [style['gradient-button']]: isConfigured,
+            })}
             aria-label={isConfigured ? 'Open in Figma' : 'Configure Figma'}
           >
             <FigmaIcon className="h-4 w-4" />
             {isConfigured ? 'Open in Figma' : 'Configure Figma'}
-            {isConfigured && (
-              <div className="absolute -inset-[2px] rounded-[calc(var(--radius)+2px)] bg-[linear-gradient(to_right,#FF7262,#A259FF,#1ABCFE,#0ACF83)] -z-10"></div>
-            )}
           </Button>
         </AlertDialogTrigger>
 

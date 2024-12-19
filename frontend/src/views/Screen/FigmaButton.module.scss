@@ -1,0 +1,46 @@
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.gradient-button {
+  position: relative;
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content: '';
+    inset: 0;
+    position: absolute;
+    border-radius: inherit;
+    background: conic-gradient(
+      from var(--gradient-angle),
+      #ff3737,
+      #ff7237,
+      #874fff,
+      #00b6ff,
+      #24cb71,
+      #ff3737
+    );
+    animation: rotate-gradient 4s linear infinite;
+  }
+
+  &::before {
+    padding: 2px;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+
+  &::after {
+    z-index: -1;
+  }
+}
+
+@keyframes rotate-gradient {
+  to {
+    --gradient-angle: 1turn;
+  }
+}

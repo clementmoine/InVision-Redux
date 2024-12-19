@@ -441,7 +441,7 @@ function Screen() {
 
       {/* Footer */}
       <footer className="dark flex fixed bottom-0 w-full h-16 items-center border-t z-auto overflow-hidden bg-background flex-shrink-0">
-        <nav className="flex flex-1 gap-1 justify-between p-3 overflow-hidden">
+        <nav className="flex flex-1 gap-4 justify-between p-3 overflow-hidden">
           <div className="flex flex-1 overflow-hidden items-center gap-4 justify-start">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -492,12 +492,14 @@ function Screen() {
                             className="flex gap-2 items-center"
                             onClick={() => setIsTrayOpen(o => !o)}
                           >
-                            {screen?.name}
+                            <span className="text-nowrap overflow-hidden text-ellipsis">
+                              {screen?.name}
+                            </span>
 
                             {isTrayOpen ? (
-                              <ChevronDown className="size-3.5" />
+                              <ChevronDown className="size-3.5 shrink-0" />
                             ) : (
-                              <ChevronUp className="size-3.5" />
+                              <ChevronUp className="size-3.5 shrink-0" />
                             )}
                           </span>
                         </TooltipTrigger>
@@ -513,7 +515,7 @@ function Screen() {
             </Breadcrumb>
           </div>
 
-          <div className="flex flex-1 items-center gap-4 justify-center">
+          <div className="flex items-center gap-4 justify-center">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
