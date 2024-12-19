@@ -3,7 +3,13 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  useIsFetching,
+  useIsMutating,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -30,6 +36,7 @@ import { getProjectFigmaUrl, updateProjectFigmaUrl } from '@/api/projects';
 
 import style from './FigmaButton.module.scss';
 import { cn } from '@/lib/utils';
+import { Spinner } from '@/components/Spinner';
 
 interface FigmaButtonProps {}
 
@@ -46,6 +53,8 @@ const formSchema = z.object({
 
 const FigmaButton: React.FC<FigmaButtonProps> = () => {
   const params = useParams();
+  const isMutating = useIsMutating();
+  const isFetching = useIsFetching();
   const [isOpen, setIsOpen] = useState(false);
 
   const [isShiftPressed, setIsShiftPressed] = useState(false); // State to track Shift key
@@ -229,7 +238,12 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
 
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <Button type="submit">Save</Button>
+                <Button type="submit" className="gap-2">
+                  {(!!isFetching || !!isMutating) && (
+                    <Spinner className="h-4 w-4 pointer-events-none" />
+                  )}
+                  Save
+                </Button>
               </AlertDialogFooter>
             </form>
           </Form>
