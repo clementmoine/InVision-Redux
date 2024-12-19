@@ -37,7 +37,7 @@ const formSchema = z.object({
   url: z
     .string()
     .url({ message: 'URL must be a valid URL.' })
-    .refine(val => val.includes('figma.com'), {
+    .refine(val => /figma\.com\/(design|proto)\//.test(val), {
       message: 'URL must come from figma.com',
     })
     .optional()
@@ -76,7 +76,10 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
   });
 
   const figmaUrl: string = useMemo(
-    () => (_figmaUrl && isValidUrl(_figmaUrl) ? _figmaUrl.trim() : ''),
+    () =>
+      _figmaUrl && isValidUrl(_figmaUrl)
+        ? _figmaUrl.replace('/design/', '/proto/').trim()
+        : '',
     [_figmaUrl],
   );
 
