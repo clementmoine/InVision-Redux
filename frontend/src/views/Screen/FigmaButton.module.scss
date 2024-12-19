@@ -12,6 +12,7 @@
   &::after {
     content: '';
     inset: 0;
+    pointer-events: none;
     position: absolute;
     border-radius: inherit;
     background: conic-gradient(

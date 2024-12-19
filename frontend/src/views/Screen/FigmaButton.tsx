@@ -164,6 +164,15 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
       <AlertDialog open={isOpen} onOpenChange={handleOpen} defaultOpen={false}>
         <AlertDialogTrigger asChild>
           <Button
+            tooltip={
+              isConfigured
+                ? 'Open the prototype in Figma'
+                : 'Configure the Figma prototype url'
+            }
+            tooltipContentProps={{
+              side: 'bottom',
+              sideOffset: 5,
+            }}
             variant="secondary"
             id={isConfigured ? 'open-in-figma' : 'configure-figma'}
             className={cn('relative rounded-lg gap-2', {
