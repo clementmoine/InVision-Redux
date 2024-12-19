@@ -1,5 +1,4 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-
 import {
   MouseEvent,
   useCallback,
@@ -11,6 +10,10 @@ import {
 
 import Hotspot from '@/views/Screen/Preview/Hotspot';
 
+import { cn } from '@/lib/utils';
+import { getStaticUrl } from '@/utils';
+import { useDragScroll } from '@/hooks/useDragScroll';
+
 import {
   ArchivedScreenDetails,
   HotspotWithMetadata,
@@ -19,11 +22,12 @@ import {
   Screen,
   TargetType,
 } from '@/types';
-import { cn } from '@/lib/utils';
+
 import Conversation from '../Conversation';
-import { getStaticUrl } from '@/utils';
+import { mergeRefs } from '@/utils/mergeRefs';
 
 interface ScreenPreviewProps {
+  isMobile?: boolean;
   isEmbedded?: boolean;
   closeParent?: () => void;
   screenId: Screen['id'];
@@ -42,6 +46,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
     isEmbedded = false,
     closeParent = () => null,
     screenId,
+    isMobile = false,
     projectId,
     zoomLevel,
     screen,
@@ -57,6 +62,9 @@ function ScreenPreview(props: ScreenPreviewProps) {
   const params = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { containerRef, onMouseDown, onMouseMove, onMouseUp } =
+    useDragScroll(isMobile);
 
   const timeoutRef = useRef<number>();
   const [showHotspots, setShowHotspots] = useState(false);
@@ -308,10 +316,14 @@ function ScreenPreview(props: ScreenPreviewProps) {
 
   return (
     <div
-      ref={ref}
+      ref={mergeRefs(ref, containerRef)}
       id="screen-preview"
       data-screen-id={screen.id.toString()}
       onScroll={handlePreviewScroll}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseUp}
       className="flex flex-col relative mx-auto overflow-auto"
     >
       {/* Screen with hotspots */}
@@ -335,6 +347,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
       >
         {/* Image */}
         <img
+          data-permit_scroll
           // key={screen.id}
           decoding="sync"
           alt={screen.name}
@@ -375,6 +388,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
         {/* Hotspots */}
         {restHotspots && (
           <div
+            data-permit_scroll
             className="absolute left-0 inset-0 bg-transparent overflow-hidden"
             onClick={onHotspotGroupClick}
             style={{
@@ -405,6 +419,7 @@ function ScreenPreview(props: ScreenPreviewProps) {
         {/* Fixed header */}
         {'fixedHeaderHeight' in screen && screen.fixedHeaderHeight > 0 && (
           <div
+            data-permit_scroll
             id="screen-preview-fixed-header"
             className="fixed header top-0 overflow-hidden bg-no-repeat bg-top bg-cover"
             style={{

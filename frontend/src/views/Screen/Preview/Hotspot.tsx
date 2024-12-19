@@ -424,6 +424,7 @@ const Hotspot: React.FC<HotspotProps> = props => {
         ref={refs.setReference}
         {...getReferenceProps()}
         style={style}
+        data-permit_scroll
         data-event={eventType}
         data-target={targetType}
         data-hotspotid={hotspot.id.toString()}

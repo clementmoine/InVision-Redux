@@ -323,6 +323,7 @@ function Screen() {
                 <Preview
                   zoomLevel={zoomLevel}
                   screen={screen}
+                  isMobile={isMobile}
                   hotspots={hotspots}
                   allScreens={allScreens}
                   allHotspots={allHotspots}
