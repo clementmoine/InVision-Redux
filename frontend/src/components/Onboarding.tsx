@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useIsFetching } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +27,8 @@ const onboardingSteps: OnboardingStep[] = [
 ];
 
 const Onboarding: React.FC = () => {
+  const isFetching = useIsFetching();
+
   const [currentStep, setCurrentStep] = useState<number | null>(null);
   const [visibleStep, setVisibleStep] = useState<number | null>(null);
 
@@ -46,25 +49,24 @@ const Onboarding: React.FC = () => {
     setCurrentStep(null);
   };
 
-  // Monitor DOM changes and set visible step
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const seenSteps = new Set(JSON.parse(storage.getItem('seen') || '[]'));
+    if (isFetching === 0) {
+      const timeout = setTimeout(() => {
+        const seenSteps = new Set(JSON.parse(storage.getItem('seen') || '[]'));
 
-      onboardingSteps.forEach((step, index) => {
-        if (
-          !seenSteps.has(step.target) &&
-          document.querySelector(step.target)
-        ) {
-          setVisibleStep(index);
-        }
-      });
-    });
+        onboardingSteps.forEach((step, index) => {
+          if (
+            !seenSteps.has(step.target) &&
+            document.querySelector(step.target)
+          ) {
+            setVisibleStep(index);
+          }
+        });
+      }, 300); // 300ms delay to ensure DOM is stable
 
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    return () => observer.disconnect();
-  }, []);
+      return () => clearTimeout(timeout);
+    }
+  }, [isFetching]);
 
   useEffect(() => {
     if (visibleStep !== null) {
@@ -72,16 +74,13 @@ const Onboarding: React.FC = () => {
     }
   }, [visibleStep]);
 
-  const step = useMemo(() => {
-    if (currentStep == null) return;
-
-    return onboardingSteps[currentStep];
-  }, [currentStep, onboardingSteps]);
+  const step = currentStep !== null ? onboardingSteps[currentStep] : null;
 
   const targetRect = useMemo(() => {
     if (step == null) return;
 
-    return document.querySelector(step.target)?.getBoundingClientRect();
+    const element = document.querySelector(step.target);
+    return element?.getBoundingClientRect();
   }, [step]);
 
   return (
