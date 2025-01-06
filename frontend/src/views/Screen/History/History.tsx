@@ -266,7 +266,10 @@ function History(props: HistoryProps) {
                     compareMode === 'overlay'
                       ? screen.height * zoomLevel
                       : undefined,
-                  backgroundImage: `url("${getStaticUrl(currentVersion?.imageUrl)}")`,
+                  backgroundImage:
+                    compareMode === 'overlay'
+                      ? `url("${getStaticUrl(currentVersion?.imageUrl)}")`
+                      : undefined,
                   backgroundSize: 'cover',
                 }}
               />
