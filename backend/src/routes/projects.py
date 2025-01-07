@@ -1,3 +1,4 @@
+import re
 import json
 import math
 from pathlib import Path
@@ -179,8 +180,16 @@ def update_project_figma_url(project_id):
         # Get the URL from the request body
         figma_url = request.json.get("url")
 
-        # Update the mapping for the given project
-        figma_data[str(project_id)] = figma_url
+        # If the URL is empty or None, remove the mapping for the project
+        if not figma_url:
+            figma_data.pop(str(project_id), None)
+        else:
+            # Validate the URL
+            if not re.match(r"^https?://.*\.figma\.com/(design|proto)/.*$", figma_url):
+                return jsonify({"error": "Invalid Figma URL format"}), 400
+
+            # Update the mapping for the given project
+            figma_data[str(project_id)] = figma_url
 
         # Save the updated data back to the file
         with figma_file.open("w") as file:
@@ -218,6 +227,12 @@ def get_project_figma_url(project_id):
 
         # Retrieve the URL for the given project ID
         figma_url = figma_data.get(str(project_id))
+
+        # Validate the URL
+        if figma_url and not re.match(
+            r"^https?://.*\.figma\.com/(design|proto)/.*$", figma_url
+        ):
+            return jsonify({"error": "Invalid Figma URL format stored"}), 500
 
         return jsonify({"project_id": project_id, "figma_url": figma_url}), 200
 

@@ -133,9 +133,14 @@ export const updateProjectFigmaUrl: MutationFunction<
     },
     body: JSON.stringify({ url }),
   })
-    .then(response => {
+    .then(async response => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        const errorData = await response.json().catch(() => null);
+
+        const errorMessage =
+          errorData?.error || 'An unexpected server error occurred.';
+
+        throw new Error(errorMessage);
       }
 
       return response.json();

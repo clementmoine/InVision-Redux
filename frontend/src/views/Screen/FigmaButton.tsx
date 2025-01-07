@@ -11,7 +11,10 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 
+import { cn } from '@/lib/utils';
+
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/Spinner';
 import { Button } from '@/components/ui/button';
 import { FigmaIcon } from '@/components/icons/figma';
 import {
@@ -19,6 +22,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import {
@@ -35,8 +39,6 @@ import {
 import { getProjectFigmaUrl, updateProjectFigmaUrl } from '@/api/projects';
 
 import style from './FigmaButton.module.scss';
-import { cn } from '@/lib/utils';
-import { Spinner } from '@/components/Spinner';
 
 interface FigmaButtonProps {}
 
@@ -99,6 +101,12 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
 
   const { mutate } = useMutation({
     mutationFn: updateProjectFigmaUrl,
+    onError: error => {
+      form.setError('url', {
+        type: 'manual',
+        message: error.message,
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['figma', Number(projectId)],
@@ -219,6 +227,7 @@ const FigmaButton: React.FC<FigmaButtonProps> = () => {
                 name="url"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel hidden>Figma project URL</FormLabel>
                     <FormControl>
                       <div className="flex relative ml-auto flex-1 md:grow-0 items-center">
                         <FigmaIcon className="absolute left-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
