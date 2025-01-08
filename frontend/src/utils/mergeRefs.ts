@@ -1,4 +1,4 @@
-import { MutableRefObject, Ref, useCallback } from 'react';
+import { MutableRefObject, Ref } from 'react';
 
 export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): Ref<T> {
   return (value: T | null) => {
